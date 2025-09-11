@@ -1,18 +1,18 @@
-import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
+import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
-import { sanitizeText, sanitizeURLParam, isValidURL } from "@/utils/sanitize";
-
-interface Book {
-  title: string;
-  description: string;
-  status: "published" | "coming-soon";
-}
+import { sanitizeURLParam, isValidURL } from "@/utils/sanitize";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { Book } from "@/types/Book";
 
 interface AuthorProfileProps {
   name: string;
-  bio: string;
+  bio: {
+    es: string;
+    en: string;
+  };
   books: Book[];
   image?: string;
 }
@@ -20,53 +20,55 @@ interface AuthorProfileProps {
 const AuthorProfile = ({ name, bio, books, image }: AuthorProfileProps) => {
   const [showMoreInfo, setShowMoreInfo] = useState(false);
   const { toast } = useToast();
+  const { language, t } = useLanguage();
 
   const handleKnowMore = () => {
     setShowMoreInfo(!showMoreInfo);
     toast({
-      title: showMoreInfo ? "Info ocultada" : "Más información",
-      description: showMoreInfo ? "Se ocultó la información adicional" : "Mostrando más información del autor",
+      title: t('knowMore'),
+      description: showMoreInfo ? "Información oculta" : "Mostrando más información del autor",
     });
   };
 
   const handleContact = () => {
     toast({
-      title: "Contacto",
-      description: "Funcionalidad de contacto en desarrollo. Pronto podrás contactar al autor.",
+      title: t('contactDevelopment'),
+      description: t('contactDevelopmentDesc'),
     });
   };
 
-  const handleBuyOnAmazon = (bookTitle: string) => {
-    const sanitizedTitle = sanitizeURLParam(bookTitle);
-    const amazonURL = `https://amazon.com/s?k=${sanitizedTitle}`;
-    
-    if (isValidURL(amazonURL)) {
+  const handleBuyOnAmazon = (book: Book) => {
+    if (book.amazonUrl && isValidURL(book.amazonUrl)) {
       toast({
-        title: "Comprar en Amazon",
-        description: `Redirigiendo a Amazon para comprar "${sanitizeText(bookTitle)}"`,
+        title: t('buyingRedirect'),
+        description: `${t('buyingRedirectDesc')} "${book.title}"`,
       });
-      // window.open(amazonURL, '_blank', 'noopener,noreferrer');
+      window.open(book.amazonUrl, '_blank', 'noopener,noreferrer');
     } else {
+      // Fallback to Amazon search
+      const searchQuery = sanitizeURLParam(book.title);
+      const amazonUrl = `https://www.amazon.com/s?k=${searchQuery}`;
+      
       toast({
-        title: "Error",
-        description: "URL no válida",
-        variant: "destructive"
+        title: t('buyingRedirect'),
+        description: `${t('buyingRedirectDesc')} "${book.title}"`,
       });
+      window.open(amazonUrl, '_blank', 'noopener,noreferrer');
     }
   };
 
   const handlePreview = (bookTitle: string) => {
     toast({
-      title: "Vista Previa",
-      description: `Abriendo vista previa de "${bookTitle}"`,
+      title: t('previewOpen'),
+      description: `${t('previewOpenDesc')} "${bookTitle}"`,
     });
   };
 
   return (
-    <div className="w-full max-w-4xl mx-auto p-6">
+    <div className="w-full max-w-4xl mx-auto">
       <div className="grid md:grid-cols-3 gap-8 mb-8">
         <div className="md:col-span-1">
-          <div className="aspect-square bg-gradient-to-br from-primary to-accent rounded-lg mb-4 flex items-center justify-center">
+          <div className="aspect-square bg-gradient-to-br from-primary to-secondary rounded-lg mb-4 flex items-center justify-center">
             {image ? (
               <img src={image} alt={name} className="w-full h-full object-cover rounded-lg" />
             ) : (
@@ -79,30 +81,24 @@ const AuthorProfile = ({ name, bio, books, image }: AuthorProfileProps) => {
         
         <div className="md:col-span-2">
           <h2 className="text-3xl font-bold text-foreground mb-4">{name}</h2>
-          <p className="text-muted-foreground leading-relaxed mb-6">{bio}</p>
-          
-          <div className="flex gap-4">
-            <Button 
-              variant="default" 
-              className="bg-primary hover:bg-primary/90"
-              onClick={handleKnowMore}
-            >
-              {showMoreInfo ? "Ocultar Info" : "Conoce Más"}
-            </Button>
-            <Button variant="outline" onClick={handleContact}>
-              Contacto
-            </Button>
-          </div>
-          
-          {showMoreInfo && (
-            <div className="mt-4 p-4 bg-muted/50 rounded-lg">
-              <h4 className="font-semibold mb-2">Información Adicional</h4>
-              <p className="text-sm text-muted-foreground">
-                Aquí puedes agregar más detalles sobre el autor, como premios recibidos, 
-                trayectoria profesional, otros trabajos, etc.
-              </p>
+          <div className="space-y-4">
+            <p className="text-muted-foreground">{bio[language]}</p>
+            <div className="flex gap-4">
+              <Button onClick={handleKnowMore} variant="outline">
+                {t('knowMore')}
+              </Button>
+              <Button onClick={handleContact} variant="secondary">
+                {t('contact')}
+              </Button>
             </div>
-          )}
+            {showMoreInfo && (
+              <div className="p-4 bg-muted/50 rounded-lg">
+                <p className="text-muted-foreground">
+                  {t('additionalInfo')}
+                </p>
+              </div>
+            )}
+          </div>
         </div>
       </div>
 
@@ -110,36 +106,39 @@ const AuthorProfile = ({ name, bio, books, image }: AuthorProfileProps) => {
         <h3 className="text-2xl font-semibold text-foreground">Obras</h3>
         
         {books.map((book, index) => (
-          <Card key={index} className="border-muted/20">
-            <CardContent className="p-6">
-              <div className="flex justify-between items-start mb-3">
-                <h4 className="text-xl font-semibold text-foreground">{book.title}</h4>
-                {book.status === "coming-soon" && (
-                  <span className="px-3 py-1 bg-secondary text-secondary-foreground text-sm rounded-full">
-                    Próximamente
-                  </span>
+          <Card key={index} className="border border-border">
+            <CardHeader>
+              <div className="flex justify-between items-start">
+                <CardTitle className="text-xl">{book.title}</CardTitle>
+                <Badge variant={book.status === "published" ? "default" : "secondary"}>
+                  {book.status === "published" ? t('published') : t('comingSoon')}
+                </Badge>
+              </div>
+            </CardHeader>
+            <CardContent>
+              <CardDescription className="text-sm">
+                {book.description[language]}
+              </CardDescription>
+              <div className="flex items-center justify-between mt-4">
+                {book.status === "published" && (
+                  <div className="flex gap-2">
+                    <Button
+                      size="sm"
+                      onClick={() => handleBuyOnAmazon(book)}
+                      className="bg-secondary hover:bg-secondary/90"
+                    >
+                      {t('buyOnAmazon')}
+                    </Button>
+                    <Button
+                      size="sm"
+                      variant="outline"
+                      onClick={() => handlePreview(book.title)}
+                    >
+                      {t('preview')}
+                    </Button>
+                  </div>
                 )}
               </div>
-              <p className="text-muted-foreground leading-relaxed mb-4">{book.description}</p>
-              
-              {book.status === "published" && (
-                <div className="flex gap-3">
-                  <Button 
-                    size="sm" 
-                    className="bg-primary hover:bg-primary/90"
-                    onClick={() => handleBuyOnAmazon(book.title)}
-                  >
-                    Comprar en Amazon
-                  </Button>
-                  <Button 
-                    size="sm" 
-                    variant="outline"
-                    onClick={() => handlePreview(book.title)}
-                  >
-                    Vista Previa
-                  </Button>
-                </div>
-              )}
             </CardContent>
           </Card>
         ))}

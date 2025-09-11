@@ -1,16 +1,16 @@
 import { Button } from "@/components/ui/button";
-import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { useLanguage } from "@/contexts/LanguageContext";
 
 const LanguageToggle = () => {
-  const [language, setLanguage] = useState<'es' | 'en'>('es');
+  const { language, setLanguage, t } = useLanguage();
   const { toast } = useToast();
 
   const handleLanguageChange = (newLang: 'es' | 'en') => {
     setLanguage(newLang);
     toast({
-      title: "Idioma cambiado",
-      description: `Idioma cambiado a ${newLang === 'es' ? 'Español' : 'English'}`,
+      title: t('languageChanged'),
+      description: `${t('languageChangedDesc')} ${newLang === 'es' ? t('spanish') : t('english')}`,
     });
   };
 
@@ -22,7 +22,7 @@ const LanguageToggle = () => {
         onClick={() => handleLanguageChange('es')}
         className="text-sm"
       >
-        Español
+        {t('spanish')}
       </Button>
       <Button
         variant={language === 'en' ? 'default' : 'ghost'}
@@ -30,7 +30,7 @@ const LanguageToggle = () => {
         onClick={() => handleLanguageChange('en')}
         className="text-sm"
       >
-        English
+        {t('english')}
       </Button>
     </div>
   );

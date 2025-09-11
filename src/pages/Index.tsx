@@ -1,96 +1,119 @@
-import AuthorProfile from "@/components/AuthorProfile";
 import LanguageToggle from "@/components/LanguageToggle";
+import AuthorProfile from "@/components/AuthorProfile";
+import { useLanguage } from "@/contexts/LanguageContext";
+import { Book } from "@/types/Book";
+
+// Datos de ejemplo para los libros de Juan C. Ribot Guzmán
+const juanBooks: Book[] = [
+  {
+    title: "Cartas de Newark",
+    description: {
+      es: "Una colección de cartas que capturan la experiencia puertorriqueña en Nueva Jersey, explorando temas de identidad, nostalgia y la diáspora.",
+      en: "A collection of letters capturing the Puerto Rican experience in New Jersey, exploring themes of identity, nostalgia, and diaspora."
+    },
+    status: "published" as const,
+    amazonUrl: "https://a.co/d/4dgdLk4",
+  },
+];
+
+// Datos de ejemplo para los libros de Rosnelma García Amalbert
+const rosnelmaBooks: Book[] = [
+  {
+    title: "Isabel y Sofía",
+    description: {
+      es: "Una tierna historia sobre la amistad entre dos niñas que explora los valores familiares y la importancia de los lazos humanos.",
+      en: "A tender story about friendship between two girls exploring family values and the importance of human bonds."
+    },
+    status: "published" as const,
+    amazonUrl: "https://a.co/d/23apCTx",
+  },
+  {
+    title: "Las Aventuras de Luna y Avo",
+    description: {
+      es: "Un libro infantil lleno de aventuras que enseña a los niños sobre la valentía, la amistad y el poder de la imaginación.",
+      en: "A children's book full of adventures teaching kids about courage, friendship, and the power of imagination."
+    },
+    status: "published" as const,
+    amazonUrl: "https://a.co/d/aZnA5O7",
+  },
+  {
+    title: "Eres una Estrella",
+    description: {
+      es: "Un libro inspirador que ayuda a los niños a descubrir su autoestima y a creer en sus propias capacidades y talentos únicos.",
+      en: "An inspiring book helping children discover their self-esteem and believe in their own unique abilities and talents."
+    },
+    status: "published" as const,
+    amazonUrl: "https://a.co/d/9C2DSkK",
+  },
+  {
+    title: "Dios y yo somos amigos",
+    description: {
+      es: "Una hermosa exploración de la espiritualidad infantil que presenta conceptos de fe de manera accesible y reconfortante para los más pequeños.",
+      en: "A beautiful exploration of children's spirituality presenting faith concepts in an accessible and comforting way for little ones."
+    },
+    status: "published" as const,
+    amazonUrl: "https://a.co/d/73bZggx",
+  },
+];
 
 const Index = () => {
-  const juanBooks = [
-    {
-      title: "Cartas de Newark",
-      description: "Una novela epistolar que revela la distancia entre promesas y realidades. Gregorio, desde Newark, escribe cartas que nunca envía a su madre en Puerto Rico, mientras ella construye bloque a bloque una casa esperando su regreso. Una historia conmovedora sobre familia, exilio y las verdades que nunca llegan a tiempo.",
-      status: "published" as const
-    },
-    {
-      title: "Divided Hearts",
-      description: "Charlotte Valdez and Diego Herrera navigate the fault lines of privilege, policing, and identity in contemporary Orange County, told in alternating first-person voices.",
-      status: "coming-soon" as const
-    },
-    {
-      title: "Raíces en tierra ajena",
-      description: "Una familia colombiana en Kenner enfrenta redadas migratorias y la tensa empatía de una familia estadounidense conservadora.",
-      status: "coming-soon" as const
-    }
-  ];
-
-  const rosnelmaBooks = [
-    {
-      title: "Isabel y Sofía: Hermanas Diferentes, Corazones Unidos",
-      description: "Un libro infantil que explora la identidad, la familia y la imaginación a través de la historia de dos hermanas con personalidades únicas pero corazones unidos.",
-      status: "published" as const
-    },
-    {
-      title: "Las Aventuras de Luna y Avo",
-      description: "Proyectos narrativos que integran ciencia, fantasía y vida cotidiana, diseñados para conectar con lectores de todas las edades.",
-      status: "published" as const
-    }
-  ];
+  const { t } = useLanguage();
 
   return (
     <div className="min-h-screen bg-background">
       {/* Header */}
-      <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-        <div className="container flex h-16 items-center justify-between">
-          <div className="flex items-center space-x-4">
-            <h1 className="text-xl font-bold bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-              Escritores Puertorriqueños
-            </h1>
-          </div>
+      <header className="w-full bg-white/80 backdrop-blur-sm border-b border-gray-200 sticky top-0 z-50">
+        <div className="container mx-auto px-4 py-4 flex justify-between items-center">
+          <h1 className="text-2xl font-bold text-primary">{t('title')}</h1>
           <LanguageToggle />
         </div>
       </header>
 
       {/* Hero Section */}
-      <section className="relative overflow-hidden bg-gradient-to-br from-primary/5 via-background to-accent/5 py-16">
-        <div className="container relative">
-          <div className="text-center max-w-3xl mx-auto">
-            <h2 className="text-4xl font-bold tracking-tight sm:text-6xl mb-6">
-              Voces que conectan{" "}
-              <span className="bg-gradient-to-r from-primary to-accent bg-clip-text text-transparent">
-                dos tierras
-              </span>
-            </h2>
-            <p className="text-xl text-muted-foreground leading-relaxed">
-              Historias que exploran la migración, la memoria y el amor inquebrantable 
-              de quienes construyen hogares entre culturas.
-            </p>
-          </div>
+      <section className="hero relative py-24 px-4 text-center">
+        <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-secondary/10 to-accent/20"></div>
+        <div className="relative z-10 max-w-4xl mx-auto">
+          <h2 className="text-5xl md:text-6xl font-bold text-foreground mb-6 leading-tight">
+            {t('heroTitle')}
+          </h2>
+          <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed">
+            {t('heroSubtitle')}
+          </p>
         </div>
       </section>
 
       {/* Authors Section */}
-      <section className="py-16">
-        <div className="container">
+      <section className="authors py-16 px-4">
+        <div className="max-w-6xl mx-auto">
+          <h3 className="text-4xl font-bold text-center mb-12 text-foreground">{t('authorsTitle')}</h3>
           <div className="space-y-20">
             <AuthorProfile
               name="Juan C. Ribot Guzmán"
-              bio="Escritor puertorriqueño radicado en California. Su obra explora la migración, la memoria y el amor inquebrantable de quienes construyen hogares entre dos tierras."
+              bio={{
+                es: "Escritor puertorriqueño conocido por sus obras que exploran la experiencia de la diáspora y la identidad cultural. Sus escritos capturan la esencia de la vida puertorriqueña tanto en la isla como en el continente.",
+                en: "Puerto Rican writer known for his works exploring the diaspora experience and cultural identity. His writings capture the essence of Puerto Rican life both on the island and on the mainland."
+              }}
               books={juanBooks}
+              image="/placeholder.svg"
             />
-            
-            <div className="border-t border-muted/20 pt-16">
-              <AuthorProfile
-                name="Rosnelma García Amalbert"
-                bio="Escritora puertorriqueña y cofundadora de Jíbaros en la Luna, LLC. Combina su formación en administración y su pasión por la creatividad para dar vida a historias que exploran la identidad, la familia y la imaginación. Vive en California junto a su familia, desde donde impulsa iniciativas literarias y proyectos digitales con el propósito de conectar con lectores de todas las edades."
-                books={rosnelmaBooks}
-              />
-            </div>
+            <AuthorProfile
+              name="Rosnelma García Amalbert"
+              bio={{
+                es: "Autora especializada en literatura infantil que ha dedicado su carrera a crear historias que inspiran y educan a los niños. Sus libros combinan entretenimiento con valores fundamentales.",
+                en: "Author specialized in children's literature who has dedicated her career to creating stories that inspire and educate children. Her books combine entertainment with fundamental values."
+              }}
+              books={rosnelmaBooks}
+              image="/placeholder.svg"
+            />
           </div>
         </div>
       </section>
 
       {/* Footer */}
-      <footer className="border-t bg-muted/30 py-8">
-        <div className="container text-center text-muted-foreground">
-          <p>© 2024 Escritores Puertorriqueños. Historias que trascienden fronteras.</p>
-        </div>
+      <footer className="bg-muted py-8 px-4 text-center">
+        <p className="text-muted-foreground">
+          {t('footerText')}
+        </p>
       </footer>
     </div>
   );

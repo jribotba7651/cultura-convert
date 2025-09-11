@@ -1,5 +1,7 @@
 import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
+import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 interface Book {
   title: string;
@@ -15,6 +17,40 @@ interface AuthorProfileProps {
 }
 
 const AuthorProfile = ({ name, bio, books, image }: AuthorProfileProps) => {
+  const [showMoreInfo, setShowMoreInfo] = useState(false);
+  const { toast } = useToast();
+
+  const handleKnowMore = () => {
+    setShowMoreInfo(!showMoreInfo);
+    toast({
+      title: showMoreInfo ? "Info ocultada" : "Más información",
+      description: showMoreInfo ? "Se ocultó la información adicional" : "Mostrando más información del autor",
+    });
+  };
+
+  const handleContact = () => {
+    toast({
+      title: "Contacto",
+      description: "Funcionalidad de contacto en desarrollo. Pronto podrás contactar al autor.",
+    });
+  };
+
+  const handleBuyOnAmazon = (bookTitle: string) => {
+    toast({
+      title: "Comprar en Amazon",
+      description: `Redirigiendo a Amazon para comprar "${bookTitle}"`,
+    });
+    // Aquí podrías abrir un enlace real a Amazon
+    // window.open(`https://amazon.com/s?k=${encodeURIComponent(bookTitle)}`, '_blank');
+  };
+
+  const handlePreview = (bookTitle: string) => {
+    toast({
+      title: "Vista Previa",
+      description: `Abriendo vista previa de "${bookTitle}"`,
+    });
+  };
+
   return (
     <div className="w-full max-w-4xl mx-auto p-6">
       <div className="grid md:grid-cols-3 gap-8 mb-8">
@@ -35,13 +71,27 @@ const AuthorProfile = ({ name, bio, books, image }: AuthorProfileProps) => {
           <p className="text-muted-foreground leading-relaxed mb-6">{bio}</p>
           
           <div className="flex gap-4">
-            <Button variant="default" className="bg-primary hover:bg-primary/90">
-              Conoce Más
+            <Button 
+              variant="default" 
+              className="bg-primary hover:bg-primary/90"
+              onClick={handleKnowMore}
+            >
+              {showMoreInfo ? "Ocultar Info" : "Conoce Más"}
             </Button>
-            <Button variant="outline">
+            <Button variant="outline" onClick={handleContact}>
               Contacto
             </Button>
           </div>
+          
+          {showMoreInfo && (
+            <div className="mt-4 p-4 bg-muted/50 rounded-lg">
+              <h4 className="font-semibold mb-2">Información Adicional</h4>
+              <p className="text-sm text-muted-foreground">
+                Aquí puedes agregar más detalles sobre el autor, como premios recibidos, 
+                trayectoria profesional, otros trabajos, etc.
+              </p>
+            </div>
+          )}
         </div>
       </div>
 
@@ -63,10 +113,18 @@ const AuthorProfile = ({ name, bio, books, image }: AuthorProfileProps) => {
               
               {book.status === "published" && (
                 <div className="flex gap-3">
-                  <Button size="sm" className="bg-primary hover:bg-primary/90">
+                  <Button 
+                    size="sm" 
+                    className="bg-primary hover:bg-primary/90"
+                    onClick={() => handleBuyOnAmazon(book.title)}
+                  >
                     Comprar en Amazon
                   </Button>
-                  <Button size="sm" variant="outline">
+                  <Button 
+                    size="sm" 
+                    variant="outline"
+                    onClick={() => handlePreview(book.title)}
+                  >
                     Vista Previa
                   </Button>
                 </div>

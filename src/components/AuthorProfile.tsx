@@ -2,6 +2,7 @@ import { Card, CardContent } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
+import { sanitizeText, sanitizeURLParam, isValidURL } from "@/utils/sanitize";
 
 interface Book {
   title: string;
@@ -36,12 +37,22 @@ const AuthorProfile = ({ name, bio, books, image }: AuthorProfileProps) => {
   };
 
   const handleBuyOnAmazon = (bookTitle: string) => {
-    toast({
-      title: "Comprar en Amazon",
-      description: `Redirigiendo a Amazon para comprar "${bookTitle}"`,
-    });
-    // Aquí podrías abrir un enlace real a Amazon
-    // window.open(`https://amazon.com/s?k=${encodeURIComponent(bookTitle)}`, '_blank');
+    const sanitizedTitle = sanitizeURLParam(bookTitle);
+    const amazonURL = `https://amazon.com/s?k=${sanitizedTitle}`;
+    
+    if (isValidURL(amazonURL)) {
+      toast({
+        title: "Comprar en Amazon",
+        description: `Redirigiendo a Amazon para comprar "${sanitizeText(bookTitle)}"`,
+      });
+      // window.open(amazonURL, '_blank', 'noopener,noreferrer');
+    } else {
+      toast({
+        title: "Error",
+        description: "URL no válida",
+        variant: "destructive"
+      });
+    }
   };
 
   const handlePreview = (bookTitle: string) => {

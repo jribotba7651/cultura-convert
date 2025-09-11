@@ -42,6 +42,14 @@ const translations = {
     previewOpen: "Abriendo vista previa",
     previewOpenDesc: "Abriendo vista previa de",
     
+    // Navigation
+    home: "Inicio",
+    blog: "Blog",
+    siteTitle: "Jíbaro en la Luna",
+    
+    // Blog
+    blogDescription: "Reflexiones, historias y voces de la cultura jíbara que late en la distancia",
+    
     // Footer
     footerText: "© 2024 Escritores Puertorriqueños. Todos los derechos reservados.",
     
@@ -82,6 +90,14 @@ const translations = {
     buyingRedirectDesc: "We're redirecting you to Amazon to purchase",
     previewOpen: "Opening preview",
     previewOpenDesc: "Opening preview for",
+    
+    // Navigation
+    home: "Home",
+    blog: "Blog",
+    siteTitle: "Jíbaro en la Luna",
+    
+    // Blog
+    blogDescription: "Reflections, stories and voices of jíbaro culture that beats in the distance",
     
     // Footer
     footerText: "© 2024 Puerto Rican Writers. All rights reserved.",

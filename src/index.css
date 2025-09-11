@@ -8,26 +8,26 @@ All colors MUST be HSL.
 
 @layer base {
   :root {
-    /* Jíbaro Luna Inspired Colors - Light Mode */
-    --background: 45 20 8;
-    --foreground: 36 78 61;
-    --card: 42 69 52;
-    --card-foreground: 48 94 85;
-    --popover: 42 69 52;
-    --popover-foreground: 48 94 85;
-    --primary: 45 98 65;
-    --primary-foreground: 158 25 15;
-    --secondary: 39 85 54;
-    --secondary-foreground: 48 94 85;
-    --muted: 158 25 15;
-    --muted-foreground: 39 85 54;
-    --accent: 45 98 65;
-    --accent-foreground: 158 25 15;
-    --destructive: 0 84.2% 60.2%;
+    /* Jíbaro Luna Colors from Website - Light Mode */
+    --background: 43 19% 88%;  /* rgb(229, 227, 220) */
+    --foreground: 180 6% 20%;  /* rgb(48, 54, 54) */
+    --card: 43 19% 92%;
+    --card-foreground: 180 6% 20%;
+    --popover: 43 19% 92%;
+    --popover-foreground: 180 6% 20%;
+    --primary: 17 49% 66%;  /* rgb(212, 150, 125) */
+    --primary-foreground: 43 19% 95%;
+    --secondary: 43 19% 80%;
+    --secondary-foreground: 180 6% 20%;
+    --muted: 43 19% 85%;
+    --muted-foreground: 180 6% 40%;
+    --accent: 17 49% 66%;
+    --accent-foreground: 43 19% 95%;
+    --destructive: 0 84% 60%;
     --destructive-foreground: 210 40% 98%;
-    --border: 39 85 54;
-    --input: 39 85 54;
-    --ring: 45 98 65;
+    --border: 43 19% 80%;
+    --input: 43 19% 80%;
+    --ring: 17 49% 66%;
     --radius: 0.5rem;
 
     --sidebar-background: 0 0% 98%;
@@ -49,25 +49,25 @@ All colors MUST be HSL.
 
   .dark {
     /* Jíbaro Luna Dark Mode */
-    --background: 158 25 15;
-    --foreground: 48 94 85;
-    --card: 158 35 20;
-    --card-foreground: 48 94 85;
-    --popover: 158 35 20;
-    --popover-foreground: 48 94 85;
-    --primary: 45 98 65;
-    --primary-foreground: 158 25 15;
-    --secondary: 158 45 25;
-    --secondary-foreground: 48 94 85;
-    --muted: 158 45 25;
-    --muted-foreground: 39 85 54;
-    --accent: 158 45 25;
-    --accent-foreground: 48 94 85;
-    --destructive: 0 62.8% 30.6%;
+    --background: 180 6% 15%;
+    --foreground: 43 19% 88%;
+    --card: 180 6% 18%;
+    --card-foreground: 43 19% 88%;
+    --popover: 180 6% 18%;
+    --popover-foreground: 43 19% 88%;
+    --primary: 17 49% 66%;
+    --primary-foreground: 180 6% 15%;
+    --secondary: 180 6% 25%;
+    --secondary-foreground: 43 19% 88%;
+    --muted: 180 6% 25%;
+    --muted-foreground: 43 19% 70%;
+    --accent: 180 6% 25%;
+    --accent-foreground: 43 19% 88%;
+    --destructive: 0 62% 31%;
     --destructive-foreground: 210 40% 98%;
-    --border: 158 45 25;
-    --input: 158 45 25;
-    --ring: 45 98 65;
+    --border: 180 6% 25%;
+    --input: 180 6% 25%;
+    --ring: 17 49% 66%;
     --sidebar-background: 240 5.9% 10%;
     --sidebar-foreground: 240 4.8% 95.9%;
     --sidebar-primary: 224.3 76.3% 48%;

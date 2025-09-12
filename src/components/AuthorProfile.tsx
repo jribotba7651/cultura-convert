@@ -116,18 +116,18 @@ const AuthorProfile = ({ name, bio, books, image }: AuthorProfileProps) => {
               </div>
             </CardHeader>
             <CardContent>
-              <div className="flex gap-4">
+              <div className="flex gap-6">
                 {book.coverImage && (
                   <div className="flex-shrink-0">
                     <img 
                       src={book.coverImage} 
                       alt={`Portada de ${book.title}`}
-                      className="w-24 h-32 object-cover rounded-md shadow-md"
+                      className="w-32 h-48 object-cover rounded-lg shadow-lg"
                     />
                   </div>
                 )}
-                <div className="flex-1">
-                  <CardDescription className="text-sm mb-4">
+                <div className="flex-1 flex flex-col justify-between">
+                  <CardDescription className="text-sm mb-6 leading-relaxed">
                     {book.description[language]}
                   </CardDescription>
                   {book.status === "published" && (

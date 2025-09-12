@@ -81,7 +81,7 @@ export const ProductCard = ({ product, onProductClick }: ProductCardProps) => {
           </h3>
           
           <p className="text-muted-foreground text-sm mb-3 line-clamp-2">
-            {product.description[language]}
+            {product.description[language].replace(/<[^>]*>/g, '')}
           </p>
 
           <div className="flex flex-wrap gap-1 mb-3">

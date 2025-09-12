@@ -1,6 +1,14 @@
 import { Badge } from '@/components/ui/badge';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { Category } from '@/types/Store';
+
+interface Category {
+  id: string;
+  name: {
+    es: string;
+    en: string;
+    [key: string]: string;
+  };
+}
 
 interface CategoryFilterProps {
   categories: Category[];
@@ -14,7 +22,7 @@ export const CategoryFilter = ({
   onCategorySelect 
 }: CategoryFilterProps) => {
   const { language } = useLanguage();
-
+  
   return (
     <div className="flex flex-wrap gap-2 mb-6">
       <Badge
@@ -32,7 +40,7 @@ export const CategoryFilter = ({
           className="cursor-pointer transition-colors hover:bg-accent"
           onClick={() => onCategorySelect(category.id)}
         >
-          {category.name[language]}
+          {category.name[language] || category.name.en || category.name.es}
         </Badge>
       ))}
     </div>

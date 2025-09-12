@@ -2,6 +2,7 @@ import AuthorProfile from "@/components/AuthorProfile";
 import Navigation from "@/components/Navigation";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Book } from "@/types/Book";
+import juanProfileImage from "@/assets/juan-c-ribot-profile.jpg";
 
 // Datos de ejemplo para los libros de Juan C. Ribot Guzmán
 const juanBooks: Book[] = [
@@ -88,7 +89,7 @@ const Index = () => {
                 en: "Puerto Rican writer known for his works exploring the diaspora experience and cultural identity. His writings capture the essence of Puerto Rican life both on the island and on the mainland."
               }}
               books={juanBooks}
-              image="/placeholder.svg"
+              image={juanProfileImage}
             />
             <AuthorProfile
               name="Rosnelma García Amalbert"

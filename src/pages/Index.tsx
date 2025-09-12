@@ -81,15 +81,6 @@ const Index = () => {
           <h3 className="text-4xl font-bold text-center mb-12 text-foreground">{t('authorsTitle')}</h3>
           <div className="space-y-20">
             <AuthorProfile
-              name="Juan C. Ribot Guzmán"
-              bio={{
-                es: "Escritor puertorriqueño conocido por sus obras que exploran la experiencia de la diáspora y la identidad cultural. Sus escritos capturan la esencia de la vida puertorriqueña tanto en la isla como en el continente.",
-                en: "Puerto Rican writer known for his works exploring the diaspora experience and cultural identity. His writings capture the essence of Puerto Rican life both on the island and on the mainland."
-              }}
-              books={juanBooks}
-              image={juanProfileImage}
-            />
-            <AuthorProfile
               name="Rosnelma García Amalbert"
               bio={{
                 es: "Autora especializada en literatura infantil que ha dedicado su carrera a crear historias que inspiran y educan a los niños. Sus libros combinan entretenimiento con valores fundamentales.",
@@ -97,6 +88,15 @@ const Index = () => {
               }}
               books={rosnelmaBooks}
               image={rosnelmaProfileImage}
+            />
+            <AuthorProfile
+              name="Juan C. Ribot Guzmán"
+              bio={{
+                es: "Escritor puertorriqueño conocido por sus obras que exploran la experiencia de la diáspora y la identidad cultural. Sus escritos capturan la esencia de la vida puertorriqueña tanto en la isla como en el continente.",
+                en: "Puerto Rican writer known for his works exploring the diaspora experience and cultural identity. His writings capture the essence of Puerto Rican life both on the island and on the mainland."
+              }}
+              books={juanBooks}
+              image={juanProfileImage}
             />
           </div>
         </div>

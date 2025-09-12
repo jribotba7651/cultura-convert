@@ -3,6 +3,7 @@ import Navigation from "@/components/Navigation";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Book } from "@/types/Book";
 import juanProfileImage from "@/assets/juan-c-ribot-profile.jpg";
+import rosnelmaProfileImage from "@/assets/rosnelma-garcia-profile.jpg";
 
 // Datos de ejemplo para los libros de Juan C. Ribot Guzmán
 const juanBooks: Book[] = [
@@ -98,7 +99,7 @@ const Index = () => {
                 en: "Author specialized in children's literature who has dedicated her career to creating stories that inspire and educate children. Her books combine entertainment with fundamental values."
               }}
               books={rosnelmaBooks}
-              image="/placeholder.svg"
+              image={rosnelmaProfileImage}
             />
           </div>
         </div>

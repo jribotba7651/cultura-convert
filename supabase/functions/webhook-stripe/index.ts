@@ -17,9 +17,48 @@ const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') ?? '', {
   apiVersion: '2023-10-16',
 });
 
+const corsHeaders = {
+  'Access-Control-Allow-Origin': '*',
+  'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, stripe-signature',
+  'Access-Control-Allow-Methods': 'POST, OPTIONS',
+};
+
 const handler = async (req: Request): Promise<Response> => {
+  // Handle CORS preflight requests
+  if (req.method === 'OPTIONS') {
+    return new Response(null, { 
+      headers: corsHeaders,
+      status: 200 
+    });
+  }
+
+  // Handle non-POST requests (like browser GET requests to webhook URL)
+  if (req.method !== 'POST') {
+    console.log(`Received ${req.method} request to webhook endpoint`);
+    return new Response('Stripe webhook endpoint - POST only', { 
+      headers: { ...corsHeaders, 'Content-Type': 'text/plain' },
+      status: 200 
+    });
+  }
+
+  // Only process POST requests with proper Stripe signature
   const signature = req.headers.get('stripe-signature');
+  if (!signature) {
+    console.error('Missing stripe-signature header');
+    return new Response('Missing stripe-signature header', { 
+      headers: corsHeaders,
+      status: 400 
+    });
+  }
+
   const body = await req.text();
+  if (!body) {
+    console.error('Missing request body');
+    return new Response('Missing request body', { 
+      headers: corsHeaders,
+      status: 400 
+    });
+  }
   
   let event: Stripe.Event;
 
@@ -34,12 +73,13 @@ const handler = async (req: Request): Promise<Response> => {
     return new Response(`Webhook Error: ${err.message}`, { status: 400 });
   }
 
-  console.log('Processing Stripe webhook:', event.type);
+  console.log(`Processing Stripe webhook: ${event.type} (ID: ${event.id})`);
 
   try {
     switch (event.type) {
       case 'payment_intent.succeeded': {
         const paymentIntent = event.data.object as Stripe.PaymentIntent;
+        console.log(`Payment succeeded - PaymentIntent: ${paymentIntent.id}, Amount: ${paymentIntent.amount}`);
         
         // Update order status
         const { error: orderError } = await supabase
@@ -54,6 +94,8 @@ const handler = async (req: Request): Promise<Response> => {
           throw new Error('Failed to update order status');
         }
 
+        console.log(`Order status updated to 'paid' for PaymentIntent: ${paymentIntent.id}`);
+
         // Trigger Printify order creation
         const { error: printifyError } = await supabase.functions.invoke('create-printify-order', {
           body: { payment_intent_id: paymentIntent.id }
@@ -61,14 +103,18 @@ const handler = async (req: Request): Promise<Response> => {
 
         if (printifyError) {
           console.error('Failed to create Printify order:', printifyError);
+          console.log('Continuing despite Printify error - order is still marked as paid');
+        } else {
+          console.log(`Printify order creation initiated for PaymentIntent: ${paymentIntent.id}`);
         }
 
-        console.log('Payment succeeded for order:', paymentIntent.id);
+        console.log(`✅ Payment processing complete for PaymentIntent: ${paymentIntent.id}`);
         break;
       }
 
       case 'payment_intent.payment_failed': {
         const paymentIntent = event.data.object as Stripe.PaymentIntent;
+        console.log(`Payment failed - PaymentIntent: ${paymentIntent.id}, Last error: ${paymentIntent.last_payment_error?.message || 'Unknown error'}`);
         
         const { error } = await supabase
           .from('orders')
@@ -78,10 +124,12 @@ const handler = async (req: Request): Promise<Response> => {
           .eq('stripe_payment_intent_id', paymentIntent.id);
 
         if (error) {
-          console.error('Failed to update order status:', error);
+          console.error('Failed to update order status to failed:', error);
+        } else {
+          console.log(`Order status updated to 'failed' for PaymentIntent: ${paymentIntent.id}`);
         }
 
-        console.log('Payment failed for order:', paymentIntent.id);
+        console.log(`❌ Payment failure processed for PaymentIntent: ${paymentIntent.id}`);
         break;
       }
 
@@ -90,7 +138,7 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     return new Response(JSON.stringify({ received: true }), {
-      headers: { 'Content-Type': 'application/json' },
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,
     });
 
@@ -99,7 +147,7 @@ const handler = async (req: Request): Promise<Response> => {
     return new Response(
       JSON.stringify({ error: error.message }),
       {
-        headers: { 'Content-Type': 'application/json' },
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 500,
       }
     );

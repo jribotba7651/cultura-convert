@@ -92,31 +92,36 @@ const handler = async (req: Request): Promise<Response> => {
     }
     // Case 2: Anonymous order with valid access token
     else if (!order.user_id && access_token) {
-      const { data: tokenData, error: tokenError } = await supabase
-        .from('order_access_tokens')
-        .select('*')
-        .eq('order_id', order_id)
-        .eq('token', access_token)
-        .eq('is_active', true)
-        .gt('expires_at', new Date().toISOString())
-        .single();
+      try {
+        // Set the access token context for RLS validation
+        const { error: contextError } = await supabase
+          .rpc('set_order_access_context', {
+            p_order_id: order_id,
+            p_token: access_token
+          });
 
-      if (!tokenError && tokenData) {
-        hasAccess = true;
-        accessMethod = 'token';
-        console.log('Access granted: valid access token for anonymous order');
-        
-        // Update token usage tracking
-        await supabase
-          .from('order_access_tokens')
-          .update({ 
-            access_count: (tokenData.access_count || 0) + 1,
-            last_accessed_at: new Date().toISOString()
-          })
-          .eq('id', tokenData.id);
-      } else {
-        errorMessage = 'Invalid, expired, or inactive access token';
-        console.log(errorMessage);
+        if (!contextError) {
+          hasAccess = true;
+          accessMethod = 'token';
+          console.log('Access granted: valid access token for anonymous order');
+          
+          // Update token usage tracking
+          await supabase
+            .from('order_access_tokens')
+            .update({ 
+              access_count: supabase.raw('access_count + 1'),
+              last_accessed_at: new Date().toISOString()
+            })
+            .eq('order_id', order_id)
+            .eq('token', access_token)
+            .eq('is_active', true);
+        } else {
+          errorMessage = 'Invalid, expired, or inactive access token';
+          console.log(errorMessage, contextError);
+        }
+      } catch (error) {
+        errorMessage = 'Token validation failed';
+        console.log(errorMessage, error);
       }
     } else if (!order.user_id && !access_token) {
       errorMessage = 'Anonymous order requires access token';

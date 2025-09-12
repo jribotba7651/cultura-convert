@@ -360,6 +360,14 @@ export type Database = {
         Args: { p_old_token: string; p_order_id: string }
         Returns: string
       }
+      set_order_access_context: {
+        Args: { p_order_id: string; p_token: string }
+        Returns: undefined
+      }
+      validate_order_access_token: {
+        Args: { p_order_id: string; p_token: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never

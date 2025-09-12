@@ -13,6 +13,7 @@ import { useCart } from '@/contexts/CartContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { sanitizeText, validateInput } from '@/utils/sanitize';
 
 const stripePromise = loadStripe('pk_test_51QdK4IGfIcOJCKx4mhHTfOcE6lRN6yyF9sZUYi7YdktKGqzksQkGEJzPL5ZVEFhyO8KMCaVOHnfJPLhAhOLNJK2v00T5qdgVrR');
 

@@ -44,6 +44,36 @@ export type Database = {
         }
         Relationships: []
       }
+      order_access_attempts: {
+        Row: {
+          attempt_count: number
+          blocked_until: string | null
+          first_attempt_at: string
+          id: string
+          ip_address: unknown
+          last_attempt_at: string
+          order_id: string
+        }
+        Insert: {
+          attempt_count?: number
+          blocked_until?: string | null
+          first_attempt_at?: string
+          id?: string
+          ip_address: unknown
+          last_attempt_at?: string
+          order_id: string
+        }
+        Update: {
+          attempt_count?: number
+          blocked_until?: string | null
+          first_attempt_at?: string
+          id?: string
+          ip_address?: unknown
+          last_attempt_at?: string
+          order_id?: string
+        }
+        Relationships: []
+      }
       order_access_logs: {
         Row: {
           access_method: string
@@ -341,6 +371,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
+      check_order_access_rate_limit: {
+        Args: { p_ip_address: unknown; p_order_id: string }
+        Returns: boolean
+      }
       check_order_access_token: {
         Args: { order_uuid: string; token_value: string }
         Returns: boolean
@@ -354,6 +388,10 @@ export type Database = {
           p_success?: boolean
           p_user_agent?: string
         }
+        Returns: undefined
+      }
+      record_order_access_attempt: {
+        Args: { p_ip_address: unknown; p_order_id: string; p_success: boolean }
         Returns: undefined
       }
       rotate_order_access_token: {

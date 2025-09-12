@@ -5,6 +5,7 @@ import { useCart } from "@/contexts/CartContext";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import LanguageToggle from "./LanguageToggle";
+import UserMenu from "./UserMenu";
 
 const Navigation = () => {
   const { t } = useLanguage();
@@ -39,6 +40,7 @@ const Navigation = () => {
                 </Link>
               ))}
             </div>
+            <UserMenu />
             <Button
               variant="ghost"
               size="icon"

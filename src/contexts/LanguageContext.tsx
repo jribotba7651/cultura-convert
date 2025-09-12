@@ -59,7 +59,32 @@ const translations = {
     
     // Languages
     spanish: "Español",
-    english: "English"
+    english: "English",
+    
+    // Auth
+    signIn: "Iniciar Sesión",
+    signUp: "Registrarse",
+    signOut: "Cerrar Sesión",
+    myAccount: "Mi Cuenta",
+    welcome: "Bienvenido",
+    email: "Correo electrónico",
+    password: "Contraseña",
+    confirmPassword: "Confirmar contraseña",
+    createAccount: "Crear Cuenta",
+    backToStore: "Volver a la tienda",
+    welcomeMessage: "Inicia sesión o crea una cuenta para continuar",
+    
+    // Security messages
+    tooManyAttempts: "Demasiados intentos fallidos. Intenta de nuevo más tarde.",
+    invalidCredentials: "Credenciales inválidas",
+    emailNotConfirmed: "Por favor confirma tu email antes de iniciar sesión",
+    userAlreadyRegistered: "Este email ya está registrado",
+    checkEmailConfirm: "Revisa tu email para confirmar tu cuenta",
+    passwordsDontMatch: "Las contraseñas no coinciden",
+    passwordTooShort: "La contraseña debe tener al menos 6 caracteres",
+    signedOut: "Sesión cerrada",
+    signedOutSuccess: "Has cerrado sesión exitosamente",
+    error: "Error"
   },
   en: {
     // Header
@@ -109,7 +134,32 @@ const translations = {
     
     // Languages
     spanish: "Español",
-    english: "English"
+    english: "English",
+    
+    // Auth
+    signIn: "Sign In",
+    signUp: "Sign Up",
+    signOut: "Sign Out",
+    myAccount: "My Account",
+    welcome: "Welcome",
+    email: "Email",
+    password: "Password",
+    confirmPassword: "Confirm Password",
+    createAccount: "Create Account",
+    backToStore: "Back to store",
+    welcomeMessage: "Sign in or create an account to continue",
+    
+    // Security messages
+    tooManyAttempts: "Too many failed attempts. Please try again later.",
+    invalidCredentials: "Invalid credentials",
+    emailNotConfirmed: "Please confirm your email before signing in",
+    userAlreadyRegistered: "This email is already registered",
+    checkEmailConfirm: "Check your email to confirm your account",
+    passwordsDontMatch: "Passwords do not match",
+    passwordTooShort: "Password must be at least 6 characters",
+    signedOut: "Signed out",
+    signedOutSuccess: "You have been signed out successfully",
+    error: "Error"
   }
 };
 

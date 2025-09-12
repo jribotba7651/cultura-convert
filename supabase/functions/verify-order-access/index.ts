@@ -36,6 +36,32 @@ const handler = async (req: Request): Promise<Response> => {
     const clientIP = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || '127.0.0.1';
     const userAgent = req.headers.get('user-agent') || 'Unknown';
 
+    // Check rate limiting before processing the request
+    const { data: rateLimitCheck } = await supabase.rpc('check_order_access_rate_limit', {
+      p_ip_address: clientIP,
+      p_order_id: order_id
+    });
+
+    if (!rateLimitCheck) {
+      console.log(`Rate limit exceeded for IP ${clientIP} on order ${order_id}`);
+      await supabase.rpc('log_order_access', {
+        p_order_id: order_id,
+        p_access_method: 'token',
+        p_ip_address: clientIP,
+        p_user_agent: userAgent,
+        p_success: false,
+        p_error_message: 'Rate limit exceeded'
+      });
+      
+      return new Response(
+        JSON.stringify({ error: 'Too many failed attempts. Please try again later.' }),
+        { 
+          status: 429,
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' }
+        }
+      );
+    }
+
     // Check if user is authenticated
     const authHeader = req.headers.get('Authorization');
     let userId = null;
@@ -142,6 +168,13 @@ const handler = async (req: Request): Promise<Response> => {
     });
 
     if (!hasAccess) {
+      // Record failed access attempt for rate limiting
+      await supabase.rpc('record_order_access_attempt', {
+        p_ip_address: clientIP,
+        p_order_id: order_id,
+        p_success: false
+      });
+
       console.log('Access denied for order:', order_id, '-', errorMessage);
       return new Response(
         JSON.stringify({ error: 'Access denied' }),

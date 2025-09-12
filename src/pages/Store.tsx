@@ -30,12 +30,14 @@ const Store = () => {
 
   const fetchProducts = async () => {
     try {
+      console.log('Fetching products...');
       const { data, error } = await supabase
         .from('products')
         .select('*')
         .eq('is_active', true)
         .order('created_at', { ascending: false });
 
+      console.log('Products query result:', { data, error });
       if (error) throw error;
       setProducts((data || []) as unknown as Product[]);
     } catch (error) {

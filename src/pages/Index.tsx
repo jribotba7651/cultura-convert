@@ -21,10 +21,10 @@ const juanBooks: Book[] = [
 // Datos de ejemplo para los libros de Rosnelma García Amalbert
 const rosnelmaBooks: Book[] = [
   {
-    title: "Isabel y Sofía",
+    title: "JÍBARA EN LA LUNA: Transformando Desafíos en Oportunidades: 22 Años de Liderazgo Consciente",
     description: {
-      es: "Una tierna historia sobre la amistad entre dos niñas que explora los valores familiares y la importancia de los lazos humanos.",
-      en: "A tender story about friendship between two girls exploring family values and the importance of human bonds."
+      es: "¿Qué pasaría si una jíbara de Puerto Rico pudiera llegar a la luna sin perder su esencia? Una guía práctica y honesta para el liderazgo consciente con estrategias comprobadas para convertir desafíos en oportunidades, técnicas para navegar el bullying corporativo, y herramientas para usar la perspectiva bicultural como ventaja competitiva.",
+      en: "What would happen if a jíbara from Puerto Rico could reach the moon without losing her essence? A practical and honest guide to conscious leadership with proven strategies to turn challenges into opportunities, techniques to navigate corporate bullying, and tools to use bicultural perspective as a competitive advantage."
     },
     status: "published" as const,
     amazonUrl: "https://a.co/d/23apCTx",

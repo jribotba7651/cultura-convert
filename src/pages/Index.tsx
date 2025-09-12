@@ -7,6 +7,7 @@ import rosnelmaProfileImage from "@/assets/rosnelma-garcia-profile.jpg";
 import jibaraEnLaLunaCover from "@/assets/jibara-en-la-luna-cover.jpg";
 import lasAventurasLunaAvoCover from "@/assets/las-aventuras-luna-avo-cover.jpg";
 import sofiaMariePalomaCover from "@/assets/sofia-marie-paloma-cover.jpg";
+import cartasDeNewarkCover from "@/assets/cartas-de-newark-cover.jpg";
 
 // Datos de ejemplo para los libros de Juan C. Ribot Guzmán
 const juanBooks: Book[] = [
@@ -18,6 +19,7 @@ const juanBooks: Book[] = [
     },
     status: "published" as const,
     amazonUrl: "https://a.co/d/4dgdLk4",
+    coverImage: cartasDeNewarkCover,
   },
 ];
 

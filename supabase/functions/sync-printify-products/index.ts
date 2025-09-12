@@ -136,8 +136,8 @@ const handler = async (req: Request): Promise<Response> => {
             en: product.description || 'Premium coffee from Puerto Rico'
           },
           category_id: categoryId,
-          price_cents: Math.round((product.variants?.[0]?.price || 15.99) * 100),
-          compare_at_price_cents: Math.round((product.variants?.[0]?.price || 15.99) * 120), // 20% higher compare price
+          price_cents: Math.round((product.variants?.[0]?.price || 15.99)),
+          compare_at_price_cents: Math.round((product.variants?.[0]?.price || 15.99) * 1.2), // 20% higher compare price
           images: product.images?.map(img => img.src) || [],
           variants: product.variants || [],
           tags: product.tags || ['coffee', 'puerto rico', 'artisanal'],

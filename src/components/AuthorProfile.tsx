@@ -116,28 +116,39 @@ const AuthorProfile = ({ name, bio, books, image }: AuthorProfileProps) => {
               </div>
             </CardHeader>
             <CardContent>
-              <CardDescription className="text-sm">
-                {book.description[language]}
-              </CardDescription>
-              <div className="flex items-center justify-between mt-4">
-                {book.status === "published" && (
-                  <div className="flex gap-2">
-                    <Button
-                      size="sm"
-                      onClick={() => handleBuyOnAmazon(book)}
-                      className="bg-secondary hover:bg-secondary/90"
-                    >
-                      {t('buyOnAmazon')}
-                    </Button>
-                    <Button
-                      size="sm"
-                      variant="outline"
-                      onClick={() => handlePreview(book.title)}
-                    >
-                      {t('preview')}
-                    </Button>
+              <div className="flex gap-4">
+                {book.coverImage && (
+                  <div className="flex-shrink-0">
+                    <img 
+                      src={book.coverImage} 
+                      alt={`Portada de ${book.title}`}
+                      className="w-24 h-32 object-cover rounded-md shadow-md"
+                    />
                   </div>
                 )}
+                <div className="flex-1">
+                  <CardDescription className="text-sm mb-4">
+                    {book.description[language]}
+                  </CardDescription>
+                  {book.status === "published" && (
+                    <div className="flex gap-2">
+                      <Button
+                        size="sm"
+                        onClick={() => handleBuyOnAmazon(book)}
+                        className="bg-secondary hover:bg-secondary/90"
+                      >
+                        {t('buyOnAmazon')}
+                      </Button>
+                      <Button
+                        size="sm"
+                        variant="outline"
+                        onClick={() => handlePreview(book.title)}
+                      >
+                        {t('preview')}
+                      </Button>
+                    </div>
+                  )}
+                </div>
               </div>
             </CardContent>
           </Card>

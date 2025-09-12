@@ -4,6 +4,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { Book } from "@/types/Book";
 import juanProfileImage from "@/assets/juan-c-ribot-profile.jpg";
 import rosnelmaProfileImage from "@/assets/rosnelma-garcia-profile.jpg";
+import jibaraEnLaLunaCover from "@/assets/jibara-en-la-luna-cover.jpg";
 
 // Datos de ejemplo para los libros de Juan C. Ribot Guzmán
 const juanBooks: Book[] = [
@@ -28,6 +29,7 @@ const rosnelmaBooks: Book[] = [
     },
     status: "published" as const,
     amazonUrl: "https://a.co/d/23apCTx",
+    coverImage: jibaraEnLaLunaCover,
   },
   {
     title: "Las Aventuras de Luna y Avo",

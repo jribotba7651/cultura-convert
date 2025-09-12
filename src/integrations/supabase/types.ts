@@ -14,7 +14,259 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      categories: {
+        Row: {
+          created_at: string
+          description: Json | null
+          id: string
+          image_url: string | null
+          name: Json
+          slug: string
+          updated_at: string
+        }
+        Insert: {
+          created_at?: string
+          description?: Json | null
+          id?: string
+          image_url?: string | null
+          name: Json
+          slug: string
+          updated_at?: string
+        }
+        Update: {
+          created_at?: string
+          description?: Json | null
+          id?: string
+          image_url?: string | null
+          name?: Json
+          slug?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      order_items: {
+        Row: {
+          created_at: string
+          id: string
+          order_id: string
+          printify_line_item_id: string | null
+          product_id: string
+          quantity: number
+          total_price_cents: number
+          unit_price_cents: number
+          variant_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          order_id: string
+          printify_line_item_id?: string | null
+          product_id: string
+          quantity?: number
+          total_price_cents: number
+          unit_price_cents: number
+          variant_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          order_id?: string
+          printify_line_item_id?: string | null
+          product_id?: string
+          quantity?: number
+          total_price_cents?: number
+          unit_price_cents?: number
+          variant_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "order_items_order_id_fkey"
+            columns: ["order_id"]
+            isOneToOne: false
+            referencedRelation: "orders"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "order_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      orders: {
+        Row: {
+          billing_address: Json
+          created_at: string
+          currency: string | null
+          customer_email: string
+          customer_name: string
+          customer_phone: string | null
+          id: string
+          notes: string | null
+          printify_order_id: string | null
+          profile_id: string | null
+          shipping_address: Json
+          shipping_amount_cents: number | null
+          status: string
+          stripe_payment_intent_id: string | null
+          tax_amount_cents: number | null
+          total_amount_cents: number
+          tracking_number: string | null
+          tracking_url: string | null
+          updated_at: string
+          user_id: string | null
+        }
+        Insert: {
+          billing_address: Json
+          created_at?: string
+          currency?: string | null
+          customer_email: string
+          customer_name: string
+          customer_phone?: string | null
+          id?: string
+          notes?: string | null
+          printify_order_id?: string | null
+          profile_id?: string | null
+          shipping_address: Json
+          shipping_amount_cents?: number | null
+          status?: string
+          stripe_payment_intent_id?: string | null
+          tax_amount_cents?: number | null
+          total_amount_cents: number
+          tracking_number?: string | null
+          tracking_url?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Update: {
+          billing_address?: Json
+          created_at?: string
+          currency?: string | null
+          customer_email?: string
+          customer_name?: string
+          customer_phone?: string | null
+          id?: string
+          notes?: string | null
+          printify_order_id?: string | null
+          profile_id?: string | null
+          shipping_address?: Json
+          shipping_amount_cents?: number | null
+          status?: string
+          stripe_payment_intent_id?: string | null
+          tax_amount_cents?: number | null
+          total_amount_cents?: number
+          tracking_number?: string | null
+          tracking_url?: string | null
+          updated_at?: string
+          user_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "orders_profile_id_fkey"
+            columns: ["profile_id"]
+            isOneToOne: false
+            referencedRelation: "profiles"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      products: {
+        Row: {
+          category_id: string | null
+          compare_at_price_cents: number | null
+          created_at: string
+          description: Json | null
+          id: string
+          images: string[] | null
+          is_active: boolean | null
+          price_cents: number
+          printify_data: Json | null
+          printify_product_id: string | null
+          tags: string[] | null
+          title: Json
+          updated_at: string
+          variants: Json | null
+        }
+        Insert: {
+          category_id?: string | null
+          compare_at_price_cents?: number | null
+          created_at?: string
+          description?: Json | null
+          id?: string
+          images?: string[] | null
+          is_active?: boolean | null
+          price_cents: number
+          printify_data?: Json | null
+          printify_product_id?: string | null
+          tags?: string[] | null
+          title: Json
+          updated_at?: string
+          variants?: Json | null
+        }
+        Update: {
+          category_id?: string | null
+          compare_at_price_cents?: number | null
+          created_at?: string
+          description?: Json | null
+          id?: string
+          images?: string[] | null
+          is_active?: boolean | null
+          price_cents?: number
+          printify_data?: Json | null
+          printify_product_id?: string | null
+          tags?: string[] | null
+          title?: Json
+          updated_at?: string
+          variants?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "products_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      profiles: {
+        Row: {
+          billing_address: Json | null
+          created_at: string
+          email: string
+          full_name: string | null
+          id: string
+          phone: string | null
+          shipping_address: Json | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          billing_address?: Json | null
+          created_at?: string
+          email: string
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+          shipping_address?: Json | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          billing_address?: Json | null
+          created_at?: string
+          email?: string
+          full_name?: string | null
+          id?: string
+          phone?: string | null
+          shipping_address?: Json | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never

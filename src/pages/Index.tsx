@@ -6,6 +6,7 @@ import juanProfileImage from "@/assets/juan-c-ribot-profile.jpg";
 import rosnelmaProfileImage from "@/assets/rosnelma-garcia-profile.jpg";
 import jibaraEnLaLunaCover from "@/assets/jibara-en-la-luna-cover.jpg";
 import lasAventurasLunaAvoCover from "@/assets/las-aventuras-luna-avo-cover.jpg";
+import sofiaMariePalomaCover from "@/assets/sofia-marie-paloma-cover.jpg";
 
 // Datos de ejemplo para los libros de Juan C. Ribot Guzmán
 const juanBooks: Book[] = [
@@ -43,22 +44,14 @@ const rosnelmaBooks: Book[] = [
     coverImage: lasAventurasLunaAvoCover,
   },
   {
-    title: "Eres una Estrella",
+    title: "Sofía Marie, 'Sofí Mary' o Paloma",
     description: {
-      es: "Un libro inspirador que ayuda a los niños a descubrir su autoestima y a creer en sus propias capacidades y talentos únicos.",
-      en: "An inspiring book helping children discover their self-esteem and believe in their own unique abilities and talents."
+      es: "Sofía Marie, también conocida como 'Sofí Mary,' es mucho más que una estudiante universitaria de primer año. Es el resultado de una infancia marcada por una madre brillante pero obsesivamente controladora, que combinaba tecnología de punta con rituales antiguos para vigilar cada uno de sus pasos. Ambientada en Puerto Rico y cargada de profundidad emocional, suspenso y tensiones propias del paso a la adultez, esta novela explora la delgada línea entre la protección y el control, el legado y la rebelión, la verdad y la identidad.",
+      en: "Sofía Marie, also known as 'Sofí Mary,' is much more than a college freshman. She is the result of a childhood marked by a brilliant but obsessively controlling mother, who combined cutting-edge technology with ancient rituals to monitor her every step. Set in Puerto Rico and loaded with emotional depth, suspense, and coming-of-age tensions, this novel explores the thin line between protection and control, legacy and rebellion, truth and identity."
     },
     status: "published" as const,
-    amazonUrl: "https://a.co/d/9C2DSkK",
-  },
-  {
-    title: "Dios y yo somos amigos",
-    description: {
-      es: "Una hermosa exploración de la espiritualidad infantil que presenta conceptos de fe de manera accesible y reconfortante para los más pequeños.",
-      en: "A beautiful exploration of children's spirituality presenting faith concepts in an accessible and comforting way for little ones."
-    },
-    status: "published" as const,
-    amazonUrl: "https://a.co/d/73bZggx",
+    amazonUrl: "https://www.amazon.com/dp/B0FB82RBP6?ref=cm_sw_r_ffobk_cp_ud_dp_79GCRX5MZ21X75R7H553&ref_=cm_sw_r_ffobk_cp_ud_dp_79GCRX5MZ21X75R7H553&social_share=cm_sw_r_ffobk_cp_ud_dp_79GCRX5MZ21X75R7H553&bestFormat=true",
+    coverImage: sofiaMariePalomaCover,
   },
 ];
 

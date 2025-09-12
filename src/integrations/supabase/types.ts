@@ -44,26 +44,71 @@ export type Database = {
         }
         Relationships: []
       }
+      order_access_logs: {
+        Row: {
+          access_method: string
+          created_at: string
+          error_message: string | null
+          id: string
+          ip_address: unknown | null
+          order_id: string
+          success: boolean
+          user_agent: string | null
+        }
+        Insert: {
+          access_method: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          ip_address?: unknown | null
+          order_id: string
+          success?: boolean
+          user_agent?: string | null
+        }
+        Update: {
+          access_method?: string
+          created_at?: string
+          error_message?: string | null
+          id?: string
+          ip_address?: unknown | null
+          order_id?: string
+          success?: boolean
+          user_agent?: string | null
+        }
+        Relationships: []
+      }
       order_access_tokens: {
         Row: {
+          access_count: number
           created_at: string
           expires_at: string
           id: string
+          is_active: boolean
+          last_accessed_at: string | null
           order_id: string
+          replaced_by: string | null
           token: string
         }
         Insert: {
+          access_count?: number
           created_at?: string
           expires_at?: string
           id?: string
+          is_active?: boolean
+          last_accessed_at?: string | null
           order_id: string
+          replaced_by?: string | null
           token: string
         }
         Update: {
+          access_count?: number
           created_at?: string
           expires_at?: string
           id?: string
+          is_active?: boolean
+          last_accessed_at?: string | null
           order_id?: string
+          replaced_by?: string | null
           token?: string
         }
         Relationships: []
@@ -299,6 +344,21 @@ export type Database = {
       check_order_access_token: {
         Args: { order_uuid: string; token_value: string }
         Returns: boolean
+      }
+      log_order_access: {
+        Args: {
+          p_access_method: string
+          p_error_message?: string
+          p_ip_address?: unknown
+          p_order_id: string
+          p_success?: boolean
+          p_user_agent?: string
+        }
+        Returns: undefined
+      }
+      rotate_order_access_token: {
+        Args: { p_old_token: string; p_order_id: string }
+        Returns: string
       }
     }
     Enums: {

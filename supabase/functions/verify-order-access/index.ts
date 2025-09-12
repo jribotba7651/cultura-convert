@@ -32,6 +32,10 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log('Verifying access for order:', order_id);
 
+    // Extract client information for logging
+    const clientIP = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || '127.0.0.1';
+    const userAgent = req.headers.get('user-agent') || 'Unknown';
+
     // Check if user is authenticated
     const authHeader = req.headers.get('Authorization');
     let userId = null;
@@ -75,12 +79,15 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-    // Check access permissions
+    // Check access permissions with enhanced security and logging
     let hasAccess = false;
+    let accessMethod = '';
+    let errorMessage = '';
 
     // Case 1: Authenticated user accessing their own order
     if (userId && order.user_id === userId) {
       hasAccess = true;
+      accessMethod = 'authenticated_user';
       console.log('Access granted: authenticated user owns order');
     }
     // Case 2: Anonymous order with valid access token
@@ -90,19 +97,47 @@ const handler = async (req: Request): Promise<Response> => {
         .select('*')
         .eq('order_id', order_id)
         .eq('token', access_token)
+        .eq('is_active', true)
         .gt('expires_at', new Date().toISOString())
         .single();
 
       if (!tokenError && tokenData) {
         hasAccess = true;
+        accessMethod = 'token';
         console.log('Access granted: valid access token for anonymous order');
+        
+        // Update token usage tracking
+        await supabase
+          .from('order_access_tokens')
+          .update({ 
+            access_count: (tokenData.access_count || 0) + 1,
+            last_accessed_at: new Date().toISOString()
+          })
+          .eq('id', tokenData.id);
       } else {
-        console.log('Invalid or expired access token');
+        errorMessage = 'Invalid, expired, or inactive access token';
+        console.log(errorMessage);
       }
+    } else if (!order.user_id && !access_token) {
+      errorMessage = 'Anonymous order requires access token';
+    } else if (order.user_id && !userId) {
+      errorMessage = 'Order belongs to authenticated user but no authentication provided';
+    } else {
+      errorMessage = 'User does not own this order';
     }
 
+    // Log access attempt
+    await supabase.rpc('log_order_access', {
+      p_order_id: order_id,
+      p_access_method: accessMethod || 'unknown',
+      p_ip_address: clientIP,
+      p_user_agent: userAgent,
+      p_success: hasAccess,
+      p_error_message: errorMessage || null
+    });
+
     if (!hasAccess) {
-      console.log('Access denied for order:', order_id);
+      console.log('Access denied for order:', order_id, '-', errorMessage);
       return new Response(
         JSON.stringify({ error: 'Access denied' }),
         {

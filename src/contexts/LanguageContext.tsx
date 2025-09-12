@@ -45,6 +45,7 @@ const translations = {
     // Navigation
     home: "Inicio",
     blog: "Blog",
+    store: "Tienda",
     siteTitle: "Jíbaro en la Luna",
     
     // Blog
@@ -94,6 +95,7 @@ const translations = {
     // Navigation
     home: "Home",
     blog: "Blog",
+    store: "Store",
     siteTitle: "Jíbaro en la Luna",
     
     // Blog

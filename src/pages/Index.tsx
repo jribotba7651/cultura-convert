@@ -5,6 +5,7 @@ import { Book } from "@/types/Book";
 import juanProfileImage from "@/assets/juan-c-ribot-profile.jpg";
 import rosnelmaProfileImage from "@/assets/rosnelma-garcia-profile.jpg";
 import jibaraEnLaLunaCover from "@/assets/jibara-en-la-luna-cover.jpg";
+import lasAventurasLunaAvoCover from "@/assets/las-aventuras-luna-avo-cover.jpg";
 
 // Datos de ejemplo para los libros de Juan C. Ribot Guzmán
 const juanBooks: Book[] = [
@@ -38,7 +39,8 @@ const rosnelmaBooks: Book[] = [
       en: "A children's book full of adventures teaching kids about courage, friendship, and the power of imagination."
     },
     status: "published" as const,
-    amazonUrl: "https://a.co/d/aZnA5O7",
+    amazonUrl: "https://www.amazon.com/Las-aventuras-Luna-Avo-Spanish-ebook/dp/B0DYYV2NKH/ref=sr_1_4?dib=eyJ2IjoiMSJ9.ZuSe3DmdBrrx2NzXq2GjkF7apVCj913zvdaNPNuFRoZxqHNqYv4b6rQHjfIeM6cWMLjgH0rYnBa8c6Xim3hKSs56oXNi6J2FDDpUqgGwHfA.zENM8fRa48HJpgzlsuNHa-8cNVEzan_SURD_m9-5myA&dib_tag=se&qid=1757705499&refinements=p_27%3ARosnelma+Garcia&s=digital-text&sr=1-4&text=Rosnelma+Garcia",
+    coverImage: lasAventurasLunaAvoCover,
   },
   {
     title: "Eres una Estrella",

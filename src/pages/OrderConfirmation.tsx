@@ -25,22 +25,35 @@ const OrderConfirmation = () => {
 
   const fetchOrder = async (id: string) => {
     try {
-      const { data, error } = await supabase
-        .from('orders')
-        .select(`
-          *,
-          order_items (
-            *,
-            products (*)
-          )
-        `)
-        .eq('id', id)
-        .single();
+      // Get access token from localStorage for anonymous orders
+      const accessToken = localStorage.getItem(`order_token_${id}`);
+      
+      // Use the secure verification endpoint
+      const { data, error } = await supabase.functions.invoke('verify-order-access', {
+        body: {
+          order_id: id,
+          access_token: accessToken
+        }
+      });
 
-      if (error) throw error;
-      setOrder(data as unknown as Order);
-    } catch (error) {
+      if (error) {
+        throw new Error(error.message || 'Failed to verify order access');
+      }
+
+      if (data.error) {
+        throw new Error(data.error);
+      }
+
+      setOrder(data.order as unknown as Order);
+      
+      // Clean up token after successful access (optional - for security)
+      if (accessToken) {
+        localStorage.removeItem(`order_token_${id}`);
+      }
+      
+    } catch (error: any) {
       console.error('Error fetching order:', error);
+      // Redirect to store with error message
       navigate('/store');
     } finally {
       setLoading(false);

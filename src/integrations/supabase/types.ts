@@ -44,6 +44,30 @@ export type Database = {
         }
         Relationships: []
       }
+      order_access_tokens: {
+        Row: {
+          created_at: string
+          expires_at: string
+          id: string
+          order_id: string
+          token: string
+        }
+        Insert: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          order_id: string
+          token: string
+        }
+        Update: {
+          created_at?: string
+          expires_at?: string
+          id?: string
+          order_id?: string
+          token?: string
+        }
+        Relationships: []
+      }
       order_items: {
         Row: {
           created_at: string

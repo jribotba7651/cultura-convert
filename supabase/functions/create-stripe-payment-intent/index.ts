@@ -114,10 +114,25 @@ const handler = async (req: Request): Promise<Response> => {
       },
     });
 
+    // Get current user if authenticated
+    const authHeader = req.headers.get('Authorization');
+    let userId = null;
+    
+    if (authHeader) {
+      try {
+        const token = authHeader.replace('Bearer ', '');
+        const { data: { user } } = await supabase.auth.getUser(token);
+        userId = user?.id || null;
+      } catch (error) {
+        console.log('No authenticated user, proceeding with anonymous order');
+      }
+    }
+
     // Create order record
     const { data: order, error: orderError } = await supabase
       .from('orders')
       .insert({
+        user_id: userId, // Set user_id if authenticated, null if anonymous
         total_amount_cents: totalAmount,
         shipping_amount_cents: shippingAmount,
         tax_amount_cents: 0,
@@ -151,12 +166,35 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error(`Failed to create order items: ${itemsError.message}`);
     }
 
+    // Generate secure access token for anonymous orders
+    let accessToken = null;
+    if (!userId) {
+      // Generate a cryptographically secure random token
+      const tokenArray = new Uint8Array(32);
+      crypto.getRandomValues(tokenArray);
+      accessToken = Array.from(tokenArray, byte => byte.toString(16).padStart(2, '0')).join('');
+      
+      // Store the token in the database
+      const { error: tokenError } = await supabase
+        .from('order_access_tokens')
+        .insert({
+          order_id: order.id,
+          token: accessToken,
+        });
+
+      if (tokenError) {
+        console.error('Failed to create access token:', tokenError);
+        // Don't fail the entire request, just log the error
+      }
+    }
+
     console.log('Payment intent created:', paymentIntent.id);
 
     return new Response(
       JSON.stringify({
         client_secret: paymentIntent.client_secret,
         order_id: order.id,
+        access_token: accessToken, // Include token for anonymous orders
         amount: totalAmount,
       }),
       {

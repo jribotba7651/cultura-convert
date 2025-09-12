@@ -171,6 +171,12 @@ const CheckoutForm = () => {
 
       if (paymentIntent && paymentIntent.status === 'succeeded') {
         clearCart();
+        
+        // Store access token for anonymous orders
+        if (data.access_token) {
+          localStorage.setItem(`order_token_${data.order_id}`, data.access_token);
+        }
+        
         toast({
           title: language === 'es' ? '¡Pago exitoso!' : 'Payment successful!',
           description: language === 'es' 

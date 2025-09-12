@@ -22,6 +22,7 @@ const Store = () => {
   const [loading, setLoading] = useState(true);
   const [selectedCategory, setSelectedCategory] = useState<string>();
   const [searchQuery, setSearchQuery] = useState('');
+  const [hasAttemptedSync, setHasAttemptedSync] = useState(false);
 
   useEffect(() => {
     fetchProducts();
@@ -39,7 +40,29 @@ const Store = () => {
 
       console.log('Products query result:', { data, error });
       if (error) throw error;
-      setProducts((data || []) as unknown as Product[]);
+      const safeData = (data || []) as unknown as Product[];
+      setProducts(safeData);
+
+      // Auto-sync from Printify if no products are found (one-time)
+      if (safeData.length === 0 && !hasAttemptedSync) {
+        console.log('No products found locally. Auto-syncing from Printify...');
+        setHasAttemptedSync(true);
+        try {
+          const { data: syncData, error: syncError } = await supabase.functions.invoke('sync-printify-products');
+          if (syncError) throw syncError;
+          console.log('Auto-sync result:', syncData);
+        } catch (syncErr) {
+          console.error('Auto-sync failed:', syncErr);
+        } finally {
+          // Try to fetch again after sync attempt
+          const { data: refreshed } = await supabase
+            .from('products')
+            .select('*')
+            .eq('is_active', true)
+            .order('created_at', { ascending: false });
+          setProducts((refreshed || []) as unknown as Product[]);
+        }
+      }
     } catch (error) {
       console.error('Error fetching products:', error);
     }
@@ -76,6 +99,7 @@ const Store = () => {
   };
 
   const handleSyncProducts = async () => {
+    setHasAttemptedSync(true);
     setLoading(true);
     try {
       const { data, error } = await supabase.functions.invoke('sync-printify-products');

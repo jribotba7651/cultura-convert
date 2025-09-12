@@ -90,7 +90,7 @@ const CheckoutForm = () => {
       setFormData(prev => ({
         ...prev,
         [keys[0]]: {
-          ...prev[keys[0] as keyof CheckoutFormData],
+          ...(prev[keys[0] as 'shippingAddress' | 'billingAddress']),
           [keys[1]]: value
         }
       }));

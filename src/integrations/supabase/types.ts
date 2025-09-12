@@ -296,7 +296,10 @@ export type Database = {
       [_ in never]: never
     }
     Functions: {
-      [_ in never]: never
+      check_order_access_token: {
+        Args: { order_uuid: string; token_value: string }
+        Returns: boolean
+      }
     }
     Enums: {
       [_ in never]: never

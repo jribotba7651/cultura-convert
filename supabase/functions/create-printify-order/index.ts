@@ -32,7 +32,7 @@ const handler = async (req: Request): Promise<Response> => {
       throw new Error('PRINTIFY_API_TOKEN not found');
     }
 
-    // Get order details
+    // Get order details - ensure single row even if duplicates exist
     const { data: order, error: orderError } = await supabase
       .from('orders')
       .select(`
@@ -43,10 +43,12 @@ const handler = async (req: Request): Promise<Response> => {
         )
       `)
       .eq('stripe_payment_intent_id', payment_intent_id)
+      .order('created_at', { ascending: false })
+      .limit(1)
       .single();
 
     if (orderError || !order) {
-      throw new Error(`Order not found: ${orderError?.message}`);
+      throw new Error(`Order not found or multiple matched: ${orderError?.message ?? 'no matching order'}`);
     }
 
     // Get first shop ID

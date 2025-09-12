@@ -7,6 +7,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useCart } from '@/contexts/CartContext';
 import { Product } from '@/types/Store';
 import { useToast } from '@/hooks/use-toast';
+import { truncateText } from '@/utils/htmlCleaner';
 
 interface ProductCardProps {
   product: Product;
@@ -81,7 +82,7 @@ export const ProductCard = ({ product, onProductClick }: ProductCardProps) => {
           </h3>
           
           <p className="text-muted-foreground text-sm mb-3 line-clamp-2">
-            {product.description[language].replace(/<[^>]*>/g, '')}
+            {truncateText(product.description[language], 120)}
           </p>
 
           <div className="flex flex-wrap gap-1 mb-3">

@@ -84,13 +84,19 @@ const Store = () => {
     }
   };
 
-  const filteredProducts = products.filter(product => {
+  const filteredProducts = products.filter((product) => {
     const matchesCategory = !selectedCategory || product.category_id === selectedCategory;
-    const matchesSearch = !searchQuery || 
-      product.title[language].toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.description[language].toLowerCase().includes(searchQuery.toLowerCase()) ||
-      product.tags.some(tag => tag.toLowerCase().includes(searchQuery.toLowerCase()));
-    
+    const q = searchQuery.trim().toLowerCase();
+    if (!q) return matchesCategory;
+
+    const title = product.title?.[language]?.toLowerCase?.() || '';
+    const desc = (product.description?.[language] || '').toLowerCase();
+    const tags = Array.isArray(product.tags) ? product.tags : [];
+    const matchesSearch =
+      title.includes(q) ||
+      desc.includes(q) ||
+      tags.some((tag) => (tag || '').toLowerCase().includes(q));
+
     return matchesCategory && matchesSearch;
   });
 

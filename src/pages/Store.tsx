@@ -113,10 +113,30 @@ const Store = () => {
       
       console.log('Sync result:', data);
       await fetchProducts(); // Refresh products list
+      
+      // Show success message with details
+      if (data?.deactivatedCount > 0) {
+        console.log(`Deactivated ${data.deactivatedCount} products that no longer exist in Printify`);
+      }
     } catch (error) {
       console.error('Error syncing products:', error);
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleManageProduct = async (productId: string, action: 'deactivate' | 'activate' | 'delete') => {
+    try {
+      const { data, error } = await supabase.functions.invoke('manage-product', {
+        body: { action, productId }
+      });
+      
+      if (error) throw error;
+      
+      console.log(`Product ${action}d successfully:`, data);
+      await fetchProducts(); // Refresh products list
+    } catch (error) {
+      console.error(`Error ${action}ing product:`, error);
     }
   };
 

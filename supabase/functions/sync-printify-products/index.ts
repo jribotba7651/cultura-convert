@@ -81,6 +81,33 @@ const handler = async (req: Request): Promise<Response> => {
     const { data: printifyProducts } = await productsResponse.json();
     console.log('Found products:', printifyProducts.length);
 
+    // Get current active products from database to identify deleted ones
+    const { data: currentProducts } = await supabase
+      .from('products')
+      .select('id, printify_product_id')
+      .eq('is_active', true)
+      .not('printify_product_id', 'is', null);
+
+    const printifyProductIds = new Set(printifyProducts.map(p => p.id));
+    const deletedProducts = (currentProducts || []).filter(
+      p => p.printify_product_id && !printifyProductIds.has(p.printify_product_id)
+    );
+
+    // Deactivate products that no longer exist in Printify
+    if (deletedProducts.length > 0) {
+      console.log(`Deactivating ${deletedProducts.length} deleted products...`);
+      const { error: deactivateError } = await supabase
+        .from('products')
+        .update({ is_active: false })
+        .in('id', deletedProducts.map(p => p.id));
+      
+      if (deactivateError) {
+        console.error('Failed to deactivate deleted products:', deactivateError);
+      } else {
+        console.log('Successfully deactivated deleted products');
+      }
+    }
+
     // Create or update coffee category
     const { data: existingCategory } = await supabase
       .from('categories')
@@ -173,13 +200,14 @@ const handler = async (req: Request): Promise<Response> => {
       }
     }
 
-    console.log(`Sync completed. Synced ${syncedCount} products.`);
+    console.log(`Sync completed. Synced ${syncedCount} products. Deactivated ${deletedProducts.length} deleted products.`);
 
     return new Response(
       JSON.stringify({ 
         success: true, 
-        message: `Successfully synced ${syncedCount} products`,
+        message: `Successfully synced ${syncedCount} products and deactivated ${deletedProducts.length} deleted products`,
         syncedCount,
+        deactivatedCount: deletedProducts.length,
         totalProducts: printifyProducts.length
       }),
       {

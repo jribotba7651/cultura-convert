@@ -16,7 +16,7 @@ import { useToast } from '@/hooks/use-toast';
 import { sanitizeText, validateInput } from '@/utils/sanitize';
 import { validateAddress, formatZipCode } from '@/utils/addressValidation';
 
-const stripePromise = loadStripe('pk_test_51QdK4IGfIcOJCKx4mhHTfOcE6lRN6yyF9sZUYi7YdktKGqzksQkGEJzPL5ZVEFhyO8KMCaVOHnfJPLhAhOLNJK2v00T5qdgVrR');
+const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || 'pk_test_51QdK4IGfIcOJCKx4mhHTfOcE6lRN6yyF9sZUYi7YdktKGqzksQkGEJzPL5ZVEFhyO8KMCaVOHnfJPLhAhOLNJK2v00T5qdgVrR');
 
 interface CheckoutFormData {
   email: string;

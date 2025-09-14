@@ -53,6 +53,68 @@ interface CreatePaymentIntentRequest {
   customer_phone?: string;
 }
 
+// Server-side address validation
+async function validateServerSideAddress(address: any): Promise<{ valid: boolean; errors?: string[] }> {
+  const errors: string[] = [];
+  
+  // Basic validation
+  if (!address.name || address.name.length < 2) {
+    errors.push('Full name is required and must be at least 2 characters');
+  }
+  
+  if (!address.line1 || address.line1.length < 5) {
+    errors.push('Address line 1 is required and must be at least 5 characters');
+  }
+  
+  if (!address.city || address.city.length < 2) {
+    errors.push('City is required and must be at least 2 characters');
+  }
+  
+  if (!address.state || address.state.length < 2) {
+    errors.push('State is required');
+  }
+  
+  if (!address.postal_code) {
+    errors.push('Postal code is required');
+  }
+  
+  // Validate postal code format based on country
+  if (address.country === 'US' || address.country === 'PR') {
+    const zipRegex = /^\d{5}(-\d{4})?$/;
+    if (!zipRegex.test(address.postal_code)) {
+      errors.push('Invalid US/PR postal code format');
+    }
+  }
+  
+  if (!address.country || address.country.length !== 2) {
+    errors.push('Valid country code is required');
+  }
+  
+  // Sanitize text fields
+  const sanitizeText = (text: string) => {
+    return text.replace(/[<>'"]/g, (char) => {
+      switch (char) {
+        case '<': return '&lt;';
+        case '>': return '&gt;';
+        case '"': return '&quot;';
+        case "'": return '&#x27;';
+        default: return char;
+      }
+    });
+  };
+  
+  // Sanitize address fields
+  if (address.name) address.name = sanitizeText(address.name);
+  if (address.line1) address.line1 = sanitizeText(address.line1);
+  if (address.line2) address.line2 = sanitizeText(address.line2);
+  if (address.city) address.city = sanitizeText(address.city);
+  
+  return {
+    valid: errors.length === 0,
+    errors: errors.length > 0 ? errors : undefined
+  };
+}
+
 const handler = async (req: Request): Promise<Response> => {
   if (req.method === 'OPTIONS') {
     return new Response(null, { headers: corsHeaders });
@@ -69,6 +131,18 @@ const handler = async (req: Request): Promise<Response> => {
     }: CreatePaymentIntentRequest = await req.json();
 
     console.log('Creating payment intent for items:', items.length);
+
+    // Validate shipping address server-side
+    const addressValidation = await validateServerSideAddress(shipping_address);
+    if (!addressValidation.valid) {
+      return new Response(
+        JSON.stringify({ 
+          error: 'Invalid shipping address', 
+          details: addressValidation.errors 
+        }),
+        { status: 400, headers: corsHeaders }
+      );
+    }
 
     // Calculate order total
     let totalAmount = 0;

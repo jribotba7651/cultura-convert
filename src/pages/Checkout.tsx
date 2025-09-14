@@ -14,6 +14,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { sanitizeText, validateInput } from '@/utils/sanitize';
+import { validateAddress, formatZipCode } from '@/utils/addressValidation';
 
 const stripePromise = loadStripe('pk_test_51QdK4IGfIcOJCKx4mhHTfOcE6lRN6yyF9sZUYi7YdktKGqzksQkGEJzPL5ZVEFhyO8KMCaVOHnfJPLhAhOLNJK2v00T5qdgVrR');
 
@@ -49,6 +50,8 @@ const CheckoutForm = () => {
   const { toast } = useToast();
   
   const [loading, setLoading] = useState(false);
+  const [addressErrors, setAddressErrors] = useState<{[key: string]: string[]}>({});
+  const [addressWarnings, setAddressWarnings] = useState<{[key: string]: string[]}>({});
   const [formData, setFormData] = useState<CheckoutFormData>({
     email: '',
     name: '',
@@ -96,6 +99,27 @@ const CheckoutForm = () => {
         }
       }));
     }
+
+    // Validate address in real-time for postal codes
+    if (field.includes('postal_code') || field.includes('country')) {
+      const addressType = field.startsWith('shipping') ? 'shippingAddress' : 'billingAddress';
+      setTimeout(() => validateAddressField(addressType), 100);
+    }
+  };
+
+  const validateAddressField = (addressType: 'shippingAddress' | 'billingAddress') => {
+    const address = formData[addressType];
+    const validation = validateAddress(address, language);
+    
+    setAddressErrors(prev => ({
+      ...prev,
+      [addressType]: validation.errors
+    }));
+    
+    setAddressWarnings(prev => ({
+      ...prev,
+      [addressType]: validation.warnings
+    }));
   };
 
   const handleSameAsShippingChange = (checked: boolean) => {
@@ -110,6 +134,29 @@ const CheckoutForm = () => {
     event.preventDefault();
     
     if (!stripe || !elements) {
+      return;
+    }
+
+    // Validate addresses before proceeding
+    const shippingValidation = validateAddress(formData.shippingAddress, language);
+    const billingValidation = validateAddress(
+      formData.sameAsShipping ? formData.shippingAddress : formData.billingAddress, 
+      language
+    );
+
+    if (!shippingValidation.isValid || !billingValidation.isValid) {
+      setAddressErrors({
+        shippingAddress: shippingValidation.errors,
+        billingAddress: billingValidation.errors
+      });
+      
+      toast({
+        title: language === 'es' ? 'Error en la dirección' : 'Address Error',
+        description: language === 'es' 
+          ? 'Por favor corrige los errores en las direcciones.'
+          : 'Please correct the address errors.',
+        variant: 'destructive',
+      });
       return;
     }
 
@@ -353,9 +400,25 @@ const CheckoutForm = () => {
                       <Input
                         id="shipping-postal"
                         value={formData.shippingAddress.postal_code}
-                        onChange={(e) => handleInputChange('shippingAddress.postal_code', e.target.value)}
+                        onChange={(e) => {
+                          const formatted = formatZipCode(e.target.value, formData.shippingAddress.country);
+                          handleInputChange('shippingAddress.postal_code', formatted);
+                        }}
+                        className={addressErrors.shippingAddress?.some(error => 
+                          error.toLowerCase().includes('postal') || error.toLowerCase().includes('zip')
+                        ) ? 'border-destructive' : ''}
                         required
                       />
+                      {addressErrors.shippingAddress?.filter(error => 
+                        error.toLowerCase().includes('postal') || error.toLowerCase().includes('zip')
+                      ).map((error, index) => (
+                        <p key={index} className="text-sm text-destructive mt-1">{error}</p>
+                      ))}
+                      {addressWarnings.shippingAddress?.filter(warning => 
+                        warning.toLowerCase().includes('postal') || warning.toLowerCase().includes('zip')
+                      ).map((warning, index) => (
+                        <p key={index} className="text-sm text-yellow-600 mt-1">{warning}</p>
+                      ))}
                     </div>
                     
                     <div>

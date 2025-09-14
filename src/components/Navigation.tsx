@@ -15,6 +15,7 @@ const Navigation = () => {
   const navItems = [
     { path: "/", label: t('home') },
     { path: "/blog", label: t('blog') },
+    { path: "/services", label: t('services') },
     { path: "/store", label: t('store') },
   ];
 

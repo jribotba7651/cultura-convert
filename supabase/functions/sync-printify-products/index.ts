@@ -152,6 +152,14 @@ const handler = async (req: Request): Promise<Response> => {
           .eq('printify_product_id', product.id)
           .single();
 
+        // Normalize price to cents regardless of source format (dollars vs cents)
+        const rawPrice = product.variants?.[0]?.price ?? 15.99;
+        const normalized_price_cents = Number.isFinite(rawPrice)
+          ? ((Number.isInteger(rawPrice) && (rawPrice as number) >= 100)
+              ? Math.round(rawPrice as number)
+              : Math.round((rawPrice as number) * 100))
+          : 1599;
+
         const productData = {
           printify_product_id: product.id,
           title: {
@@ -163,14 +171,15 @@ const handler = async (req: Request): Promise<Response> => {
             en: product.description || 'Premium coffee from Puerto Rico'
           },
           category_id: categoryId,
-          price_cents: Math.round((product.variants?.[0]?.price || 15.99)),
-          compare_at_price_cents: Math.round((product.variants?.[0]?.price || 15.99) * 1.2), // 20% higher compare price
+          price_cents: normalized_price_cents,
+          compare_at_price_cents: Math.round(normalized_price_cents * 1.2), // 20% higher compare price
           images: product.images?.map(img => img.src) || [],
           variants: product.variants || [],
           tags: product.tags || ['coffee', 'puerto rico', 'artisanal'],
           is_active: true,
           printify_data: product
         };
+
 
         if (existingProduct) {
           const { error: updateError } = await supabase

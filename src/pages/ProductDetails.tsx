@@ -24,6 +24,7 @@ const ProductDetails = () => {
   const [selectedVariant, setSelectedVariant] = useState<string>();
   const [loading, setLoading] = useState(true);
   const [isLiked, setIsLiked] = useState(false);
+  const [showAllTags, setShowAllTags] = useState(false);
 
   useEffect(() => {
     if (id) {
@@ -197,11 +198,16 @@ const ProductDetails = () => {
               </div>
 
               <div className="flex flex-wrap gap-2 mb-4">
-                {product.tags.map((tag) => (
+                {(showAllTags ? product.tags : product.tags.slice(0, 8)).map((tag) => (
                   <Badge key={tag} variant="secondary">
                     {tag}
                   </Badge>
                 ))}
+                {product.tags.length > 8 && (
+                  <Button variant="ghost" size="sm" onClick={() => setShowAllTags(!showAllTags)}>
+                    {showAllTags ? (language === 'es' ? 'Ver menos' : 'Show less') : (language === 'es' ? 'Ver más' : 'Show more')}
+                  </Button>
+                )}
               </div>
             </div>
 

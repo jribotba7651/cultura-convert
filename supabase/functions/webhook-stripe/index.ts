@@ -24,6 +24,9 @@ const corsHeaders = {
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
 };
 
+// Security: Maximum request size (2MB for webhooks)
+const MAX_REQUEST_SIZE = 2 * 1024 * 1024;
+
 const handler = async (req: Request): Promise<Response> => {
   // Handle CORS preflight requests
   if (req.method === 'OPTIONS') {
@@ -39,6 +42,16 @@ const handler = async (req: Request): Promise<Response> => {
     return new Response('Stripe webhook endpoint - POST only', { 
       headers: { ...corsHeaders, 'Content-Type': 'text/plain' },
       status: 200 
+    });
+  }
+
+  // Security: Check request size
+  const contentLength = req.headers.get('content-length');
+  if (contentLength && parseInt(contentLength) > MAX_REQUEST_SIZE) {
+    console.error('Request too large:', contentLength);
+    return new Response('Request too large', { 
+      headers: corsHeaders,
+      status: 413 
     });
   }
 

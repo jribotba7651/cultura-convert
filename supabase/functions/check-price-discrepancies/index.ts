@@ -6,6 +6,9 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// Security: Maximum request size (512KB for price checks)
+const MAX_REQUEST_SIZE = 512 * 1024;
+
 const supabase = createClient(
   Deno.env.get('SUPABASE_URL') ?? '',
   Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
@@ -23,6 +26,15 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
+    // Security: Check request size
+    const contentLength = req.headers.get('content-length');
+    if (contentLength && parseInt(contentLength) > MAX_REQUEST_SIZE) {
+      return new Response(JSON.stringify({ error: 'Request too large' }), {
+        status: 413,
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      });
+    }
+
     console.log('Checking price discrepancies between database and Printify...');
     
     const printifyApiKey = Deno.env.get('PRINTIFY_API_TOKEN');

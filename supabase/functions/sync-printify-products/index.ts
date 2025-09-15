@@ -222,7 +222,7 @@ const handler = async (req: Request): Promise<Response> => {
         }
 
         syncedCount++;
-        console.log('Synced product:', product.title);
+        console.log(`Synced product: ${product.title} - Price: $${(minPrice/100).toFixed(2)} (${normalizedVariants.length} variants)`);
       } catch (error) {
         console.error('Error processing product:', product.id, error);
       }

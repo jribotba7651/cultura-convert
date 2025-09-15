@@ -188,7 +188,15 @@ const ProductDetails = () => {
               
               <div className="flex items-center gap-3 mb-4">
                 <span className="text-2xl font-bold text-primary">
-                  {formatPrice(product.price_cents)}
+                  {(() => {
+                    if (selectedVariant && product.variants) {
+                      const variant = product.variants.find(v => v.id === selectedVariant);
+                      if (variant && variant.price) {
+                        return formatPrice(variant.price);
+                      }
+                    }
+                    return formatPrice(product.price_cents);
+                  })()}
                 </span>
                 {hasDiscount && (
                   <span className="text-lg text-muted-foreground line-through">

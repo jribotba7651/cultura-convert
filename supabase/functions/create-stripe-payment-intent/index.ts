@@ -159,7 +159,16 @@ const handler = async (req: Request): Promise<Response> => {
         throw new Error(`Product not found: ${item.id}`);
       }
 
-      const unitPrice = product.price_cents;
+      let unitPrice = product.price_cents;
+      
+      // Use variant price if variant_id is provided
+      if (item.variant_id && product.variants) {
+        const variant = product.variants.find((v: any) => v.id === item.variant_id);
+        if (variant && variant.price) {
+          unitPrice = variant.price;
+        }
+      }
+      
       const itemTotal = unitPrice * item.quantity;
       totalAmount += itemTotal;
 

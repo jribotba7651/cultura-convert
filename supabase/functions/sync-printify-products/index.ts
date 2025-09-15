@@ -152,13 +152,32 @@ const handler = async (req: Request): Promise<Response> => {
           .eq('printify_product_id', product.id)
           .single();
 
-        // Normalize price to cents regardless of source format (dollars vs cents)
-        const rawPrice = product.variants?.[0]?.price ?? 15.99;
-        const normalized_price_cents = Number.isFinite(rawPrice)
-          ? ((Number.isInteger(rawPrice) && (rawPrice as number) >= 100)
-              ? Math.round(rawPrice as number)
-              : Math.round((rawPrice as number) * 100))
-          : 1599;
+        // Filter and normalize all variant prices to cents
+        const availableVariants = (product.variants || []).filter(variant => variant.available);
+        
+        if (availableVariants.length === 0) {
+          console.log(`Skipping product ${product.title} - no available variants`);
+          continue;
+        }
+
+        // Normalize all variant prices to cents
+        const normalizedVariants = availableVariants.map(variant => {
+          const rawPrice = variant.price ?? 15.99;
+          const normalized_price_cents = Number.isFinite(rawPrice)
+            ? ((Number.isInteger(rawPrice) && (rawPrice as number) >= 100)
+                ? Math.round(rawPrice as number)
+                : Math.round((rawPrice as number) * 100))
+            : 1599;
+          
+          return {
+            ...variant,
+            price: normalized_price_cents
+          };
+        });
+
+        // Get minimum price from available variants for product base price
+        const minPrice = Math.min(...normalizedVariants.map(v => v.price));
+        const maxPrice = Math.max(...normalizedVariants.map(v => v.price));
 
         const productData = {
           printify_product_id: product.id,
@@ -171,10 +190,10 @@ const handler = async (req: Request): Promise<Response> => {
             en: product.description || 'Premium coffee from Puerto Rico'
           },
           category_id: categoryId,
-          price_cents: normalized_price_cents,
-          compare_at_price_cents: Math.round(normalized_price_cents * 1.2), // 20% higher compare price
+          price_cents: minPrice,
+          compare_at_price_cents: maxPrice > minPrice ? maxPrice : Math.round(minPrice * 1.2),
           images: product.images?.map(img => img.src) || [],
-          variants: product.variants || [],
+          variants: normalizedVariants,
           tags: product.tags || ['coffee', 'puerto rico', 'artisanal'],
           is_active: true,
           printify_data: product

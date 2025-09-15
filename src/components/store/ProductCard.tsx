@@ -94,14 +94,29 @@ export const ProductCard = ({ product, onProductClick }: ProductCardProps) => {
           </div>
 
           <div className="flex items-center gap-2 mb-3">
-            <span className="text-xl font-bold text-primary">
-              {formatPrice(product.price_cents)}
-            </span>
-            {hasDiscount && (
-              <span className="text-sm text-muted-foreground line-through">
-                {formatPrice(product.compare_at_price_cents!)}
-              </span>
-            )}
+            {(() => {
+              const variants = product.variants || [];
+              const prices = variants.map(v => v.price).filter(p => p != null);
+              const minPrice = prices.length > 0 ? Math.min(...prices) : product.price_cents;
+              const maxPrice = prices.length > 0 ? Math.max(...prices) : product.price_cents;
+              const hasVariation = minPrice !== maxPrice;
+
+              return (
+                <>
+                  <span className="text-xl font-bold text-primary">
+                    {hasVariation 
+                      ? `${language === 'es' ? 'Desde' : 'From'} ${formatPrice(minPrice)}`
+                      : formatPrice(product.price_cents)
+                    }
+                  </span>
+                  {hasDiscount && (
+                    <span className="text-sm text-muted-foreground line-through">
+                      {formatPrice(product.compare_at_price_cents!)}
+                    </span>
+                  )}
+                </>
+              );
+            })()}
           </div>
         </div>
       </CardContent>

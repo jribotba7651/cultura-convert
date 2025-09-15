@@ -93,7 +93,17 @@ export const CartProvider: React.FC<{ children: ReactNode }> = ({ children }) =>
 
   const getTotalPrice = () => {
     return items.reduce((total, item) => {
-      return total + (item.product.price_cents * item.quantity);
+      let unitPrice = item.product.price_cents;
+      
+      // Use variant price if available
+      if (item.variant_id && item.product.variants) {
+        const variant = item.product.variants.find(v => v.id === item.variant_id);
+        if (variant && variant.price) {
+          unitPrice = variant.price;
+        }
+      }
+      
+      return total + (unitPrice * item.quantity);
     }, 0);
   };
 

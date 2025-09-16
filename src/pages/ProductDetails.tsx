@@ -45,7 +45,12 @@ const ProductDetails = () => {
       setProduct(data as unknown as Product);
       
       if (data.variants && Array.isArray(data.variants) && data.variants.length > 0) {
-        setSelectedVariant((data.variants as any)[0].id);
+        // Select the variant with the lowest price by default
+        const variants = data.variants as any;
+        const cheapestVariant = variants.reduce((prev: any, curr: any) => 
+          (curr.price && prev.price && curr.price < prev.price) ? curr : prev
+        );
+        setSelectedVariant(cheapestVariant.id);
       }
     } catch (error) {
       console.error('Error fetching product:', error);

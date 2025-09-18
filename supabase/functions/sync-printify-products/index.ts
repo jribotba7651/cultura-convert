@@ -181,42 +181,26 @@ const handler = async (req: Request): Promise<Response> => {
 
     for (const product of printifyProducts) {
       try {
-        // First get basic product info
         console.log(`Processing product ${product.id}: ${product.title}`);
         
-        // Get published product details with images
-        const publishResponse = await fetch(`https://api.printify.com/v1/shops/${shopId}/products/${product.id}/publishing_succeeded.json`, {
+        // Get DETAILED product info with variants and images
+        const detailResponse = await fetch(`https://api.printify.com/v1/shops/${shopId}/products/${product.id}.json`, {
           headers: {
             'Authorization': `Bearer ${printifyApiKey}`,
             'Content-Type': 'application/json',
           },
         });
 
-        let productImages = [];
-        if (publishResponse.ok) {
-          const publishData = await publishResponse.json();
-          console.log(`Published product data:`, publishData);
-          productImages = publishData.images || [];
-        } else {
-          console.log(`No published version for product ${product.id}, fetching basic details...`);
-          
-          // Fallback to basic product details
-          const detailResponse = await fetch(`https://api.printify.com/v1/shops/${shopId}/products/${product.id}.json`, {
-            headers: {
-              'Authorization': `Bearer ${printifyApiKey}`,
-              'Content-Type': 'application/json',
-            },
-          });
-
-          if (detailResponse.ok) {
-            const detailedProduct = await detailResponse.json();
-            productImages = detailedProduct.images || [];
-            console.log(`Basic product images:`, productImages);
-          }
+        if (!detailResponse.ok) {
+          console.error(`Failed to fetch product details for ${product.id}: ${detailResponse.status}`);
+          continue;
         }
 
-        console.log(`Final product images for ${product.id}:`, productImages);
-
+        const detailedProduct = await detailResponse.json();
+        console.log(`Detailed product:`, detailedProduct.title);
+        console.log(`Product variants count:`, detailedProduct.variants?.length || 0);
+        console.log(`Product images count:`, detailedProduct.images?.length || 0);
+        
         // Check if product already exists
         const { data: existingProduct } = await supabase
           .from('products')
@@ -224,13 +208,15 @@ const handler = async (req: Request): Promise<Response> => {
           .eq('printify_product_id', product.id)
           .single();
 
-        // Get variants from basic product data
-        const availableVariants = (product.variants || []).filter(variant => variant.available);
+        // Get variants from DETAILED product data
+        const availableVariants = (detailedProduct.variants || []).filter(variant => variant.available);
         
         if (availableVariants.length === 0) {
-          console.log(`Skipping product ${product.title} - no available variants`);
+          console.log(`Skipping product ${detailedProduct.title} - no available variants`);
           continue;
         }
+
+        console.log(`Product ${detailedProduct.title} has ${availableVariants.length} available variants`);
 
         // Normalize all variant prices to cents
         const normalizedVariants = availableVariants.map(variant => {
@@ -254,32 +240,28 @@ const handler = async (req: Request): Promise<Response> => {
         const productData = {
           printify_product_id: product.id,
           title: {
-            es: product.title,
-            en: product.title
+            es: detailedProduct.title,
+            en: detailedProduct.title
           },
           description: {
-            es: product.description || 'Producto premium de Puerto Rico',
-            en: product.description || 'Premium product from Puerto Rico'
+            es: detailedProduct.description || 'Producto premium de Puerto Rico',
+            en: detailedProduct.description || 'Premium product from Puerto Rico'
           },
           category_id: categoryId,
           price_cents: minPrice,
           compare_at_price_cents: maxPrice > minPrice ? maxPrice : Math.round(minPrice * 1.2),
-          images: productImages.map(img => typeof img === 'string' ? img : img.src).filter(Boolean),
+          images: (detailedProduct.images || []).map(img => typeof img === 'string' ? img : img.src).filter(Boolean),
           variants: normalizedVariants,
-          tags: product.tags || ['puerto rico', 'artisanal'],
+          tags: detailedProduct.tags || ['puerto rico', 'artisanal'],
           is_active: true,
-          printify_data: {
-            shop_id: shopId,
-            visible: product.visible,
-            available_variants_count: availableVariants.length,
-            total_variants_count: (product.variants || []).length
-          }
+          printify_data: detailedProduct
         };
 
         console.log(`Product data for ${product.id}:`, {
           title: productData.title,
           images_count: productData.images.length,
-          images: productData.images
+          images_sample: productData.images.slice(0, 2),
+          variants_count: normalizedVariants.length
         });
 
 

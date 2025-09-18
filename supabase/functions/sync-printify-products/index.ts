@@ -40,31 +40,42 @@ const handler = async (req: Request): Promise<Response> => {
   try {
     console.log('Starting Printify product sync...');
     
-    const printifyApiKey = Deno.env.get('PRINTIFY_API_TOKEN');
+    const printifyApiKey = Deno.env.get('PRINTIFY_API_TOKEN') ?? Deno.env.get('PRINTIFY_API_KEY');
     if (!printifyApiKey) {
-      throw new Error('PRINTIFY_API_TOKEN not found');
+      throw new Error('Missing Printify API key. Set PRINTIFY_API_TOKEN or PRINTIFY_API_KEY in Supabase secrets.');
     }
 
-    // Fetch products from Printify
-    const response = await fetch('https://api.printify.com/v1/shops.json', {
-      headers: {
-        'Authorization': `Bearer ${printifyApiKey}`,
-        'Content-Type': 'application/json',
-      },
-    });
+    // Resolve shop ID (prefer configured one)
+    const configuredShopId = Deno.env.get('PRINTIFY_SHOP_ID');
+    let shopId: string;
 
-    if (!response.ok) {
-      throw new Error(`Printify API error: ${response.status}`);
+    if (configuredShopId) {
+      shopId = configuredShopId;
+      console.log('Using configured Printify shop ID:', shopId);
+    } else {
+      // Fetch shops from Printify
+      const response = await fetch('https://api.printify.com/v1/shops.json', {
+        headers: {
+          'Authorization': `Bearer ${printifyApiKey}`,
+          'Content-Type': 'application/json',
+        },
+      });
+
+      if (!response.ok) {
+        const errText = await response.text();
+        throw new Error(`Printify API error: ${response.status} - ${errText}`);
+      }
+
+      const shops = await response.json();
+      console.log('Found shops:', shops.length);
+
+      if (shops.length === 0) {
+        throw new Error('No Printify shops found');
+      }
+
+      shopId = shops[0].id;
     }
 
-    const shops = await response.json();
-    console.log('Found shops:', shops.length);
-
-    if (shops.length === 0) {
-      throw new Error('No Printify shops found');
-    }
-
-    const shopId = shops[0].id;
 
     // Fetch products from the first shop
     const productsResponse = await fetch(`https://api.printify.com/v1/shops/${shopId}/products.json`, {

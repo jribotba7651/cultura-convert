@@ -53,11 +53,17 @@ export const ProductCard = ({ product, onProductClick }: ProductCardProps) => {
     >
       <CardContent className="p-0">
         <div className="relative overflow-hidden rounded-t-lg">
-          <img
-            src={product.images && product.images[0] ? product.images[0] : '/placeholder.svg'}
-            alt={product.title[language]}
-            className="w-full h-64 object-cover transition-transform duration-300 group-hover:scale-105"
-          />
+          {(() => {
+            const primaryImage = product.images?.[0] || product.printify_data?.images?.[0]?.src || '/placeholder.svg';
+            return (
+              <img
+                src={primaryImage}
+                alt={`${product.title[language]} product image`}
+                loading="lazy"
+                className="w-full h-64 object-cover transition-transform duration-300 group-hover:scale-105"
+              />
+            );
+          })()}
           
           {hasDiscount && (
             <Badge className="absolute top-3 left-3 bg-destructive text-destructive-foreground">

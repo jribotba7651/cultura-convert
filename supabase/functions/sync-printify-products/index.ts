@@ -160,6 +160,8 @@ const handler = async (req: Request): Promise<Response> => {
 
         const detailedProduct = await detailResponse.json();
         console.log(`Fetched details for product: ${detailedProduct.title}`);
+        console.log(`Product images:`, detailedProduct.images);
+        console.log(`Product data structure:`, Object.keys(detailedProduct));
 
         // Check if product already exists
         const { data: existingProduct } = await supabase
@@ -208,7 +210,7 @@ const handler = async (req: Request): Promise<Response> => {
           category_id: categoryId,
           price_cents: minPrice,
           compare_at_price_cents: maxPrice > minPrice ? maxPrice : Math.round(minPrice * 1.2),
-          images: detailedProduct.images?.map(img => img.src) || [],
+          images: detailedProduct.images?.map(img => typeof img === 'string' ? img : img.src).filter(Boolean) || [],
           variants: normalizedVariants,
           tags: detailedProduct.tags || ['coffee', 'puerto rico', 'artisanal'],
           is_active: true,

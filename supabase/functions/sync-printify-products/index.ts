@@ -179,6 +179,8 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
+let syncedCount = 0;
+
     for (const product of printifyProducts) {
       try {
         console.log(`Processing product ${product.id}: ${product.title}`);
@@ -209,7 +211,7 @@ const handler = async (req: Request): Promise<Response> => {
           .single();
 
         // Get variants from DETAILED product data
-        const availableVariants = (detailedProduct.variants || []).filter(variant => variant.available);
+        const availableVariants = (detailedProduct.variants || []).filter((variant: any) => ((variant.is_available ?? variant.available) && (variant.is_enabled ?? true)));
         
         if (availableVariants.length === 0) {
           console.log(`Skipping product ${detailedProduct.title} - no available variants`);

@@ -179,7 +179,7 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
-let syncedCount = 0;
+    let syncedCount = 0;
 
     for (const product of printifyProducts) {
       try {
@@ -242,8 +242,8 @@ let syncedCount = 0;
         const productData = {
           printify_product_id: product.id,
           title: {
-            es: detailedProduct.title,
-            en: detailedProduct.title
+            es: detailedProduct.title?.substring(0, 100) || 'Producto de Puerto Rico',
+            en: detailedProduct.title?.substring(0, 100) || 'Product from Puerto Rico'
           },
           description: {
             es: detailedProduct.description || 'Producto premium de Puerto Rico',

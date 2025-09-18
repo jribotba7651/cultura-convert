@@ -53,7 +53,7 @@ export const ProductCard = ({ product, onProductClick }: ProductCardProps) => {
       <CardContent className="p-0">
         <div className="relative overflow-hidden rounded-t-lg">
           <img
-            src={product.images[0] || 'https://images.unsplash.com/photo-1497935586351-b67a49e012bf?auto=format&fit=crop&w=400&h=400'}
+            src={(product.images && product.images[0]) || 'https://images.unsplash.com/photo-1497935586351-b67a49e012bf?auto=format&fit=crop&w=400&h=400'}
             alt={product.title[language]}
             className="w-full h-64 object-cover transition-transform duration-300 group-hover:scale-105"
           />
@@ -86,7 +86,7 @@ export const ProductCard = ({ product, onProductClick }: ProductCardProps) => {
           </p>
 
           <div className="flex flex-wrap gap-1 mb-3">
-            {product.tags.slice(0, 2).map((tag) => (
+            {product.tags && product.tags.slice(0, 2).map((tag) => (
               <Badge key={tag} variant="secondary" className="text-xs">
                 {tag}
               </Badge>

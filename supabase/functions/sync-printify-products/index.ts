@@ -145,6 +145,22 @@ const handler = async (req: Request): Promise<Response> => {
 
     for (const product of printifyProducts) {
       try {
+        // Fetch detailed product information to get images
+        const detailResponse = await fetch(`https://api.printify.com/v1/shops/${shopId}/products/${product.id}.json`, {
+          headers: {
+            'Authorization': `Bearer ${printifyApiKey}`,
+            'Content-Type': 'application/json',
+          },
+        });
+
+        if (!detailResponse.ok) {
+          console.error(`Failed to fetch product details for ${product.id}: ${detailResponse.status}`);
+          continue;
+        }
+
+        const detailedProduct = await detailResponse.json();
+        console.log(`Fetched details for product: ${detailedProduct.title}`);
+
         // Check if product already exists
         const { data: existingProduct } = await supabase
           .from('products')
@@ -153,10 +169,10 @@ const handler = async (req: Request): Promise<Response> => {
           .single();
 
         // Filter and normalize all variant prices to cents
-        const availableVariants = (product.variants || []).filter(variant => variant.available);
+        const availableVariants = (detailedProduct.variants || []).filter(variant => variant.available);
         
         if (availableVariants.length === 0) {
-          console.log(`Skipping product ${product.title} - no available variants`);
+          console.log(`Skipping product ${detailedProduct.title} - no available variants`);
           continue;
         }
 
@@ -182,21 +198,21 @@ const handler = async (req: Request): Promise<Response> => {
         const productData = {
           printify_product_id: product.id,
           title: {
-            es: product.title,
-            en: product.title
+            es: detailedProduct.title,
+            en: detailedProduct.title
           },
           description: {
-            es: product.description || 'Café premium de Puerto Rico',
-            en: product.description || 'Premium coffee from Puerto Rico'
+            es: detailedProduct.description || 'Café premium de Puerto Rico',
+            en: detailedProduct.description || 'Premium coffee from Puerto Rico'
           },
           category_id: categoryId,
           price_cents: minPrice,
           compare_at_price_cents: maxPrice > minPrice ? maxPrice : Math.round(minPrice * 1.2),
-          images: product.images?.map(img => img.src) || [],
+          images: detailedProduct.images?.map(img => img.src) || [],
           variants: normalizedVariants,
-          tags: product.tags || ['coffee', 'puerto rico', 'artisanal'],
+          tags: detailedProduct.tags || ['coffee', 'puerto rico', 'artisanal'],
           is_active: true,
-          printify_data: product
+          printify_data: detailedProduct
         };
 
 

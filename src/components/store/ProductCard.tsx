@@ -20,25 +20,6 @@ export const ProductCard = ({ product, onProductClick }: ProductCardProps) => {
   const { toast } = useToast();
   const [isLiked, setIsLiked] = useState(false);
 
-  const getDefaultImage = () => {
-    const title = product.title[language].toLowerCase();
-    
-    if (title.includes('coffee') || title.includes('café')) {
-      return 'https://images.unsplash.com/photo-1497935586351-b67a49e012bf?auto=format&fit=crop&w=400&h=400';
-    }
-    if (title.includes('shirt') || title.includes('camiseta') || title.includes('t-shirt')) {
-      return 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=400&h=400';
-    }
-    if (title.includes('candle') || title.includes('vela')) {
-      return 'https://images.unsplash.com/photo-1602874801007-96487b1d9cb5?auto=format&fit=crop&w=400&h=400';
-    }
-    if (title.includes('sticker') || title.includes('decal')) {
-      return 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=400&h=400';
-    }
-    
-    // Default general product image
-    return 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?auto=format&fit=crop&w=400&h=400';
-  };
 
   const formatPrice = (cents: number) => {
     return new Intl.NumberFormat('en-US', {
@@ -73,7 +54,7 @@ export const ProductCard = ({ product, onProductClick }: ProductCardProps) => {
       <CardContent className="p-0">
         <div className="relative overflow-hidden rounded-t-lg">
           <img
-            src={(product.images && product.images[0]) || getDefaultImage()}
+            src={product.images && product.images[0] ? product.images[0] : '/placeholder.svg'}
             alt={product.title[language]}
             className="w-full h-64 object-cover transition-transform duration-300 group-hover:scale-105"
           />

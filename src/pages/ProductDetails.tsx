@@ -12,24 +12,6 @@ import { Product } from '@/types/Store';
 import { useToast } from '@/hooks/use-toast';
 
 const ProductDetails = () => {
-  const getDefaultImage = (title: string) => {
-    const lowerTitle = title.toLowerCase();
-    
-    if (lowerTitle.includes('coffee') || lowerTitle.includes('café')) {
-      return 'https://images.unsplash.com/photo-1497935586351-b67a49e012bf?auto=format&fit=crop&w=600&h=600';
-    }
-    if (lowerTitle.includes('shirt') || lowerTitle.includes('camiseta') || lowerTitle.includes('t-shirt')) {
-      return 'https://images.unsplash.com/photo-1521572163474-6864f9cf17ab?auto=format&fit=crop&w=600&h=600';
-    }
-    if (lowerTitle.includes('candle') || lowerTitle.includes('vela')) {
-      return 'https://images.unsplash.com/photo-1602874801007-96487b1d9cb5?auto=format&fit=crop&w=600&h=600';
-    }
-    if (lowerTitle.includes('sticker') || lowerTitle.includes('decal')) {
-      return 'https://images.unsplash.com/photo-1558618666-fcd25c85cd64?auto=format&fit=crop&w=600&h=600';
-    }
-    
-    return 'https://images.unsplash.com/photo-1560472354-b33ff0c44a43?auto=format&fit=crop&w=600&h=600';
-  };
   const { id } = useParams<{ id: string }>();
   const navigate = useNavigate();
   const { language } = useLanguage();
@@ -168,7 +150,7 @@ const ProductDetails = () => {
           <div className="space-y-4">
             <div className="relative">
               <img
-                src={(product.images && product.images[selectedImage]) || getDefaultImage(product.title[language])}
+                src={product.images && product.images[selectedImage] ? product.images[selectedImage] : '/placeholder.svg'}
                 alt={product.title[language]}
                 className="w-full h-96 object-cover rounded-lg"
               />

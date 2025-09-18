@@ -13,6 +13,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { Product, Category } from '@/types/Store';
 
 const Store = () => {
+  console.log('Store component rendering...');
   const { language } = useLanguage();
   const { getTotalItems, setIsOpen } = useCart();
   const navigate = useNavigate();
@@ -174,13 +175,17 @@ const Store = () => {
     }
   };
 
+  console.log('Store render - loading:', loading, 'products:', products.length);
+  
   if (loading) {
+    console.log('Store showing loading state');
     return (
       <div className="min-h-screen bg-background">
         <Navigation />
         <div className="container mx-auto px-4 py-8">
           <div className="flex items-center justify-center h-64">
             <Loader2 className="h-8 w-8 animate-spin text-primary" />
+            <span className="ml-2">Cargando tienda...</span>
           </div>
         </div>
       </div>

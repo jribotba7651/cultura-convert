@@ -22,7 +22,13 @@ class ErrorBoundary extends Component<Props, State> {
   }
 
   componentDidCatch(error: Error, errorInfo: ErrorInfo) {
-    console.error("Error capturado por ErrorBoundary:", error, errorInfo);
+    console.error("=== ERROR BOUNDARY TRIGGERED ===");
+    console.error("Error:", error);
+    console.error("Error message:", error.message);
+    console.error("Error stack:", error.stack);
+    console.error("Component stack:", errorInfo.componentStack);
+    console.error("Error info:", errorInfo);
+    console.error("=== END ERROR DETAILS ===");
   }
 
   handleReload = () => {
@@ -43,6 +49,17 @@ class ErrorBoundary extends Component<Props, State> {
               <p className="text-muted-foreground">
                 Ha ocurrido un error inesperado. Por favor, intenta recargar la página.
               </p>
+              {this.state.error && (
+                <details className="mt-4 p-3 bg-muted rounded-md">
+                  <summary className="cursor-pointer text-sm font-medium">Detalles del error</summary>
+                  <div className="mt-2 text-xs font-mono">
+                    <p><strong>Error:</strong> {this.state.error.message}</p>
+                    {this.state.error.stack && (
+                      <pre className="mt-2 whitespace-pre-wrap text-xs">{this.state.error.stack}</pre>
+                    )}
+                  </div>
+                </details>
+              )}
               <Button onClick={this.handleReload} className="w-full">
                 Recargar página
               </Button>

@@ -18,10 +18,13 @@ import OrderConfirmation from "./pages/OrderConfirmation";
 import Auth from "./pages/Auth";
 import Services from "./pages/Services";
 import NotFound from "./pages/NotFound";
+import TestComponent from "./components/TestComponent";
 
 const queryClient = new QueryClient();
 
-const App = () => (
+const App = () => {
+  console.log('App component rendering...');
+  return (
   <ErrorBoundary>
     <LanguageProvider>
       <AuthProvider>
@@ -42,6 +45,7 @@ const App = () => (
                   <Route path="/checkout" element={<Checkout />} />
                   <Route path="/order-confirmation/:orderId" element={<OrderConfirmation />} />
                   <Route path="/auth" element={<Auth />} />
+                  <Route path="/test" element={<TestComponent />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />
                 </Routes>
@@ -52,6 +56,7 @@ const App = () => (
       </AuthProvider>
     </LanguageProvider>
   </ErrorBoundary>
-);
+  );
+};
 
 export default App;

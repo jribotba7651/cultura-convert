@@ -156,23 +156,41 @@ const handler = async (req: Request): Promise<Response> => {
 
     for (const product of printifyProducts) {
       try {
-        // Fetch detailed product information to get images
-        const detailResponse = await fetch(`https://api.printify.com/v1/shops/${shopId}/products/${product.id}.json`, {
+        // First get basic product info
+        console.log(`Processing product ${product.id}: ${product.title}`);
+        
+        // Get published product details with images
+        const publishResponse = await fetch(`https://api.printify.com/v1/shops/${shopId}/products/${product.id}/publishing_succeeded.json`, {
           headers: {
             'Authorization': `Bearer ${printifyApiKey}`,
             'Content-Type': 'application/json',
           },
         });
 
-        if (!detailResponse.ok) {
-          console.error(`Failed to fetch product details for ${product.id}: ${detailResponse.status}`);
-          continue;
+        let productImages = [];
+        if (publishResponse.ok) {
+          const publishData = await publishResponse.json();
+          console.log(`Published product data:`, publishData);
+          productImages = publishData.images || [];
+        } else {
+          console.log(`No published version for product ${product.id}, fetching basic details...`);
+          
+          // Fallback to basic product details
+          const detailResponse = await fetch(`https://api.printify.com/v1/shops/${shopId}/products/${product.id}.json`, {
+            headers: {
+              'Authorization': `Bearer ${printifyApiKey}`,
+              'Content-Type': 'application/json',
+            },
+          });
+
+          if (detailResponse.ok) {
+            const detailedProduct = await detailResponse.json();
+            productImages = detailedProduct.images || [];
+            console.log(`Basic product images:`, productImages);
+          }
         }
 
-        const detailedProduct = await detailResponse.json();
-        console.log(`Fetched details for product: ${detailedProduct.title}`);
-        console.log(`Product images:`, detailedProduct.images);
-        console.log(`Product data structure:`, Object.keys(detailedProduct));
+        console.log(`Final product images for ${product.id}:`, productImages);
 
         // Check if product already exists
         const { data: existingProduct } = await supabase
@@ -181,11 +199,11 @@ const handler = async (req: Request): Promise<Response> => {
           .eq('printify_product_id', product.id)
           .single();
 
-        // Filter and normalize all variant prices to cents
-        const availableVariants = (detailedProduct.variants || []).filter(variant => variant.available);
+        // Get variants from basic product data
+        const availableVariants = (product.variants || []).filter(variant => variant.available);
         
         if (availableVariants.length === 0) {
-          console.log(`Skipping product ${detailedProduct.title} - no available variants`);
+          console.log(`Skipping product ${product.title} - no available variants`);
           continue;
         }
 
@@ -211,22 +229,33 @@ const handler = async (req: Request): Promise<Response> => {
         const productData = {
           printify_product_id: product.id,
           title: {
-            es: detailedProduct.title,
-            en: detailedProduct.title
+            es: product.title,
+            en: product.title
           },
           description: {
-            es: detailedProduct.description || 'Café premium de Puerto Rico',
-            en: detailedProduct.description || 'Premium coffee from Puerto Rico'
+            es: product.description || 'Producto premium de Puerto Rico',
+            en: product.description || 'Premium product from Puerto Rico'
           },
           category_id: categoryId,
           price_cents: minPrice,
           compare_at_price_cents: maxPrice > minPrice ? maxPrice : Math.round(minPrice * 1.2),
-          images: detailedProduct.images?.map(img => typeof img === 'string' ? img : img.src).filter(Boolean) || [],
+          images: productImages.map(img => typeof img === 'string' ? img : img.src).filter(Boolean),
           variants: normalizedVariants,
-          tags: detailedProduct.tags || ['coffee', 'puerto rico', 'artisanal'],
+          tags: product.tags || ['puerto rico', 'artisanal'],
           is_active: true,
-          printify_data: detailedProduct
+          printify_data: {
+            shop_id: shopId,
+            visible: product.visible,
+            available_variants_count: availableVariants.length,
+            total_variants_count: (product.variants || []).length
+          }
         };
+
+        console.log(`Product data for ${product.id}:`, {
+          title: productData.title,
+          images_count: productData.images.length,
+          images: productData.images
+        });
 
 
         if (existingProduct) {

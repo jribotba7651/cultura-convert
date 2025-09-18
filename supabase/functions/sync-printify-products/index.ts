@@ -77,6 +77,8 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
 
+    console.log(`Fetching products from shop: ${shopId}`);
+    
     // Fetch products from the first shop
     const productsResponse = await fetch(`https://api.printify.com/v1/shops/${shopId}/products.json`, {
       headers: {
@@ -85,12 +87,20 @@ const handler = async (req: Request): Promise<Response> => {
       },
     });
 
+    console.log(`Products response status: ${productsResponse.status}`);
+    
     if (!productsResponse.ok) {
-      throw new Error(`Failed to fetch products: ${productsResponse.status}`);
+      const errorText = await productsResponse.text();
+      console.error(`Products API error: ${productsResponse.status} - ${errorText}`);
+      throw new Error(`Failed to fetch products: ${productsResponse.status} - ${errorText}`);
     }
 
-    const { data: printifyProducts } = await productsResponse.json();
-    console.log('Found products:', printifyProducts.length);
+    const productsData = await productsResponse.json();
+    console.log('Raw products response:', JSON.stringify(productsData, null, 2));
+    
+    const printifyProducts = productsData.data || productsData;
+    console.log('Found products:', printifyProducts?.length || 0);
+    console.log('First product sample:', printifyProducts?.[0]);
 
     // Get current active products from database to identify deleted ones
     const { data: currentProducts } = await supabase
@@ -152,7 +162,22 @@ const handler = async (req: Request): Promise<Response> => {
       categoryId = newCategory.id;
     }
 
-    let syncedCount = 0;
+    if (!printifyProducts || printifyProducts.length === 0) {
+      console.log('No products found in Printify API response');
+      return new Response(
+        JSON.stringify({ 
+          success: true, 
+          message: 'No products found to sync',
+          syncedCount: 0,
+          deactivatedCount: 0,
+          totalProducts: 0
+        }),
+        {
+          headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+          status: 200,
+        }
+      );
+    }
 
     for (const product of printifyProducts) {
       try {

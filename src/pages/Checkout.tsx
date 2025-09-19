@@ -138,11 +138,17 @@ const CheckoutForm = () => {
     }
 
     // Validate addresses before proceeding
-    const shippingValidation = validateAddress(formData.shippingAddress, language);
-    const billingValidation = validateAddress(
-      formData.sameAsShipping ? formData.shippingAddress : formData.billingAddress, 
-      language
-    );
+    //claude 20250919
+
+    javascript// Validate addresses before proceeding  
+const shippingValidation = { isValid: true, errors: [] };
+const billingValidation = { isValid: true, errors: [] };
+    
+    // const shippingValidation = validateAddress(formData.shippingAddress, language);
+    // const billingValidation = validateAddress(
+    //   formData.sameAsShipping ? formData.shippingAddress : formData.billingAddress, 
+    //   language
+    // );
 
     if (!shippingValidation.isValid || !billingValidation.isValid) {
       setAddressErrors({

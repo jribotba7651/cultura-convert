@@ -56,43 +56,67 @@ interface CreatePaymentIntentRequest {
   customer_phone?: string;
 }
 
-// Server-side address validation
+// Country normalization helper
+function normalizeCountry(input: any): string {
+  if (!input) return '';
+  const raw = String(input).trim();
+  const upper = raw.toUpperCase();
+  const map: Record<string, string> = {
+    US: 'US', USA: 'US', 'UNITED STATES': 'US', 'UNITED STATES OF AMERICA': 'US', 'U.S.': 'US', 'U.S.A.': 'US',
+    PR: 'PR', 'PUERTO RICO': 'PR',
+  };
+  if (upper.length === 2) return upper;
+  return map[upper] || '';
+}
+
+// Server-side address validation (robust & sanitizing)
 async function validateServerSideAddress(address: any): Promise<{ valid: boolean; errors?: string[] }> {
   const errors: string[] = [];
-  
+
+  // Coerce to safe strings
+  const safe = {
+    name: typeof address?.name === 'string' ? address.name.trim() : '',
+    line1: typeof address?.line1 === 'string' ? address.line1.trim() : '',
+    line2: typeof address?.line2 === 'string' ? address.line2.trim() : '',
+    city: typeof address?.city === 'string' ? address.city.trim() : '',
+    state: typeof address?.state === 'string' ? address.state.trim() : '',
+    postal_code: typeof address?.postal_code === 'string' ? address.postal_code.trim() : '',
+    country: normalizeCountry(address?.country),
+  };
+
   // Basic validation
-  if (!address.name || address.name.length < 2) {
+  if (safe.name.length < 2) {
     errors.push('Full name is required and must be at least 2 characters');
   }
-  
-  if (!address.line1 || address.line1.length < 5) {
+
+  if (safe.line1.length < 5) {
     errors.push('Address line 1 is required and must be at least 5 characters');
   }
-  
-  if (!address.city || address.city.length < 2) {
+
+  if (safe.city.length < 2) {
     errors.push('City is required and must be at least 2 characters');
   }
-  
-  if (!address.state || address.state.length < 2) {
+
+  if (safe.state.length < 2) {
     errors.push('State is required');
   }
-  
-  if (!address.postal_code) {
+
+  if (!safe.postal_code) {
     errors.push('Postal code is required');
   }
-  
+
   // Validate postal code format based on country
-  if (address.country === 'US' || address.country === 'PR') {
+  if (safe.country === 'US' || safe.country === 'PR') {
     const zipRegex = /^\d{5}(-\d{4})?$/;
-    if (!zipRegex.test(address.postal_code)) {
+    if (!zipRegex.test(safe.postal_code)) {
       errors.push('Invalid US/PR postal code format');
     }
   }
-  
-  if (!address.country || address.country.length !== 2) {
+
+  if (!safe.country || safe.country.length !== 2) {
     errors.push('Valid country code is required');
   }
-  
+
   // Sanitize text fields
   const sanitizeText = (text: string) => {
     return text.replace(/[<>'"]/g, (char) => {
@@ -105,13 +129,16 @@ async function validateServerSideAddress(address: any): Promise<{ valid: boolean
       }
     });
   };
-  
-  // Sanitize address fields
-  if (address.name) address.name = sanitizeText(address.name);
-  if (address.line1) address.line1 = sanitizeText(address.line1);
-  if (address.line2) address.line2 = sanitizeText(address.line2);
-  if (address.city) address.city = sanitizeText(address.city);
-  
+
+  // Apply sanitized values back into original object for downstream usage
+  address.name = sanitizeText(safe.name);
+  address.line1 = sanitizeText(safe.line1);
+  if (safe.line2) address.line2 = sanitizeText(safe.line2);
+  address.city = sanitizeText(safe.city);
+  address.state = sanitizeText(safe.state);
+  address.postal_code = safe.postal_code;
+  address.country = safe.country;
+
   return {
     valid: errors.length === 0,
     errors: errors.length > 0 ? errors : undefined
@@ -211,6 +238,24 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Create payment intent
     console.log('Creating Stripe payment intent...');
+
+    const stripeKey = Deno.env.get('STRIPE_SECRET_KEY');
+    if (!stripeKey) {
+      console.error('Missing STRIPE_SECRET_KEY environment variable');
+      return new Response(
+        JSON.stringify({ error: 'Payment processor not configured' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    if (!Number.isFinite(totalAmount) || totalAmount <= 0) {
+      console.error('Invalid total amount for payment intent:', totalAmount);
+      return new Response(
+        JSON.stringify({ error: 'Invalid order total' }),
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     const paymentIntent = await stripe.paymentIntents.create({
       amount: totalAmount,
       currency: 'usd',

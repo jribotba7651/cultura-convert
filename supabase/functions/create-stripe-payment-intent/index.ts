@@ -124,15 +124,19 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
+    console.log('Starting payment intent creation process');
+    
     // Security: Check request size
     const contentLength = req.headers.get('content-length');
     if (contentLength && parseInt(contentLength) > MAX_REQUEST_SIZE) {
+      console.log('Request too large:', contentLength);
       return new Response(JSON.stringify({ error: 'Request too large' }), {
         status: 413,
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       });
     }
 
+    console.log('Parsing request body...');
     const {
       items,
       shipping_address,
@@ -143,24 +147,29 @@ const handler = async (req: Request): Promise<Response> => {
     }: CreatePaymentIntentRequest = await req.json();
 
     console.log('Creating payment intent for items:', items.length);
+    console.log('Customer email:', customer_email);
 
     // Validate shipping address server-side
+    console.log('Validating shipping address...');
     const addressValidation = await validateServerSideAddress(shipping_address);
     if (!addressValidation.valid) {
+      console.log('Address validation failed:', addressValidation.errors);
       return new Response(
         JSON.stringify({ 
           error: 'Invalid shipping address', 
           details: addressValidation.errors 
         }),
-        { status: 400, headers: corsHeaders }
+        { status: 400, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
     // Calculate order total
+    console.log('Calculating order total...');
     let totalAmount = 0;
     const orderItems = [];
 
     for (const item of items) {
+      console.log('Processing item:', item.id);
       const { data: product, error } = await supabase
         .from('products')
         .select('*')
@@ -168,6 +177,7 @@ const handler = async (req: Request): Promise<Response> => {
         .single();
 
       if (error || !product) {
+        console.error('Product fetch error:', error);
         throw new Error(`Product not found: ${item.id}`);
       }
 
@@ -196,8 +206,11 @@ const handler = async (req: Request): Promise<Response> => {
     // Add shipping (flat rate for now - $5.99)
     const shippingAmount = 599;
     totalAmount += shippingAmount;
+    
+    console.log('Total amount calculated:', totalAmount);
 
     // Create payment intent
+    console.log('Creating Stripe payment intent...');
     const paymentIntent = await stripe.paymentIntents.create({
       amount: totalAmount,
       currency: 'usd',
@@ -208,8 +221,11 @@ const handler = async (req: Request): Promise<Response> => {
         items_count: items.length.toString(),
       },
     });
+    
+    console.log('Stripe payment intent created:', paymentIntent.id);
 
     // Get current user if authenticated
+    console.log('Checking authentication...');
     const authHeader = req.headers.get('Authorization');
     let userId = null;
     
@@ -218,12 +234,14 @@ const handler = async (req: Request): Promise<Response> => {
         const token = authHeader.replace('Bearer ', '');
         const { data: { user } } = await supabase.auth.getUser(token);
         userId = user?.id || null;
+        console.log('User authenticated:', userId ? 'yes' : 'no');
       } catch (error) {
         console.log('No authenticated user, proceeding with anonymous order');
       }
     }
 
     // Create order record
+    console.log('Creating order record...');
     const { data: order, error: orderError } = await supabase
       .from('orders')
       .insert({
@@ -244,10 +262,14 @@ const handler = async (req: Request): Promise<Response> => {
       .single();
 
     if (orderError) {
+      console.error('Order creation error:', orderError);
       throw new Error(`Failed to create order: ${orderError.message}`);
     }
+    
+    console.log('Order created with ID:', order.id);
 
     // Create order items
+    console.log('Creating order items...');
     const orderItemsWithOrderId = orderItems.map(item => ({
       ...item,
       order_id: order.id,
@@ -258,12 +280,16 @@ const handler = async (req: Request): Promise<Response> => {
       .insert(orderItemsWithOrderId);
 
     if (itemsError) {
+      console.error('Order items creation error:', itemsError);
       throw new Error(`Failed to create order items: ${itemsError.message}`);
     }
+    
+    console.log('Order items created successfully');
 
     // Generate secure access token for anonymous orders
     let accessToken = null;
     if (!userId) {
+      console.log('Generating access token for anonymous order...');
       // Generate a cryptographically secure random token
       const tokenArray = new Uint8Array(32);
       crypto.getRandomValues(tokenArray);
@@ -280,18 +306,24 @@ const handler = async (req: Request): Promise<Response> => {
       if (tokenError) {
         console.error('Failed to create access token:', tokenError);
         // Don't fail the entire request, just log the error
+      } else {
+        console.log('Access token created successfully');
       }
     }
 
-    console.log('Payment intent created:', paymentIntent.id);
+    console.log('Payment intent process completed successfully:', paymentIntent.id);
+
+    const response = {
+      client_secret: paymentIntent.client_secret,
+      order_id: order.id,
+      access_token: accessToken, // Include token for anonymous orders
+      amount: totalAmount,
+    };
+    
+    console.log('Returning successful response');
 
     return new Response(
-      JSON.stringify({
-        client_secret: paymentIntent.client_secret,
-        order_id: order.id,
-        access_token: accessToken, // Include token for anonymous orders
-        amount: totalAmount,
-      }),
+      JSON.stringify(response),
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,

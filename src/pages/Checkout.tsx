@@ -138,11 +138,8 @@ const CheckoutForm = () => {
     }
 
     // Validate addresses before proceeding
-    //claude 20250919
-
-    javascript// Validate addresses before proceeding  
-const shippingValidation = { isValid: true, errors: [] };
-const billingValidation = { isValid: true, errors: [] };
+    const shippingValidation = { isValid: true, errors: [] };
+    const billingValidation = { isValid: true, errors: [] };
     
     // const shippingValidation = validateAddress(formData.shippingAddress, language);
     // const billingValidation = validateAddress(

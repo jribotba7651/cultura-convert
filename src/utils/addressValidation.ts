@@ -113,8 +113,9 @@ export function validateZipCode(zipCode: string, country: string = 'US'): boolea
   const trimmed = zipCode.trim();
   
   if (country === 'US') {
-    // US ZIP codes: exactly 5 digits or 5+4 format (12345 or 12345-1234)
-    const usZipRegex = /^(\d{5})(-\d{4})?$/;
+    // US ZIP codes: 5 digits (12345) or 5+4 format (12345-1234) or just digits 
+    // Allow any combination of 5-9 digits with optional hyphen
+    const usZipRegex = /^\d{5}(-?\d{0,4})?$/;
     return usZipRegex.test(trimmed);
   }
   

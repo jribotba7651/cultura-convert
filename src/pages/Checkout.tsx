@@ -8,6 +8,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import { Checkbox } from '@/components/ui/checkbox';
 import { Separator } from '@/components/ui/separator';
 import { useCart } from '@/contexts/CartContext';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -40,6 +42,24 @@ interface CheckoutFormData {
   };
   sameAsShipping: boolean;
 }
+
+const countries = [
+  { code: 'US', name: { en: 'United States', es: 'Estados Unidos' } },
+  { code: 'CA', name: { en: 'Canada', es: 'Canadá' } },
+  { code: 'MX', name: { en: 'Mexico', es: 'México' } },
+  { code: 'PR', name: { en: 'Puerto Rico', es: 'Puerto Rico' } },
+  { code: 'GB', name: { en: 'United Kingdom', es: 'Reino Unido' } },
+  { code: 'FR', name: { en: 'France', es: 'Francia' } },
+  { code: 'DE', name: { en: 'Germany', es: 'Alemania' } },
+  { code: 'ES', name: { en: 'Spain', es: 'España' } },
+  { code: 'IT', name: { en: 'Italy', es: 'Italia' } },
+  { code: 'AU', name: { en: 'Australia', es: 'Australia' } },
+  { code: 'BR', name: { en: 'Brazil', es: 'Brasil' } },
+  { code: 'AR', name: { en: 'Argentina', es: 'Argentina' } },
+  { code: 'CL', name: { en: 'Chile', es: 'Chile' } },
+  { code: 'CO', name: { en: 'Colombia', es: 'Colombia' } },
+  { code: 'PE', name: { en: 'Peru', es: 'Perú' } },
+];
 
 const CheckoutForm = () => {
   const stripe = useStripe();
@@ -428,14 +448,149 @@ const CheckoutForm = () => {
                       <Label htmlFor="shipping-country">
                         {language === 'es' ? 'País' : 'Country'}
                       </Label>
-                      <Input
-                        id="shipping-country"
+                      <Select
                         value={formData.shippingAddress.country}
-                        onChange={(e) => handleInputChange('shippingAddress.country', e.target.value)}
-                        required
-                      />
+                        onValueChange={(value) => handleInputChange('shippingAddress.country', value)}
+                      >
+                        <SelectTrigger>
+                          <SelectValue placeholder={language === 'es' ? 'Seleccionar país' : 'Select country'} />
+                        </SelectTrigger>
+                        <SelectContent>
+                          {countries.map((country) => (
+                            <SelectItem key={country.code} value={country.code}>
+                              {country.name[language]}
+                            </SelectItem>
+                          ))}
+                        </SelectContent>
+                      </Select>
                     </div>
                   </div>
+                </div>
+
+                <Separator />
+
+                {/* Billing Address */}
+                <div className="space-y-4">
+                  <div className="flex items-center space-x-2">
+                    <Checkbox
+                      id="same-as-shipping"
+                      checked={formData.sameAsShipping}
+                      onCheckedChange={handleSameAsShippingChange}
+                    />
+                    <Label htmlFor="same-as-shipping">
+                      {language === 'es' 
+                        ? 'Dirección de facturación igual a la de envío' 
+                        : 'Billing address same as shipping'}
+                    </Label>
+                  </div>
+
+                  {!formData.sameAsShipping && (
+                    <>
+                      <h3 className="font-semibold">
+                        {language === 'es' ? 'Dirección de facturación' : 'Billing Address'}
+                      </h3>
+                      
+                      <div>
+                        <Label htmlFor="billing-line1">
+                          {language === 'es' ? 'Dirección' : 'Address'}
+                        </Label>
+                        <Input
+                          id="billing-line1"
+                          value={formData.billingAddress.line1}
+                          onChange={(e) => handleInputChange('billingAddress.line1', e.target.value)}
+                          required
+                        />
+                      </div>
+                      
+                      <div>
+                        <Label htmlFor="billing-line2">
+                          {language === 'es' ? 'Apartamento, suite, etc.' : 'Apartment, suite, etc.'}
+                        </Label>
+                        <Input
+                          id="billing-line2"
+                          value={formData.billingAddress.line2}
+                          onChange={(e) => handleInputChange('billingAddress.line2', e.target.value)}
+                        />
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="billing-city">
+                            {language === 'es' ? 'Ciudad' : 'City'}
+                          </Label>
+                          <Input
+                            id="billing-city"
+                            value={formData.billingAddress.city}
+                            onChange={(e) => handleInputChange('billingAddress.city', e.target.value)}
+                            required
+                          />
+                        </div>
+                        
+                        <div>
+                          <Label htmlFor="billing-state">
+                            {language === 'es' ? 'Estado' : 'State'}
+                          </Label>
+                          <Input
+                            id="billing-state"
+                            value={formData.billingAddress.state}
+                            onChange={(e) => handleInputChange('billingAddress.state', e.target.value)}
+                            required
+                          />
+                        </div>
+                      </div>
+                      
+                      <div className="grid grid-cols-2 gap-4">
+                        <div>
+                          <Label htmlFor="billing-postal">
+                            {language === 'es' ? 'Código postal' : 'Postal code'}
+                          </Label>
+                          <Input
+                            id="billing-postal"
+                            value={formData.billingAddress.postal_code}
+                            onChange={(e) => {
+                              const formatted = formatZipCode(e.target.value, formData.billingAddress.country);
+                              handleInputChange('billingAddress.postal_code', formatted);
+                            }}
+                            className={addressErrors.billingAddress?.some(error => 
+                              error.toLowerCase().includes('postal') || error.toLowerCase().includes('zip')
+                            ) ? 'border-destructive' : ''}
+                            required
+                          />
+                          {addressErrors.billingAddress?.filter(error => 
+                            error.toLowerCase().includes('postal') || error.toLowerCase().includes('zip')
+                          ).map((error, index) => (
+                            <p key={index} className="text-sm text-destructive mt-1">{error}</p>
+                          ))}
+                          {addressWarnings.billingAddress?.filter(warning => 
+                            warning.toLowerCase().includes('postal') || warning.toLowerCase().includes('zip')
+                          ).map((warning, index) => (
+                            <p key={index} className="text-sm text-yellow-600 mt-1">{warning}</p>
+                          ))}
+                        </div>
+                        
+                        <div>
+                          <Label htmlFor="billing-country">
+                            {language === 'es' ? 'País' : 'Country'}
+                          </Label>
+                          <Select
+                            value={formData.billingAddress.country}
+                            onValueChange={(value) => handleInputChange('billingAddress.country', value)}
+                          >
+                            <SelectTrigger>
+                              <SelectValue placeholder={language === 'es' ? 'Seleccionar país' : 'Select country'} />
+                            </SelectTrigger>
+                            <SelectContent>
+                              {countries.map((country) => (
+                                <SelectItem key={country.code} value={country.code}>
+                                  {country.name[language]}
+                                </SelectItem>
+                              ))}
+                            </SelectContent>
+                          </Select>
+                        </div>
+                      </div>
+                    </>
+                  )}
                 </div>
 
                 <Separator />

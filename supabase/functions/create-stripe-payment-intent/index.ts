@@ -61,11 +61,36 @@ function normalizeCountry(input: any): string {
   if (!input) return '';
   const raw = String(input).trim();
   const upper = raw.toUpperCase();
+  
+  // Valid country codes
+  const validCountryCodes = [
+    'US', 'CA', 'MX', 'PR', 'GB', 'FR', 'DE', 'ES', 'IT', 'AU', 'BR', 'AR', 'CL', 'CO', 'PE'
+  ];
+  
+  // If it's already a valid 2-letter code, return it
+  if (upper.length === 2 && validCountryCodes.includes(upper)) {
+    return upper;
+  }
+  
+  // Country name mappings
   const map: Record<string, string> = {
-    US: 'US', USA: 'US', 'UNITED STATES': 'US', 'UNITED STATES OF AMERICA': 'US', 'U.S.': 'US', 'U.S.A.': 'US',
-    PR: 'PR', 'PUERTO RICO': 'PR',
+    USA: 'US', 'UNITED STATES': 'US', 'UNITED STATES OF AMERICA': 'US', 'U.S.': 'US', 'U.S.A.': 'US',
+    'PUERTO RICO': 'PR',
+    CANADA: 'CA',
+    MEXICO: 'MX', MÉXICO: 'MX',
+    'UNITED KINGDOM': 'GB', UK: 'GB', BRITAIN: 'GB',
+    FRANCE: 'FR', FRANCIA: 'FR',
+    GERMANY: 'DE', ALEMANIA: 'DE',
+    SPAIN: 'ES', ESPAÑA: 'ES',
+    ITALY: 'IT', ITALIA: 'IT',
+    AUSTRALIA: 'AU',
+    BRAZIL: 'BR', BRASIL: 'BR',
+    ARGENTINA: 'AR',
+    CHILE: 'CL',
+    COLOMBIA: 'CO',
+    PERU: 'PE', PERÚ: 'PE',
   };
-  if (upper.length === 2) return upper;
+  
   return map[upper] || '';
 }
 
@@ -113,8 +138,13 @@ async function validateServerSideAddress(address: any): Promise<{ valid: boolean
     }
   }
 
-  if (!safe.country || safe.country.length !== 2) {
-    errors.push('Valid country code is required');
+  // Validate country code is exactly 2 letters and from our allowed list
+  const validCountryCodes = [
+    'US', 'CA', 'MX', 'PR', 'GB', 'FR', 'DE', 'ES', 'IT', 'AU', 'BR', 'AR', 'CL', 'CO', 'PE'
+  ];
+  
+  if (!safe.country || safe.country.length !== 2 || !validCountryCodes.includes(safe.country)) {
+    errors.push('Valid country code is required (2-letter code like US, CA, MX)');
   }
 
   // Sanitize text fields

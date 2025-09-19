@@ -53,25 +53,26 @@ export function validateAddress(address: Address, language: string = 'en'): Vali
   }
 
   // Validate postal code
-  if (!address.postal_code?.trim()) {
+  const normalizedCountry = (address.country || '').trim().toUpperCase();
+  const postal = (address.postal_code || '').trim();
+  if (!postal) {
     errors.push(
       language === 'es' 
         ? 'El código postal es requerido'
         : 'Postal code is required'
     );
   } else {
-    const isValid = validateZipCode(address.postal_code, address.country);
+    const isValid = validateZipCode(postal, normalizedCountry);
     if (!isValid) {
       errors.push(
         language === 'es' 
-          ? 'Formato de código postal inválido (debe ser 12345 o 12345-6789)'
-          : 'Invalid postal code format (must be 12345 or 12345-6789)'
+          ? 'Formato de código postal inválido (ej: 12345 o 12345-6789)'
+          : 'Invalid postal code format (e.g., 12345 or 12345-6789)'
       );
     }
   }
 
-  // Validate state format for US
-  if (address.country === 'US' && address.state) {
+  if (((address.country || '').trim().toUpperCase() === 'US') && address.state) {
     const state = address.state.trim().toUpperCase();
     if (state.length === 2) {
       // Valid US state codes

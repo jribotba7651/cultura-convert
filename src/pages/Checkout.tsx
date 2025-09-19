@@ -108,22 +108,36 @@ const CheckoutForm = () => {
 
   const handleInputChange = (field: string, value: string) => {
     const keys = field.split('.');
+
+    // Build next form state synchronously
+    let nextForm = { ...formData } as typeof formData;
     if (keys.length === 1) {
-      setFormData(prev => ({ ...prev, [field]: value }));
+      nextForm = { ...nextForm, [field as 'email' | 'name' | 'phone']: value } as typeof formData;
     } else if (keys.length === 2) {
-      setFormData(prev => ({
-        ...prev,
-        [keys[0]]: {
-          ...(prev[keys[0] as 'shippingAddress' | 'billingAddress']),
-          [keys[1]]: value
-        }
-      }));
+      const [group, key] = keys as ['shippingAddress' | 'billingAddress', keyof CheckoutFormData['shippingAddress']];
+      nextForm = {
+        ...nextForm,
+        [group]: {
+          ...nextForm[group],
+          [key]: value as any,
+        },
+      };
     }
 
-    // Validate address in real-time for postal codes
+    setFormData(nextForm);
+
+    // Real-time validate with the up-to-date state (no stale closure)
     if (field.includes('postal_code') || field.includes('country')) {
       const addressType = field.startsWith('shipping') ? 'shippingAddress' : 'billingAddress';
-      setTimeout(() => validateAddressField(addressType), 100);
+      const validation = validateAddress(nextForm[addressType], language);
+      setAddressErrors(prev => ({
+        ...prev,
+        [addressType]: validation.errors,
+      }));
+      setAddressWarnings(prev => ({
+        ...prev,
+        [addressType]: validation.warnings,
+      }));
     }
   };
 

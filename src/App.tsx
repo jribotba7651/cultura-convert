@@ -17,6 +17,7 @@ import Checkout from "./pages/Checkout";
 import OrderConfirmation from "./pages/OrderConfirmation";
 import Auth from "./pages/Auth";
 import Services from "./pages/Services";
+import MyOrders from "./pages/MyOrders";
 import NotFound from "./pages/NotFound";
 import TestComponent from "./components/TestComponent";
 
@@ -45,6 +46,7 @@ const App = () => {
                   <Route path="/checkout" element={<Checkout />} />
                   <Route path="/order-confirmation/:orderId" element={<OrderConfirmation />} />
                   <Route path="/auth" element={<Auth />} />
+                  <Route path="/mis-pedidos" element={<MyOrders />} />
                   <Route path="/test" element={<TestComponent />} />
                   {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
                   <Route path="*" element={<NotFound />} />

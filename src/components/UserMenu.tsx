@@ -65,6 +65,12 @@ const UserMenu = () => {
           </p>
         </div>
         <DropdownMenuSeparator />
+        <DropdownMenuItem asChild>
+          <Link to="/mis-pedidos" className="flex items-center cursor-pointer">
+            <User className="mr-2 h-4 w-4" />
+            <span>{t('myOrders')}</span>
+          </Link>
+        </DropdownMenuItem>
         <DropdownMenuItem onClick={handleSignOut}>
           <LogOut className="mr-2 h-4 w-4" />
           <span>{t('signOut')}</span>

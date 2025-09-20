@@ -85,7 +85,23 @@ const translations = {
     passwordTooShort: "La contraseña debe tener al menos 6 caracteres",
     signedOut: "Sesión cerrada",
     signedOutSuccess: "Has cerrado sesión exitosamente",
-    error: "Error"
+    error: "Error",
+    
+    // Orders
+    myOrders: "Mis Pedidos",
+    orderStatus: "Estado",
+    orderDate: "Fecha",
+    orderTotal: "Total",
+    orderProducts: "Productos",
+    noOrders: "No tienes pedidos aún",
+    orderNumber: "Pedido",
+    pending: "Pendiente",
+    paid: "Pagado",
+    processing: "Procesando",
+    shipped: "Enviado",
+    delivered: "Entregado",
+    cancelled: "Cancelado",
+    failed: "Fallido"
   },
   en: {
     // Header
@@ -161,7 +177,23 @@ const translations = {
     passwordTooShort: "Password must be at least 6 characters",
     signedOut: "Signed out",
     signedOutSuccess: "You have been signed out successfully",
-    error: "Error"
+    error: "Error",
+    
+    // Orders
+    myOrders: "My Orders",
+    orderStatus: "Status",
+    orderDate: "Date",
+    orderTotal: "Total",
+    orderProducts: "Products",
+    noOrders: "You don't have any orders yet",
+    orderNumber: "Order",
+    pending: "Pending",
+    paid: "Paid",
+    processing: "Processing",
+    shipped: "Shipped",
+    delivered: "Delivered",
+    cancelled: "Cancelled",
+    failed: "Failed"
   }
 };
 

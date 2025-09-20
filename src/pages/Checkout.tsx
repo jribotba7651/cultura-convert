@@ -1,8 +1,8 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, CreditCard, Loader2 } from 'lucide-react';
 import { loadStripe } from '@stripe/stripe-js';
-import { Elements, CardElement, useStripe, useElements } from '@stripe/react-stripe-js';
+import { Elements, CardElement, useStripe, useElements, PaymentRequestButtonElement } from '@stripe/react-stripe-js';
 import Navigation from '@/components/Navigation';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -68,6 +68,7 @@ const CheckoutForm = () => {
   const { language } = useLanguage();
   const { items, getTotalPrice, clearCart } = useCart();
   const { toast } = useToast();
+  const [paymentRequest, setPaymentRequest] = useState(null);
   
   const [loading, setLoading] = useState(false);
   const [addressErrors, setAddressErrors] = useState<{[key: string]: string[]}>({});
@@ -105,6 +106,127 @@ const CheckoutForm = () => {
   const shippingCost = 599;
   const subtotal = getTotalPrice();
   const total = subtotal + shippingCost;
+
+  // Initialize Payment Request for Apple Pay/Google Pay
+  useEffect(() => {
+    if (stripe) {
+      const pr = stripe.paymentRequest({
+        country: 'US',
+        currency: 'usd',
+        total: {
+          label: language === 'es' ? 'Total del pedido' : 'Order Total',
+          amount: total,
+        },
+        requestPayerName: true,
+        requestPayerEmail: true,
+        requestPayerPhone: true,
+        requestShipping: true,
+        shippingOptions: [
+          {
+            id: 'standard',
+            label: language === 'es' ? 'Envío estándar' : 'Standard Shipping',
+            detail: language === 'es' ? '5-7 días laborales' : '5-7 business days',
+            amount: shippingCost,
+          },
+        ],
+      });
+
+      // Check if Payment Request is available
+      pr.canMakePayment().then((result) => {
+        if (result) {
+          setPaymentRequest(pr);
+        }
+      });
+
+      pr.on('paymentmethod', async (ev) => {
+        try {
+          // Set form data from Payment Request
+          const shippingAddress = {
+            line1: ev.shippingAddress?.addressLine?.[0] || '',
+            line2: ev.shippingAddress?.addressLine?.[1] || '',
+            city: ev.shippingAddress?.city || '',
+            state: ev.shippingAddress?.region || '',
+            postal_code: ev.shippingAddress?.postalCode || '',
+            country: ev.shippingAddress?.country || 'US',
+          };
+
+          const updatedFormData = {
+            email: ev.payerEmail || '',
+            name: ev.payerName || '',
+            phone: ev.payerPhone || '',
+            shippingAddress,
+            billingAddress: shippingAddress,
+            sameAsShipping: true,
+          };
+
+          // Create payment intent
+          const { data, error } = await supabase.functions.invoke('create-stripe-payment-intent', {
+            body: {
+              items: items.map(item => ({
+                id: item.product.id,
+                quantity: item.quantity,
+                variant_id: item.variant_id
+              })),
+              shipping_address: {
+                name: updatedFormData.name,
+                ...updatedFormData.shippingAddress
+              },
+              billing_address: {
+                name: updatedFormData.name,
+                ...updatedFormData.shippingAddress
+              },
+              customer_email: updatedFormData.email,
+              customer_name: updatedFormData.name,
+              customer_phone: updatedFormData.phone
+            }
+          });
+
+          if (error) throw error;
+
+          // Confirm payment
+          const { error: confirmError } = await stripe.confirmCardPayment(
+            data.client_secret,
+            { payment_method: ev.paymentMethod.id },
+            { handleActions: false }
+          );
+
+          if (confirmError) {
+            ev.complete('fail');
+            toast({
+              title: language === 'es' ? 'Error en el pago' : 'Payment error',
+              description: confirmError.message,
+              variant: 'destructive',
+            });
+          } else {
+            ev.complete('success');
+            clearCart();
+            
+            // Store access token for anonymous orders
+            if (data.access_token) {
+              localStorage.setItem(`order_token_${data.order_id}`, data.access_token);
+            }
+            
+            toast({
+              title: language === 'es' ? '¡Pago exitoso!' : 'Payment successful!',
+              description: language === 'es' 
+                ? 'Tu pedido ha sido procesado correctamente.'
+                : 'Your order has been processed successfully.',
+            });
+            navigate(`/order-confirmation/${data.order_id}`);
+          }
+        } catch (error: any) {
+          ev.complete('fail');
+          console.error('Payment error:', error);
+          toast({
+            title: language === 'es' ? 'Error en el pago' : 'Payment error',
+            description: error.message,
+            variant: 'destructive',
+          });
+        }
+      });
+    }
+  }, [stripe, total, items, language, navigate, clearCart, toast]);
+
 
   const handleInputChange = (field: string, value: string) => {
     const keys = field.split('.');
@@ -608,6 +730,28 @@ const CheckoutForm = () => {
                 </div>
 
                 <Separator />
+
+                {/* Apple Pay / Google Pay Button */}
+                {paymentRequest && (
+                  <div className="space-y-4">
+                    <div className="text-center">
+                      <PaymentRequestButtonElement 
+                        options={{ paymentRequest }}
+                        className="StripeElement StripeElement--empty"
+                      />
+                    </div>
+                    <div className="relative">
+                      <div className="absolute inset-0 flex items-center">
+                        <span className="w-full border-t border-border" />
+                      </div>
+                      <div className="relative flex justify-center text-xs uppercase">
+                        <span className="bg-background px-2 text-muted-foreground">
+                          {language === 'es' ? 'O paga con tarjeta' : 'Or pay with card'}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+                )}
 
                 {/* Payment Method */}
                 <div className="space-y-4">

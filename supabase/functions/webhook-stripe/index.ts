@@ -1,171 +1,145 @@
-// Updated webhook with improved logging and CORS handling
-import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
-import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.4";
-import Stripe from "https://esm.sh/stripe@14.21.0";
-
-const supabase = createClient(
-  Deno.env.get('SUPABASE_URL') ?? '',
-  Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
-  {
-    auth: {
-      autoRefreshToken: false,
-      persistSession: false
-    }
-  }
-);
-
-const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') ?? '', {
-  apiVersion: '2023-10-16',
-});
+import { serve } from "https://deno.land/std@0.168.0/http/server.ts"
+import { createClient } from 'https://esm.sh/@supabase/supabase-js@2'
+import Stripe from 'https://esm.sh/stripe@14.21.0'
 
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type, stripe-signature',
   'Access-Control-Allow-Methods': 'POST, OPTIONS',
-};
+}
 
-// Security: Maximum request size (2MB for webhooks)
-const MAX_REQUEST_SIZE = 2 * 1024 * 1024;
+const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY')!, {
+  apiVersion: '2023-10-16',
+})
 
-const handler = async (req: Request): Promise<Response> => {
-  // Handle CORS preflight requests
+serve(async (req) => {
   if (req.method === 'OPTIONS') {
-    return new Response(null, { 
-      headers: corsHeaders,
-      status: 200 
-    });
+    return new Response('ok', { headers: corsHeaders })
   }
-
-  // Handle non-POST requests (like browser GET requests to webhook URL)
-  if (req.method !== 'POST') {
-    console.log(`Received ${req.method} request to webhook endpoint`);
-    return new Response('Stripe webhook endpoint - POST only', { 
-      headers: { ...corsHeaders, 'Content-Type': 'text/plain' },
-      status: 200 
-    });
-  }
-
-  // Security: Check request size
-  const contentLength = req.headers.get('content-length');
-  if (contentLength && parseInt(contentLength) > MAX_REQUEST_SIZE) {
-    console.error('Request too large:', contentLength);
-    return new Response('Request too large', { 
-      headers: corsHeaders,
-      status: 413 
-    });
-  }
-
-  // Only process POST requests with proper Stripe signature
-  const signature = req.headers.get('stripe-signature');
-  if (!signature) {
-    console.error('Missing stripe-signature header');
-    return new Response('Missing stripe-signature header', { 
-      headers: corsHeaders,
-      status: 400 
-    });
-  }
-
-  const body = await req.text();
-  if (!body) {
-    console.error('Missing request body');
-    return new Response('Missing request body', { 
-      headers: corsHeaders,
-      status: 400 
-    });
-  }
-  
-  let event: Stripe.Event;
 
   try {
-    event = stripe.webhooks.constructEvent(
-      body,
-      signature!,
-      Deno.env.get('STRIPE_WEBHOOK_SECRET') ?? ''
-    );
-  } catch (err: any) {
-    console.error('Webhook signature verification failed:', err.message);
-    return new Response(`Webhook Error: ${err.message}`, { status: 400 });
-  }
+    const body = await req.text()
+    const signature = req.headers.get('stripe-signature')
 
-  console.log(`Processing Stripe webhook: ${event.type} (ID: ${event.id})`);
+    if (!signature) {
+      throw new Error('Missing stripe-signature header')
+    }
 
-  try {
+    const webhookSecret = Deno.env.get('STRIPE_WEBHOOK_SECRET')
+    if (!webhookSecret) {
+      throw new Error('Missing STRIPE_WEBHOOK_SECRET')
+    }
+
+    const event = stripe.webhooks.constructEvent(body, signature, webhookSecret)
+    
+    const supabase = createClient(
+      Deno.env.get('SUPABASE_URL')!,
+      Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
+    )
+
     switch (event.type) {
       case 'payment_intent.succeeded': {
-        const paymentIntent = event.data.object as Stripe.PaymentIntent;
-        console.log(`Payment succeeded - PaymentIntent: ${paymentIntent.id}, Amount: ${paymentIntent.amount}`);
+        const paymentIntent = event.data.object as Stripe.PaymentIntent
         
-        // Update order status
-        const { error: orderError } = await supabase
+        console.log('Payment succeeded:', paymentIntent.id)
+
+        // Buscar la orden asociada
+        const { data: order, error: orderError } = await supabase
           .from('orders')
-          .update({ 
-            status: 'paid'
-          })
-          .eq('stripe_payment_intent_id', paymentIntent.id);
+          .select('*, order_items(*)')
+          .eq('stripe_payment_intent_id', paymentIntent.id)
+          .single()
 
         if (orderError) {
-          console.error('Failed to update order status:', orderError);
-          throw new Error('Failed to update order status');
+          console.error('Error finding order:', orderError)
+          break
         }
 
-        console.log(`Order status updated to 'paid' for PaymentIntent: ${paymentIntent.id}`);
-
-        // Trigger Printify order creation
-        const { error: printifyError } = await supabase.functions.invoke('create-printify-order', {
-          body: { payment_intent_id: paymentIntent.id }
-        });
-
-        if (printifyError) {
-          console.error('Failed to create Printify order:', printifyError);
-          console.log('Continuing despite Printify error - order is still marked as paid');
-        } else {
-          console.log(`Printify order creation initiated for PaymentIntent: ${paymentIntent.id}`);
+        if (!order) {
+          console.log('No order found for payment intent:', paymentIntent.id)
+          break
         }
 
-        console.log(`✅ Payment processing complete for PaymentIntent: ${paymentIntent.id}`);
-        break;
+        // Actualizar estado de la orden
+        await supabase
+          .from('orders')
+          .update({ 
+            status: 'paid',
+            updated_at: new Date().toISOString()
+          })
+          .eq('id', order.id)
+
+        // Enviar email de confirmación
+        try {
+          const customerEmail = order.customer_email || paymentIntent.metadata?.customer_email
+          const customerName = order.customer_name || paymentIntent.metadata?.customer_name
+
+          if (customerEmail) {
+            console.log('Sending confirmation email to:', customerEmail)
+
+            // Llamar a la función de envío de emails
+            const emailResponse = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/send-auth-email`, {
+              method: 'POST',
+              headers: {
+                'Content-Type': 'application/json',
+                'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`
+              },
+              body: JSON.stringify({
+                type: 'order_confirmation',
+                email: customerEmail,
+                data: {
+                  customerName: customerName || 'Cliente',
+                  orderId: order.id,
+                  amount: (paymentIntent.amount / 100).toFixed(2),
+                  items: order.order_items,
+                  orderDate: new Date().toLocaleDateString('es-PR')
+                }
+              })
+            })
+
+            if (emailResponse.ok) {
+              console.log('Confirmation email sent successfully')
+            } else {
+              const emailError = await emailResponse.text()
+              console.error('Error sending email:', emailError)
+            }
+          } else {
+            console.log('No customer email found for order:', order.id)
+          }
+        } catch (emailError) {
+          console.error('Failed to send confirmation email:', emailError)
+        }
+
+        break
       }
 
       case 'payment_intent.payment_failed': {
-        const paymentIntent = event.data.object as Stripe.PaymentIntent;
-        console.log(`Payment failed - PaymentIntent: ${paymentIntent.id}, Last error: ${paymentIntent.last_payment_error?.message || 'Unknown error'}`);
+        const paymentIntent = event.data.object as Stripe.PaymentIntent
+        console.log('Payment failed:', paymentIntent.id)
         
-        const { error } = await supabase
+        // Actualizar estado de la orden
+        await supabase
           .from('orders')
-          .update({ 
-            status: 'failed'
-          })
-          .eq('stripe_payment_intent_id', paymentIntent.id);
-
-        if (error) {
-          console.error('Failed to update order status to failed:', error);
-        } else {
-          console.log(`Order status updated to 'failed' for PaymentIntent: ${paymentIntent.id}`);
-        }
-
-        console.log(`❌ Payment failure processed for PaymentIntent: ${paymentIntent.id}`);
-        break;
+          .update({ status: 'failed' })
+          .eq('stripe_payment_intent_id', paymentIntent.id)
+        
+        break
       }
 
       default:
-        console.log(`Unhandled event type: ${event.type}`);
+        console.log(`Unhandled event type: ${event.type}`)
     }
 
     return new Response(JSON.stringify({ received: true }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 200,
-    });
+    })
 
-  } catch (error: any) {
-    console.error('Error processing webhook:', error);
-    return new Response(
-      JSON.stringify({ error: error.message }),
-      {
-        headers: { ...corsHeaders, 'Content-Type': 'application/json' },
-        status: 500,
-      }
-    );
+  } catch (err) {
+    console.error('Webhook error:', err.message)
+    return new Response(JSON.stringify({ error: err.message }), {
+      headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+      status: 400,
+    })
   }
-};
-
-serve(handler);
+})

@@ -128,6 +128,98 @@ const getRecoveryEmailHTML = (token: string, supabaseUrl: string, redirectTo: st
 </html>
 `;
 
+// HTML template for order confirmation email
+const getOrderConfirmationHTML = (data: any) => {
+  const { customerName, orderId, amount, items, orderDate } = data;
+  
+  const itemsList = items?.map((item: any) => `
+    <tr>
+      <td style="padding: 12px; border-bottom: 1px solid #eee;">
+        <strong>${item.product_name || 'Producto'}</strong><br>
+        <small>Cantidad: ${item.quantity}</small>
+      </td>
+      <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right;">
+        $${((item.unit_price_cents || 0) / 100).toFixed(2)}
+      </td>
+    </tr>
+  `).join('') || '';
+
+  return `
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Confirmación de Compra - Jíbaro en la Luna</title>
+    <style>
+        body { font-family: Georgia, serif; background-color: #f5f5dc; margin: 0; padding: 0; }
+        .container { max-width: 600px; margin: 0 auto; background-color: white; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+        .header { background: linear-gradient(135deg, #2d5a87, #1e3a5f); color: white; padding: 30px; text-align: center; }
+        .logo { font-size: 24px; font-weight: bold; margin-bottom: 10px; }
+        .subtitle { font-size: 14px; opacity: 0.9; }
+        .content { padding: 30px; }
+        .moon { font-size: 40px; margin: 20px 0; }
+        .button { display: inline-block; background: linear-gradient(135deg, #2d5a87, #1e3a5f); color: white; padding: 15px 30px; text-decoration: none; border-radius: 25px; font-weight: bold; margin: 20px 0; }
+        .footer { background-color: #f8f9fa; padding: 20px; text-align: center; font-size: 12px; color: #666; }
+        .order-box { background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 25px 0; }
+        .products-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <div class="logo">Jíbaro en la Luna</div>
+            <div class="subtitle">Editorial de Libros Puertorriqueños</div>
+        </div>
+        <div class="content">
+            <div style="text-align: center;">
+                <div class="moon">🌙</div>
+                <h2 style="color: #2d5a87;">¡Gracias por tu compra!</h2>
+                <p>¡Hola ${customerName}! Tu pedido ha sido confirmado y está siendo procesado.</p>
+            </div>
+            
+            <div class="order-box">
+                <h3 style="margin-top: 0; color: #2d5a87;">Detalles del Pedido</h3>
+                <p><strong>Número de Orden:</strong> #${orderId}</p>
+                <p><strong>Fecha:</strong> ${orderDate}</p>
+                <p><strong>Total:</strong> $${amount}</p>
+            </div>
+
+            ${items && items.length > 0 ? `
+            <h3 style="color: #2d5a87; border-bottom: 2px solid #2d5a87; padding-bottom: 10px;">Productos Comprados</h3>
+            <table class="products-table">
+              ${itemsList}
+            </table>
+            ` : ''}
+
+            <div style="background: #e8f4fd; padding: 20px; border-radius: 8px; margin: 25px 0;">
+                <h4 style="margin-top: 0; color: #1976d2;">📦 ¿Qué sigue?</h4>
+                <ul style="margin: 0; padding-left: 20px;">
+                    <li>Procesaremos tu pedido en 1-2 días hábiles</li>
+                    <li>Te enviaremos un email con el tracking cuando sea enviado</li>
+                    <li>Los productos personalizados pueden tomar 3-5 días adicionales</li>
+                </ul>
+            </div>
+
+            <div style="text-align: center; margin: 30px 0;">
+                <a href="https://jibaroenlaluna.com" class="button">
+                    Visitar Nuestra Tienda
+                </a>
+            </div>
+        </div>
+        <div class="footer">
+            <p><strong>Jíbaro en la Luna</strong><br>
+            Llevando la literatura puertorriqueña a nuevas alturas</p>
+            <p style="margin-top: 10px;">
+                ¿Preguntas? Contáctanos respondiendo a este email.
+            </p>
+        </div>
+    </div>
+</body>
+</html>
+  `;
+};
+
 const handler = async (req: Request): Promise<Response> => {
   console.log('Auth email function called');
 
@@ -149,6 +241,34 @@ const handler = async (req: Request): Promise<Response> => {
     
     console.log('Received webhook payload');
 
+    const data = JSON.parse(payload);
+
+    // Check if this is an order confirmation request (direct call, not webhook)
+    if (data.type === 'order_confirmation') {
+      console.log('Processing order confirmation email');
+      
+      const { email, data: orderData } = data;
+      const emailHtml = getOrderConfirmationHTML(orderData);
+      
+      const emailResponse = await resend.emails.send({
+        from: 'Jíbaro en la Luna <noreply@resend.dev>',
+        to: [email],
+        subject: `🌙 ¡Gracias por tu compra! - Orden #${orderData.orderId}`,
+        html: emailHtml,
+      });
+
+      console.log('Order confirmation email sent:', emailResponse);
+
+      return new Response(JSON.stringify({ success: true, data: emailResponse }), {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/json',
+          ...corsHeaders,
+        },
+      });
+    }
+
+    // Original webhook handling for auth emails
     // Verify webhook signature if secret is provided
     if (hookSecret) {
       const wh = new Webhook(hookSecret);
@@ -163,7 +283,6 @@ const handler = async (req: Request): Promise<Response> => {
       }
     }
 
-    const data = JSON.parse(payload);
     const {
       user,
       email_data: { 

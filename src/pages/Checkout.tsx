@@ -63,6 +63,124 @@ const countries = [
   { code: 'PE', name: { en: 'Peru', es: 'Perú' } },
 ];
 
+const statesByCountry = {
+  US: [
+    { code: 'AL', name: { en: 'Alabama', es: 'Alabama' } },
+    { code: 'AK', name: { en: 'Alaska', es: 'Alaska' } },
+    { code: 'AZ', name: { en: 'Arizona', es: 'Arizona' } },
+    { code: 'AR', name: { en: 'Arkansas', es: 'Arkansas' } },
+    { code: 'CA', name: { en: 'California', es: 'California' } },
+    { code: 'CO', name: { en: 'Colorado', es: 'Colorado' } },
+    { code: 'CT', name: { en: 'Connecticut', es: 'Connecticut' } },
+    { code: 'DE', name: { en: 'Delaware', es: 'Delaware' } },
+    { code: 'FL', name: { en: 'Florida', es: 'Florida' } },
+    { code: 'GA', name: { en: 'Georgia', es: 'Georgia' } },
+    { code: 'HI', name: { en: 'Hawaii', es: 'Hawái' } },
+    { code: 'ID', name: { en: 'Idaho', es: 'Idaho' } },
+    { code: 'IL', name: { en: 'Illinois', es: 'Illinois' } },
+    { code: 'IN', name: { en: 'Indiana', es: 'Indiana' } },
+    { code: 'IA', name: { en: 'Iowa', es: 'Iowa' } },
+    { code: 'KS', name: { en: 'Kansas', es: 'Kansas' } },
+    { code: 'KY', name: { en: 'Kentucky', es: 'Kentucky' } },
+    { code: 'LA', name: { en: 'Louisiana', es: 'Luisiana' } },
+    { code: 'ME', name: { en: 'Maine', es: 'Maine' } },
+    { code: 'MD', name: { en: 'Maryland', es: 'Maryland' } },
+    { code: 'MA', name: { en: 'Massachusetts', es: 'Massachusetts' } },
+    { code: 'MI', name: { en: 'Michigan', es: 'Michigan' } },
+    { code: 'MN', name: { en: 'Minnesota', es: 'Minnesota' } },
+    { code: 'MS', name: { en: 'Mississippi', es: 'Mississippi' } },
+    { code: 'MO', name: { en: 'Missouri', es: 'Missouri' } },
+    { code: 'MT', name: { en: 'Montana', es: 'Montana' } },
+    { code: 'NE', name: { en: 'Nebraska', es: 'Nebraska' } },
+    { code: 'NV', name: { en: 'Nevada', es: 'Nevada' } },
+    { code: 'NH', name: { en: 'New Hampshire', es: 'Nuevo Hampshire' } },
+    { code: 'NJ', name: { en: 'New Jersey', es: 'Nueva Jersey' } },
+    { code: 'NM', name: { en: 'New Mexico', es: 'Nuevo México' } },
+    { code: 'NY', name: { en: 'New York', es: 'Nueva York' } },
+    { code: 'NC', name: { en: 'North Carolina', es: 'Carolina del Norte' } },
+    { code: 'ND', name: { en: 'North Dakota', es: 'Dakota del Norte' } },
+    { code: 'OH', name: { en: 'Ohio', es: 'Ohio' } },
+    { code: 'OK', name: { en: 'Oklahoma', es: 'Oklahoma' } },
+    { code: 'OR', name: { en: 'Oregon', es: 'Oregón' } },
+    { code: 'PA', name: { en: 'Pennsylvania', es: 'Pensilvania' } },
+    { code: 'RI', name: { en: 'Rhode Island', es: 'Rhode Island' } },
+    { code: 'SC', name: { en: 'South Carolina', es: 'Carolina del Sur' } },
+    { code: 'SD', name: { en: 'South Dakota', es: 'Dakota del Sur' } },
+    { code: 'TN', name: { en: 'Tennessee', es: 'Tennessee' } },
+    { code: 'TX', name: { en: 'Texas', es: 'Texas' } },
+    { code: 'UT', name: { en: 'Utah', es: 'Utah' } },
+    { code: 'VT', name: { en: 'Vermont', es: 'Vermont' } },
+    { code: 'VA', name: { en: 'Virginia', es: 'Virginia' } },
+    { code: 'WA', name: { en: 'Washington', es: 'Washington' } },
+    { code: 'WV', name: { en: 'West Virginia', es: 'Virginia Occidental' } },
+    { code: 'WI', name: { en: 'Wisconsin', es: 'Wisconsin' } },
+    { code: 'WY', name: { en: 'Wyoming', es: 'Wyoming' } },
+  ],
+  CA: [
+    { code: 'AB', name: { en: 'Alberta', es: 'Alberta' } },
+    { code: 'BC', name: { en: 'British Columbia', es: 'Columbia Británica' } },
+    { code: 'MB', name: { en: 'Manitoba', es: 'Manitoba' } },
+    { code: 'NB', name: { en: 'New Brunswick', es: 'Nueva Brunswick' } },
+    { code: 'NL', name: { en: 'Newfoundland and Labrador', es: 'Terranova y Labrador' } },
+    { code: 'NS', name: { en: 'Nova Scotia', es: 'Nueva Escocia' } },
+    { code: 'ON', name: { en: 'Ontario', es: 'Ontario' } },
+    { code: 'PE', name: { en: 'Prince Edward Island', es: 'Isla del Príncipe Eduardo' } },
+    { code: 'QC', name: { en: 'Quebec', es: 'Quebec' } },
+    { code: 'SK', name: { en: 'Saskatchewan', es: 'Saskatchewan' } },
+    { code: 'NT', name: { en: 'Northwest Territories', es: 'Territorios del Noroeste' } },
+    { code: 'NU', name: { en: 'Nunavut', es: 'Nunavut' } },
+    { code: 'YT', name: { en: 'Yukon', es: 'Yukón' } },
+  ],
+  MX: [
+    { code: 'AGU', name: { en: 'Aguascalientes', es: 'Aguascalientes' } },
+    { code: 'BCN', name: { en: 'Baja California', es: 'Baja California' } },
+    { code: 'BCS', name: { en: 'Baja California Sur', es: 'Baja California Sur' } },
+    { code: 'CAM', name: { en: 'Campeche', es: 'Campeche' } },
+    { code: 'CHP', name: { en: 'Chiapas', es: 'Chiapas' } },
+    { code: 'CHH', name: { en: 'Chihuahua', es: 'Chihuahua' } },
+    { code: 'COA', name: { en: 'Coahuila', es: 'Coahuila' } },
+    { code: 'COL', name: { en: 'Colima', es: 'Colima' } },
+    { code: 'DUR', name: { en: 'Durango', es: 'Durango' } },
+    { code: 'GUA', name: { en: 'Guanajuato', es: 'Guanajuato' } },
+    { code: 'GRO', name: { en: 'Guerrero', es: 'Guerrero' } },
+    { code: 'HID', name: { en: 'Hidalgo', es: 'Hidalgo' } },
+    { code: 'JAL', name: { en: 'Jalisco', es: 'Jalisco' } },
+    { code: 'MEX', name: { en: 'Mexico State', es: 'Estado de México' } },
+    { code: 'MIC', name: { en: 'Michoacán', es: 'Michoacán' } },
+    { code: 'MOR', name: { en: 'Morelos', es: 'Morelos' } },
+    { code: 'NAY', name: { en: 'Nayarit', es: 'Nayarit' } },
+    { code: 'NLE', name: { en: 'Nuevo León', es: 'Nuevo León' } },
+    { code: 'OAX', name: { en: 'Oaxaca', es: 'Oaxaca' } },
+    { code: 'PUE', name: { en: 'Puebla', es: 'Puebla' } },
+    { code: 'QUE', name: { en: 'Querétaro', es: 'Querétaro' } },
+    { code: 'ROO', name: { en: 'Quintana Roo', es: 'Quintana Roo' } },
+    { code: 'SLP', name: { en: 'San Luis Potosí', es: 'San Luis Potosí' } },
+    { code: 'SIN', name: { en: 'Sinaloa', es: 'Sinaloa' } },
+    { code: 'SON', name: { en: 'Sonora', es: 'Sonora' } },
+    { code: 'TAB', name: { en: 'Tabasco', es: 'Tabasco' } },
+    { code: 'TAM', name: { en: 'Tamaulipas', es: 'Tamaulipas' } },
+    { code: 'TLA', name: { en: 'Tlaxcala', es: 'Tlaxcala' } },
+    { code: 'VER', name: { en: 'Veracruz', es: 'Veracruz' } },
+    { code: 'YUC', name: { en: 'Yucatán', es: 'Yucatán' } },
+    { code: 'ZAC', name: { en: 'Zacatecas', es: 'Zacatecas' } },
+    { code: 'CMX', name: { en: 'Mexico City', es: 'Ciudad de México' } },
+  ],
+  AU: [
+    { code: 'NSW', name: { en: 'New South Wales', es: 'Nueva Gales del Sur' } },
+    { code: 'QLD', name: { en: 'Queensland', es: 'Queensland' } },
+    { code: 'SA', name: { en: 'South Australia', es: 'Australia Meridional' } },
+    { code: 'TAS', name: { en: 'Tasmania', es: 'Tasmania' } },
+    { code: 'VIC', name: { en: 'Victoria', es: 'Victoria' } },
+    { code: 'WA', name: { en: 'Western Australia', es: 'Australia Occidental' } },
+    { code: 'ACT', name: { en: 'Australian Capital Territory', es: 'Territorio de la Capital Australiana' } },
+    { code: 'NT', name: { en: 'Northern Territory', es: 'Territorio del Norte' } },
+  ],
+};
+
+const getStatesForCountry = (countryCode: string) => {
+  return statesByCountry[countryCode as keyof typeof statesByCountry] || [];
+};
+
 const CheckoutForm = () => {
   const stripe = useStripe();
   const elements = useElements();
@@ -248,6 +366,14 @@ const CheckoutForm = () => {
           [key]: value as any,
         },
       };
+      
+      // Reset state when country changes
+      if (key === 'country') {
+        nextForm[group] = {
+          ...nextForm[group],
+          state: '',
+        };
+      }
     }
 
     setFormData(nextForm);
@@ -641,14 +767,33 @@ const CheckoutForm = () => {
                     
                     <div>
                       <Label htmlFor="shipping-state">
-                        {language === 'es' ? 'Estado' : 'State'}
+                        {language === 'es' ? 'Estado/Provincia' : 'State/Province'}
                       </Label>
-                      <Input
-                        id="shipping-state"
-                        value={formData.shippingAddress.state}
-                        onChange={(e) => handleInputChange('shippingAddress.state', e.target.value)}
-                        required
-                      />
+                      {getStatesForCountry(formData.shippingAddress.country).length > 0 ? (
+                        <Select
+                          value={formData.shippingAddress.state}
+                          onValueChange={(value) => handleInputChange('shippingAddress.state', value)}
+                        >
+                          <SelectTrigger>
+                            <SelectValue placeholder={language === 'es' ? 'Seleccionar estado' : 'Select state'} />
+                          </SelectTrigger>
+                          <SelectContent className="bg-background border z-50">
+                            {getStatesForCountry(formData.shippingAddress.country).map((state) => (
+                              <SelectItem key={state.code} value={state.code}>
+                                {state.name[language]}
+                              </SelectItem>
+                            ))}
+                          </SelectContent>
+                        </Select>
+                      ) : (
+                        <Input
+                          id="shipping-state"
+                          value={formData.shippingAddress.state}
+                          onChange={(e) => handleInputChange('shippingAddress.state', e.target.value)}
+                          placeholder={language === 'es' ? 'Estado/Provincia' : 'State/Province'}
+                          required
+                        />
+                      )}
                     </div>
                   </div>
                   
@@ -765,14 +910,33 @@ const CheckoutForm = () => {
                         
                         <div>
                           <Label htmlFor="billing-state">
-                            {language === 'es' ? 'Estado' : 'State'}
+                            {language === 'es' ? 'Estado/Provincia' : 'State/Province'}
                           </Label>
-                          <Input
-                            id="billing-state"
-                            value={formData.billingAddress.state}
-                            onChange={(e) => handleInputChange('billingAddress.state', e.target.value)}
-                            required
-                          />
+                          {getStatesForCountry(formData.billingAddress.country).length > 0 ? (
+                            <Select
+                              value={formData.billingAddress.state}
+                              onValueChange={(value) => handleInputChange('billingAddress.state', value)}
+                            >
+                              <SelectTrigger>
+                                <SelectValue placeholder={language === 'es' ? 'Seleccionar estado' : 'Select state'} />
+                              </SelectTrigger>
+                              <SelectContent className="bg-background border z-50">
+                                {getStatesForCountry(formData.billingAddress.country).map((state) => (
+                                  <SelectItem key={state.code} value={state.code}>
+                                    {state.name[language]}
+                                  </SelectItem>
+                                ))}
+                              </SelectContent>
+                            </Select>
+                          ) : (
+                            <Input
+                              id="billing-state"
+                              value={formData.billingAddress.state}
+                              onChange={(e) => handleInputChange('billingAddress.state', e.target.value)}
+                              placeholder={language === 'es' ? 'Estado/Provincia' : 'State/Province'}
+                              required
+                            />
+                          )}
                         </div>
                       </div>
                       

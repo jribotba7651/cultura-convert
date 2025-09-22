@@ -77,31 +77,51 @@ serve(async (req) => {
           if (customerEmail) {
             console.log('Sending confirmation email to:', customerEmail)
 
-            // Llamar a la función de envío de emails
-            const emailResponse = await fetch(`${Deno.env.get('SUPABASE_URL')}/functions/v1/send-auth-email`, {
-              method: 'POST',
-              headers: {
-                'Content-Type': 'application/json',
-                'Authorization': `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`
-              },
-              body: JSON.stringify({
+            // Obtener información completa de productos
+            const { data: orderItems, error: itemsError } = await supabase
+              .from('order_items')
+              .select(`
+                quantity,
+                unit_price_cents,
+                product_id,
+                products!inner(
+                  title,
+                  images
+                )
+              `)
+              .eq('order_id', order.id)
+
+            if (itemsError) {
+              console.error('Error fetching order items:', itemsError)
+            }
+
+            const productsWithInfo = orderItems?.map(item => ({
+              product_name: item.products?.title?.es || item.products?.title?.en || 'Producto',
+              quantity: item.quantity,
+              unit_price_cents: item.unit_price_cents,
+              image_url: item.products?.images?.[0] || null
+            })) || []
+
+            // Usar supabase.functions.invoke en lugar de fetch directo
+            const { data: emailData, error: emailError } = await supabase.functions.invoke('send-auth-email', {
+              body: {
                 type: 'order_confirmation',
                 email: customerEmail,
                 data: {
                   customerName: customerName || 'Cliente',
                   orderId: order.id,
                   amount: (paymentIntent.amount / 100).toFixed(2),
-                  items: order.order_items,
-                  orderDate: new Date().toLocaleDateString('es-PR')
+                  items: productsWithInfo,
+                  orderDate: new Date().toLocaleDateString('es-PR'),
+                  trackingUrl: `https://cultura-convert.lovable.app/order-confirmation/${order.id}`
                 }
-              })
+              }
             })
 
-            if (emailResponse.ok) {
-              console.log('Confirmation email sent successfully')
+            if (emailError) {
+              console.error('Error sending email via function:', emailError)
             } else {
-              const emailError = await emailResponse.text()
-              console.error('Error sending email:', emailError)
+              console.log('Confirmation email sent successfully:', emailData)
             }
           } else {
             console.log('No customer email found for order:', order.id)

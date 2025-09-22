@@ -2,10 +2,12 @@ import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { CheckCircle, Package, Truck, Home } from 'lucide-react';
 import Navigation from '@/components/Navigation';
+import AccountCreationPrompt from '@/components/AccountCreationPrompt';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Separator } from '@/components/ui/separator';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Order } from '@/types/Store';
 
@@ -13,9 +15,11 @@ const OrderConfirmation = () => {
   const { orderId } = useParams<{ orderId: string }>();
   const navigate = useNavigate();
   const { language } = useLanguage();
+  const { user } = useAuth();
   
   const [order, setOrder] = useState<Order | null>(null);
   const [loading, setLoading] = useState(true);
+  const [showAccountPrompt, setShowAccountPrompt] = useState(false);
 
   useEffect(() => {
     if (orderId) {
@@ -45,6 +49,11 @@ const OrderConfirmation = () => {
       }
 
       setOrder(data.order as unknown as Order);
+      
+      // Show account creation prompt for anonymous orders
+      if (!user && data.order.user_id === null) {
+        setShowAccountPrompt(true);
+      }
       
       // Clean up token after successful access (optional - for security)
       if (accessToken) {
@@ -165,6 +174,18 @@ const OrderConfirmation = () => {
               }
             </p>
           </div>
+
+          {/* Account Creation Prompt */}
+          {showAccountPrompt && (
+            <div className="mb-8">
+              <AccountCreationPrompt
+                orderId={order.id}
+                customerEmail={order.customer_email}
+                customerName={order.customer_name}
+                onSuccess={() => setShowAccountPrompt(false)}
+              />
+            </div>
+          )}
 
           <div className="grid grid-cols-1 lg:grid-cols-2 gap-8">
             {/* Order Status */}

@@ -24,6 +24,8 @@ interface CheckoutFormData {
   email: string;
   name: string;
   phone: string;
+  createAccount: boolean;
+  password: string;
   shippingAddress: {
     line1: string;
     line2: string;
@@ -77,6 +79,8 @@ const CheckoutForm = () => {
     email: '',
     name: '',
     phone: '',
+    createAccount: false,
+    password: '',
     shippingAddress: {
       line1: '',
       line2: '',
@@ -228,13 +232,13 @@ const CheckoutForm = () => {
   }, [stripe, total, items, language, navigate, clearCart, toast]);
 
 
-  const handleInputChange = (field: string, value: string) => {
+  const handleInputChange = (field: string, value: string | boolean) => {
     const keys = field.split('.');
 
     // Build next form state synchronously
     let nextForm = { ...formData } as typeof formData;
     if (keys.length === 1) {
-      nextForm = { ...nextForm, [field as 'email' | 'name' | 'phone']: value } as typeof formData;
+      nextForm = { ...nextForm, [field as keyof CheckoutFormData]: value } as typeof formData;
     } else if (keys.length === 2) {
       const [group, key] = keys as ['shippingAddress' | 'billingAddress', keyof CheckoutFormData['shippingAddress']];
       nextForm = {
@@ -322,6 +326,35 @@ const CheckoutForm = () => {
     setLoading(true);
 
     try {
+      // Create account if requested
+      let userId = null;
+      if (formData.createAccount && formData.password) {
+        try {
+          const { data: authData, error: authError } = await supabase.auth.signUp({
+            email: formData.email,
+            password: formData.password,
+            options: {
+              emailRedirectTo: `${window.location.origin}/`
+            }
+          });
+
+          if (authError) {
+            console.error('Account creation error:', authError);
+            toast({
+              title: language === 'es' ? 'Error creando cuenta' : 'Account creation error',
+              description: authError.message,
+              variant: 'destructive',
+            });
+          } else if (authData.user) {
+            userId = authData.user.id;
+            console.log('Account created successfully');
+          }
+        } catch (accountError) {
+          console.error('Account creation failed:', accountError);
+          // Continue with order even if account creation fails
+        }
+      }
+
       // Create payment intent
       const { data, error } = await supabase.functions.invoke('create-stripe-payment-intent', {
         body: {
@@ -340,7 +373,8 @@ const CheckoutForm = () => {
           },
           customer_email: formData.email,
           customer_name: formData.name,
-          customer_phone: formData.phone
+          customer_phone: formData.phone,
+          user_id: userId
         }
       });
 
@@ -382,6 +416,31 @@ const CheckoutForm = () => {
         // Store access token for anonymous orders
         if (data.access_token) {
           localStorage.setItem(`order_token_${data.order_id}`, data.access_token);
+        }
+
+        // Send fallback confirmation email
+        try {
+          await supabase.functions.invoke('send-auth-email', {
+            body: {
+              type: 'order_confirmation',
+              email: formData.email,
+              data: {
+                customerName: formData.name,
+                orderId: data.order_id,
+                amount: (paymentIntent.amount / 100).toFixed(2),
+                items: items.map(item => ({
+                  product_name: item.product.title?.es || item.product.title?.en || 'Producto',
+                  quantity: item.quantity,
+                  unit_price_cents: item.product.price_cents
+                })),
+                orderDate: new Date().toLocaleDateString('es-PR'),
+                trackingUrl: `${window.location.origin}/order-confirmation/${data.order_id}`
+              }
+            }
+          });
+          console.log('Fallback confirmation email sent');
+        } catch (emailError) {
+          console.error('Fallback email failed:', emailError);
         }
         
         toast({
@@ -491,6 +550,48 @@ const CheckoutForm = () => {
                       value={formData.phone}
                       onChange={(e) => handleInputChange('phone', e.target.value)}
                     />
+                  </div>
+                </div>
+
+                {/* Account Creation Option */}
+                <div className="border rounded-lg p-4 bg-accent/50">
+                  <div className="flex items-start space-x-2">
+                    <Checkbox
+                      id="createAccount"
+                      checked={formData.createAccount}
+                      onCheckedChange={(checked) => handleInputChange('createAccount', checked)}
+                    />
+                    <div className="flex-1 space-y-2">
+                      <Label htmlFor="createAccount" className="text-sm font-medium cursor-pointer">
+                        {language === 'es' 
+                          ? '¿Crear cuenta para hacer seguimiento de pedidos?' 
+                          : 'Create account to track orders?'
+                        }
+                      </Label>
+                      <p className="text-xs text-muted-foreground">
+                        {language === 'es'
+                          ? 'Podrás ver el historial de compras y hacer recompras fácilmente.'
+                          : 'You\'ll be able to view order history and reorder easily.'
+                        }
+                      </p>
+                      
+                      {formData.createAccount && (
+                        <div className="mt-3">
+                          <Label htmlFor="password" className="text-sm">
+                            {language === 'es' ? 'Contraseña' : 'Password'}
+                          </Label>
+                          <Input
+                            id="password"
+                            type="password"
+                            value={formData.password}
+                            onChange={(e) => handleInputChange('password', e.target.value)}
+                            placeholder={language === 'es' ? 'Crear contraseña' : 'Create password'}
+                            className="mt-1"
+                            required={formData.createAccount}
+                          />
+                        </div>
+                      )}
+                    </div>
                   </div>
                 </div>
 

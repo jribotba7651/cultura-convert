@@ -89,8 +89,8 @@ export const ContactForm = ({ className = '' }: ContactFormProps) => {
         );
       }
 
-      // Send email via Supabase edge function
-      const { data, error } = await supabase.functions.invoke('send-contact-email', {
+      // Send email via secure contact form edge function
+      const { data, error } = await supabase.functions.invoke('secure-contact-form', {
         body: validatedData
       });
 

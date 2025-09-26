@@ -7,6 +7,7 @@ import ErrorBoundary from "./components/ErrorBoundary";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import { CartProvider } from "./contexts/CartContext";
 import { AuthProvider } from "./contexts/AuthContext";
+import { SecurityProvider } from "./components/SecurityProvider";
 import { ShoppingCart } from "./components/store/ShoppingCart";
 import Index from "./pages/Index";
 import Blog from "./pages/Blog";
@@ -29,9 +30,10 @@ const App = () => {
   <ErrorBoundary>
     <LanguageProvider>
       <AuthProvider>
-        <CartProvider>
-          <QueryClientProvider client={queryClient}>
-            <TooltipProvider>
+        <SecurityProvider>
+          <CartProvider>
+            <QueryClientProvider client={queryClient}>
+              <TooltipProvider>
               <Toaster />
               <Sonner />
               <BrowserRouter>
@@ -52,9 +54,10 @@ const App = () => {
                   <Route path="*" element={<NotFound />} />
                 </Routes>
               </BrowserRouter>
-            </TooltipProvider>
-          </QueryClientProvider>
-        </CartProvider>
+              </TooltipProvider>
+            </QueryClientProvider>
+          </CartProvider>
+        </SecurityProvider>
       </AuthProvider>
     </LanguageProvider>
   </ErrorBoundary>

@@ -152,6 +152,24 @@ const Store = () => {
     }
   };
 
+  const cleanupProductData = async () => {
+    setLoading(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('cleanup-product-data');
+      if (error) throw error;
+      
+      console.log('Cleanup result:', data);
+      await fetchProducts(); // Refresh products list
+      
+      alert(`Successfully cleaned up ${data.updatedCount} products`);
+    } catch (error) {
+      console.error('Error cleaning up product data:', error);
+      alert('Error cleaning up product data');
+    } finally {
+      setLoading(false);
+    }
+  };
+
   const formatDate = (dateString: string) => {
     return new Date(dateString).toLocaleString(language === 'es' ? 'es-ES' : 'en-US');
   };
@@ -256,6 +274,14 @@ const Store = () => {
             >
               {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}
               {language === 'es' ? 'Sincronizar productos' : 'Sync products'}
+            </Button>
+            
+            <Button 
+              onClick={cleanupProductData}
+              disabled={loading}
+              variant="outline"
+            >
+              {language === 'es' ? 'Limpiar datos' : 'Clean data'}
             </Button>
           </div>
         </div>

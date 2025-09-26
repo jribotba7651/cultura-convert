@@ -3,6 +3,9 @@ project_id = "ifctpzrmqcpqtgwepvoq"
 [functions.sync-printify-products]
 verify_jwt = false
 
+[functions.cleanup-product-data]
+verify_jwt = false
+
 [functions.create-stripe-payment-intent]
 verify_jwt = false
 

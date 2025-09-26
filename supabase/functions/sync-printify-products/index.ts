@@ -1,6 +1,142 @@
 import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.57.4";
 
+// HTML cleaning utilities (copied from src/utils/htmlCleaner.ts)
+const cleanHTML = (html: string): string => {
+  if (!html || typeof html !== 'string') return '';
+  
+  // Remove HTML tags
+  let cleaned = html.replace(/<[^>]*>/g, '');
+  
+  // Decode common HTML entities including Spanish characters
+  const entities: { [key: string]: string } = {
+    '&amp;': '&',
+    '&lt;': '<',
+    '&gt;': '>',
+    '&quot;': '"',
+    '&#x27;': "'",
+    '&#39;': "'",
+    '&nbsp;': ' ',
+    '&ndash;': '–',
+    '&mdash;': '—',
+    '&aacute;': 'á',
+    '&eacute;': 'é',
+    '&iacute;': 'í',
+    '&oacute;': 'ó',
+    '&uacute;': 'ú',
+    '&ntilde;': 'ñ',
+    '&Aacute;': 'Á',
+    '&Eacute;': 'É',
+    '&Iacute;': 'Í',
+    '&Oacute;': 'Ó',
+    '&Uacute;': 'Ú',
+    '&Ntilde;': 'Ñ',
+    '&uuml;': 'ü',
+    '&Uuml;': 'Ü',
+    '&iquest;': '¿',
+    '&iexcl;': '¡',
+    '&deg;': '°',
+    '&hellip;': '...',
+    '&rsquo;': "'",
+    '&lsquo;': "'",
+    '&rdquo;': '"',
+    '&ldquo;': '"',
+    '&trade;': '™',
+    '&copy;': '©',
+    '&reg;': '®'
+  };
+  
+  Object.entries(entities).forEach(([entity, replacement]) => {
+    cleaned = cleaned.replace(new RegExp(entity, 'g'), replacement);
+  });
+  
+  // Remove extra whitespace and normalize
+  cleaned = cleaned.replace(/\s+/g, ' ').trim();
+  
+  return cleaned;
+};
+
+const extractFirstParagraph = (html: string): string => {
+  if (!html) return '';
+  
+  // Try to find content within p tags first
+  const pMatch = html.match(/<p[^>]*>(.*?)<\/p>/i);
+  if (pMatch && pMatch[1]) {
+    const cleaned = cleanHTML(pMatch[1]);
+    return cleaned.length > 20 ? cleaned : cleanHTML(html);
+  }
+  
+  // Try to get first sentence/line if no paragraphs
+  const cleaned = cleanHTML(html);
+  const sentences = cleaned.split(/[.!?]\s+/);
+  if (sentences.length > 1 && sentences[0].length > 20) {
+    return sentences[0] + '.';
+  }
+  
+  // Return cleaned content up to first line break or 200 chars
+  const firstLine = cleaned.split('\n')[0];
+  if (firstLine.length > 200) {
+    return firstLine.substring(0, 197) + '...';
+  }
+  
+  return firstLine || cleaned;
+};
+
+const filterVariants = (variants: any[], productTitle: string): any[] => {
+  if (!variants || variants.length === 0) return [];
+  
+  // Filter to only enabled and available variants
+  const availableVariants = variants.filter(v => 
+    (v.is_available !== false && v.available !== false) && 
+    (v.is_enabled !== false && v.enabled !== false)
+  );
+  
+  // If it's clothing, limit size/color combinations
+  if (productTitle.toLowerCase().includes('shirt') || 
+      productTitle.toLowerCase().includes('hoodie') || 
+      productTitle.toLowerCase().includes('t-shirt')) {
+    
+    // Group by size first, then limit colors per size
+    const sizeGroups: { [key: string]: any[] } = {};
+    
+    availableVariants.forEach(variant => {
+      const sizeMatch = variant.title?.match(/\b(XS|S|M|L|XL|XXL|XXXL|2XL|3XL)\b/i);
+      const size = sizeMatch ? sizeMatch[0] : 'One Size';
+      
+      if (!sizeGroups[size]) {
+        sizeGroups[size] = [];
+      }
+      sizeGroups[size].push(variant);
+    });
+    
+    // Limit to max 6 colors per size, prioritize basic colors
+    const basicColors = ['black', 'white', 'navy', 'gray', 'red', 'blue'];
+    const limitedVariants: any[] = [];
+    
+    Object.entries(sizeGroups).forEach(([size, variants]) => {
+      // Sort by basic colors first, then by price
+      const sorted = variants.sort((a, b) => {
+        const aBasic = basicColors.some(color => 
+          a.title?.toLowerCase().includes(color)
+        ) ? 0 : 1;
+        const bBasic = basicColors.some(color => 
+          b.title?.toLowerCase().includes(color)
+        ) ? 0 : 1;
+        
+        if (aBasic !== bBasic) return aBasic - bBasic;
+        return (a.price || 0) - (b.price || 0);
+      });
+      
+      limitedVariants.push(...sorted.slice(0, 6));
+    });
+    
+    return limitedVariants.slice(0, 20); // Max 20 total variants
+  }
+  
+  // For coffee and other products, limit to 10 variants
+  return availableVariants.slice(0, 10);
+};
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
@@ -210,15 +346,15 @@ const handler = async (req: Request): Promise<Response> => {
           .eq('printify_product_id', product.id)
           .single();
 
-        // Get variants from DETAILED product data
-        const availableVariants = (detailedProduct.variants || []).filter((variant: any) => ((variant.is_available ?? variant.available) && (variant.is_enabled ?? true)));
+        // Get filtered variants using intelligent filtering
+        const availableVariants = filterVariants(detailedProduct.variants || [], detailedProduct.title);
         
         if (availableVariants.length === 0) {
-          console.log(`Skipping product ${detailedProduct.title} - no available variants`);
+          console.log(`Skipping product ${detailedProduct.title} - no available variants after filtering`);
           continue;
         }
 
-        console.log(`Product ${detailedProduct.title} has ${availableVariants.length} available variants`);
+        console.log(`Product ${detailedProduct.title} has ${availableVariants.length} variants after intelligent filtering (from ${(detailedProduct.variants || []).length} total)`);
 
         // Normalize all variant prices to cents
         const normalizedVariants = availableVariants.map((variant: any) => {
@@ -239,15 +375,19 @@ const handler = async (req: Request): Promise<Response> => {
         const minPrice = Math.min(...normalizedVariants.map((v: any) => v.price));
         const maxPrice = Math.max(...normalizedVariants.map((v: any) => v.price));
 
+        // Clean and process descriptions
+        const cleanedDescription = extractFirstParagraph(detailedProduct.description || '');
+        const fallbackDescription = 'Producto premium de Puerto Rico';
+        
         const productData = {
           printify_product_id: product.id,
           title: {
-            es: detailedProduct.title?.substring(0, 100) || 'Producto de Puerto Rico',
-            en: detailedProduct.title?.substring(0, 100) || 'Product from Puerto Rico'
+            es: cleanHTML(detailedProduct.title || '').substring(0, 100) || 'Producto de Puerto Rico',
+            en: cleanHTML(detailedProduct.title || '').substring(0, 100) || 'Product from Puerto Rico'
           },
           description: {
-            es: detailedProduct.description || 'Producto premium de Puerto Rico',
-            en: detailedProduct.description || 'Premium product from Puerto Rico'
+            es: cleanedDescription || fallbackDescription,
+            en: cleanedDescription || 'Premium product from Puerto Rico'
           },
           category_id: categoryId,
           price_cents: minPrice,

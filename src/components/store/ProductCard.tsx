@@ -89,7 +89,7 @@ export const ProductCard = ({ product, onProductClick }: ProductCardProps) => {
           </h3>
           
           <p className="text-muted-foreground text-sm mb-3 line-clamp-2">
-            {truncateText(product.description[language], 120)}
+            {truncateText(product.description[language] || product.description?.es || product.description?.en || '', 120)}
           </p>
 
           <div className="flex flex-wrap gap-1 mb-3">

@@ -31,10 +31,21 @@ const AuthorProfile = ({ name, bio, books, image }: AuthorProfileProps) => {
   };
 
   const handleContact = () => {
-    toast({
-      title: t('contactDevelopment'),
-      description: t('contactDevelopmentDesc'),
-    });
+    // Scroll to contact section
+    const contactSection = document.getElementById('contact-section');
+    if (contactSection) {
+      contactSection.scrollIntoView({ 
+        behavior: 'smooth',
+        block: 'start'
+      });
+    } else {
+      toast({
+        title: t('contact'),
+        description: language === 'es' 
+          ? 'Desliza hacia abajo para encontrar el formulario de contacto' 
+          : 'Scroll down to find the contact form',
+      });
+    }
   };
 
   const handleBuyOnAmazon = (book: Book) => {

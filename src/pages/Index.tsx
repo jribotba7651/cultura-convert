@@ -1,5 +1,6 @@
 import AuthorProfile from "@/components/AuthorProfile";
 import Navigation from "@/components/Navigation";
+import { ContactForm } from "@/components/ContactForm";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Book } from "@/types/Book";
 import juanProfileImage from "@/assets/juan-c-ribot-profile.jpg";
@@ -100,6 +101,25 @@ const Index = () => {
               books={juanBooks}
               image={juanProfileImage}
             />
+          </div>
+        </div>
+      </section>
+
+      {/* Contact Section */}
+      <section id="contact-section" className="py-20 bg-muted/30">
+        <div className="container mx-auto px-4">
+          <div className="max-w-4xl mx-auto">
+            <div className="text-center mb-12">
+              <h3 className="text-4xl font-bold mb-4 text-foreground">
+                {t('language') === 'es' ? 'Contáctanos' : 'Contact Us'}
+              </h3>
+              <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
+                {t('language') === 'es' 
+                  ? 'Nos encantaría escuchar de ti. Envíanos un mensaje y te responderemos pronto.' 
+                  : 'We would love to hear from you. Send us a message and we\'ll respond soon.'}
+              </p>
+            </div>
+            <ContactForm />
           </div>
         </div>
       </section>

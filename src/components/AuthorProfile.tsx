@@ -135,7 +135,7 @@ const AuthorProfile = ({ name, bio, books, image }: AuthorProfileProps) => {
                       <Button
                         size="sm"
                         onClick={() => handleBuyOnAmazon(book)}
-                        className="bg-primary hover:bg-primary/90 hover:animate-pulse transition-all duration-200 hover:scale-105"
+                        className="bg-slate-800 hover:bg-slate-700 text-white hover:animate-[wiggle_0.5s_ease-in-out] transition-all duration-200"
                       >
                         {t('buyOnAmazon')}
                       </Button>

@@ -257,33 +257,6 @@ const Store = () => {
             />
           </div>
           
-          <div className="flex gap-2">
-            <Button 
-              onClick={checkPriceDiscrepancies}
-              variant="outline"
-              size="sm"
-            >
-              <AlertTriangle className="mr-2 h-4 w-4" />
-              {language === 'es' ? 'Verificar precios' : 'Check prices'}
-            </Button>
-            
-            <Button 
-              onClick={handleSyncProducts}
-              disabled={loading}
-              variant="outline"
-            >
-              {loading ? <Loader2 className="mr-2 h-4 w-4 animate-spin" /> : <RefreshCw className="mr-2 h-4 w-4" />}
-              {language === 'es' ? 'Sincronizar productos' : 'Sync products'}
-            </Button>
-            
-            <Button 
-              onClick={cleanupProductData}
-              disabled={loading}
-              variant="outline"
-            >
-              {language === 'es' ? 'Limpiar datos' : 'Clean data'}
-            </Button>
-          </div>
         </div>
 
         {/* Last Sync Time */}

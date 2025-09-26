@@ -65,38 +65,48 @@ const ChartStyle = ({ id, config }: { id: string; config: ChartConfig }) => {
     return null;
   }
 
-  // Sanitize CSS values to prevent XSS attacks
+  // Enhanced CSS sanitization to prevent XSS attacks
   const sanitizeCSS = (value: string): string => {
     if (typeof value !== 'string') return '';
-    // Remove dangerous characters and ensure it's a valid CSS color/value
-    return value.replace(/[<>'"\\]/g, '').replace(/[^\w\s#().,%-]/g, '');
+    
+    // Comprehensive CSS value validation
+    const cssValueRegex = /^(?:hsl\(\s*\d{1,3}\s*,\s*\d{1,3}%\s*,\s*\d{1,3}%\s*\)|#[0-9a-fA-F]{3,6}|rgb\(\s*\d{1,3}\s*,\s*\d{1,3}\s*,\s*\d{1,3}\s*\)|[a-zA-Z]+)$/;
+    
+    // Remove all potentially dangerous characters
+    const cleaned = value.replace(/[<>'"\\`(){}[\]]/g, '').trim();
+    
+    // Only allow valid CSS color values
+    return cssValueRegex.test(cleaned) ? cleaned : '';
   };
 
   // Sanitize chart ID to prevent CSS injection
   const sanitizedId = id.replace(/[^a-zA-Z0-9-_]/g, '');
 
-  return (
-    <style
-      dangerouslySetInnerHTML={{
-        __html: Object.entries(THEMES)
-          .map(
-            ([theme, prefix]) => `
-${prefix} [data-chart=${sanitizedId}] {
-${colorConfig
-  .map(([key, itemConfig]) => {
-    const color = itemConfig.theme?.[theme as keyof typeof itemConfig.theme] || itemConfig.color;
-    const sanitizedKey = key.replace(/[^a-zA-Z0-9-_]/g, '');
-    return color ? `  --color-${sanitizedKey}: ${sanitizeCSS(color)};` : null;
-  })
-  .filter(Boolean)
-  .join("\n")}
-}
-`,
-          )
-          .join("\n"),
-      }}
-    />
-  );
+  // Build CSS safely without dangerouslySetInnerHTML
+  const cssRules = Object.entries(THEMES)
+    .map(([theme, prefix]) => {
+      const rules = colorConfig
+        .map(([key, itemConfig]) => {
+          const color = itemConfig.theme?.[theme as keyof typeof itemConfig.theme] || itemConfig.color;
+          const sanitizedKey = key.replace(/[^a-zA-Z0-9-_]/g, '');
+          const sanitizedColor = sanitizeCSS(color || '');
+          return sanitizedColor ? `  --color-${sanitizedKey}: ${sanitizedColor};` : null;
+        })
+        .filter(Boolean)
+        .join('\n');
+      
+      return rules ? `${prefix} [data-chart="${sanitizedId}"] {\n${rules}\n}` : '';
+    })
+    .filter(Boolean)
+    .join('\n');
+
+  // Create style element safely
+  const styleElement = React.createElement('style', {
+    key: sanitizedId,
+    children: cssRules
+  });
+
+  return styleElement;
 };
 
 const ChartTooltip = RechartsPrimitive.Tooltip;

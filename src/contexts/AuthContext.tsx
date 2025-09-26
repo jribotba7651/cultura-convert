@@ -22,18 +22,24 @@ export const useAuth = () => {
 };
 
 export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children }) => {
-  console.log('AuthProvider initializing...');
   const [user, setUser] = useState<User | null>(null);
   const [session, setSession] = useState<Session | null>(null);
   const [loading, setLoading] = useState(true);
 
   useEffect(() => {
-    console.log('AuthProvider setting up auth state listener...');
+    let mounted = true;
+    
     try {
       // Set up auth state listener
       const { data: { subscription } } = supabase.auth.onAuthStateChange(
         (event, session) => {
-          console.log('Auth state change:', event, session?.user?.id);
+          if (!mounted) return;
+          
+          // Only log non-sensitive information in production
+          if (process.env.NODE_ENV === 'development') {
+            console.log('Auth state change:', event, session?.user?.id);
+          }
+          
           setSession(session);
           setUser(session?.user ?? null);
           setLoading(false);
@@ -42,34 +48,47 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
       // Check for existing session
       supabase.auth.getSession().then(({ data: { session }, error }) => {
+        if (!mounted) return;
+        
         if (error) {
-          console.error('Error getting session:', error);
-        } else {
-          console.log('Initial session:', session?.user?.id);
+          console.error('Error getting session:', error.message);
+        } else if (process.env.NODE_ENV === 'development') {
+          console.log('Initial session loaded');
         }
+        
         setSession(session);
         setUser(session?.user ?? null);
         setLoading(false);
       }).catch((error) => {
-        console.error('Error in getSession:', error);
+        if (!mounted) return;
+        console.error('Error in getSession:', error.message);
         setLoading(false);
       });
 
       return () => {
-        console.log('AuthProvider cleanup...');
+        mounted = false;
         subscription.unsubscribe();
       };
     } catch (error) {
       console.error('Error in AuthProvider useEffect:', error);
-      setLoading(false);
+      if (mounted) setLoading(false);
     }
   }, []);
 
   const signUp = async (email: string, password: string) => {
+    // Enhanced input validation
+    if (!email || !email.includes('@') || email.length > 255) {
+      return { error: { message: 'Invalid email format' } };
+    }
+    
+    if (!password || password.length < 8 || password.length > 128) {
+      return { error: { message: 'Password must be between 8-128 characters' } };
+    }
+    
     const redirectUrl = `${window.location.origin}/`;
     
     const { error } = await supabase.auth.signUp({
-      email,
+      email: email.toLowerCase().trim(),
       password,
       options: {
         emailRedirectTo: redirectUrl
@@ -79,8 +98,17 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const signIn = async (email: string, password: string) => {
+    // Enhanced input validation
+    if (!email || !email.includes('@') || email.length > 255) {
+      return { error: { message: 'Invalid email format' } };
+    }
+    
+    if (!password || password.length < 1 || password.length > 128) {
+      return { error: { message: 'Invalid password' } };
+    }
+    
     const { error } = await supabase.auth.signInWithPassword({
-      email,
+      email: email.toLowerCase().trim(),
       password,
     });
     return { error };

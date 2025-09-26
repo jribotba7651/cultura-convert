@@ -9,6 +9,8 @@ import { Alert, AlertDescription } from '@/components/ui/alert';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { Loader2, ArrowLeft } from 'lucide-react';
+import { authLimiter } from '@/utils/rateLimiter';
+import { validateInput } from '@/utils/sanitize';
 
 const Auth = () => {
   const { signIn, signUp, user, loading: authLoading } = useAuth();
@@ -34,6 +36,28 @@ const Auth = () => {
     setLoading(true);
     setError('');
 
+    // Rate limiting
+    const clientId = `auth_${email}`;
+    if (!authLimiter.isAllowed(clientId)) {
+      const timeUntilReset = Math.ceil(authLimiter.getTimeUntilReset(clientId) / 1000 / 60);
+      setError(`Too many attempts. Try again in ${timeUntilReset} minutes.`);
+      setLoading(false);
+      return;
+    }
+
+    // Enhanced validation
+    if (!validateInput.email(email)) {
+      setError('Please enter a valid email address');
+      setLoading(false);
+      return;
+    }
+
+    if (!password || password.length < 1) {
+      setError('Password is required');
+      setLoading(false);
+      return;
+    }
+
     const { error } = await signIn(email, password);
     
     if (error) {
@@ -55,14 +79,37 @@ const Auth = () => {
     setError('');
     setMessage('');
 
+    // Rate limiting
+    const clientId = `auth_${email}`;
+    if (!authLimiter.isAllowed(clientId)) {
+      const timeUntilReset = Math.ceil(authLimiter.getTimeUntilReset(clientId) / 1000 / 60);
+      setError(`Too many attempts. Try again in ${timeUntilReset} minutes.`);
+      setLoading(false);
+      return;
+    }
+
+    // Enhanced validation
+    if (!validateInput.email(email)) {
+      setError('Please enter a valid email address');
+      setLoading(false);
+      return;
+    }
+
     if (password !== confirmPassword) {
       setError(t('passwordsDontMatch'));
       setLoading(false);
       return;
     }
 
-    if (password.length < 6) {
-      setError(t('passwordTooShort'));
+    // Stronger password requirements
+    if (password.length < 8) {
+      setError('Password must be at least 8 characters long');
+      setLoading(false);
+      return;
+    }
+
+    if (!/(?=.*[a-z])(?=.*[A-Z])(?=.*\d)/.test(password)) {
+      setError('Password must contain at least one uppercase letter, one lowercase letter, and one number');
       setLoading(false);
       return;
     }

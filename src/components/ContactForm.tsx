@@ -4,17 +4,33 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { Textarea } from '@/components/ui/textarea';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
-import { Mail, Send, User, MessageSquare } from 'lucide-react';
+import { Mail, Send, User, MessageSquare, Shield } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { z } from 'zod';
+import { contactFormLimiter } from '@/utils/rateLimiter';
+import { sanitizeText } from '@/utils/sanitize';
 
 const contactSchema = z.object({
-  name: z.string().trim().min(1, { message: "El nombre es requerido" }).max(100, { message: "El nombre debe tener menos de 100 caracteres" }),
-  email: z.string().trim().email({ message: "Email inválido" }).max(255, { message: "El email debe tener menos de 255 caracteres" }),
-  subject: z.string().trim().min(1, { message: "El asunto es requerido" }).max(200, { message: "El asunto debe tener menos de 200 caracteres" }),
-  message: z.string().trim().min(10, { message: "El mensaje debe tener al menos 10 caracteres" }).max(2000, { message: "El mensaje debe tener menos de 2000 caracteres" })
+  name: z.string()
+    .trim()
+    .min(2, { message: "El nombre debe tener al menos 2 caracteres" })
+    .max(100, { message: "El nombre debe tener menos de 100 caracteres" })
+    .regex(/^[a-zA-ZáéíóúüñÁÉÍÓÚÜÑ\s-'\.]+$/, { message: "El nombre contiene caracteres no válidos" }),
+  email: z.string()
+    .trim()
+    .email({ message: "Email inválido" })
+    .max(255, { message: "El email debe tener menos de 255 caracteres" })
+    .toLowerCase(),
+  subject: z.string()
+    .trim()
+    .min(5, { message: "El asunto debe tener al menos 5 caracteres" })
+    .max(200, { message: "El asunto debe tener menos de 200 caracteres" }),
+  message: z.string()
+    .trim()
+    .min(20, { message: "El mensaje debe tener al menos 20 caracteres" })
+    .max(2000, { message: "El mensaje debe tener menos de 2000 caracteres" })
 });
 
 interface ContactFormProps {
@@ -45,8 +61,33 @@ export const ContactForm = ({ className = '' }: ContactFormProps) => {
     setIsSubmitting(true);
 
     try {
-      // Validate form data
-      const validatedData = contactSchema.parse(formData);
+      // Rate limiting check
+      const clientId = 'contact_form';
+      if (!contactFormLimiter.isAllowed(clientId)) {
+        const timeUntilReset = Math.ceil(contactFormLimiter.getTimeUntilReset(clientId) / 1000 / 60);
+        throw new Error(
+          language === 'es' 
+            ? `Demasiados intentos. Intenta de nuevo en ${timeUntilReset} minutos.`
+            : `Too many attempts. Try again in ${timeUntilReset} minutes.`
+        );
+      }
+
+      // Validate and sanitize form data
+      const validatedData = contactSchema.parse({
+        name: sanitizeText(formData.name),
+        email: formData.email,
+        subject: sanitizeText(formData.subject),
+        message: sanitizeText(formData.message)
+      });
+
+      // Additional security checks
+      if (validatedData.message.includes('http') || validatedData.message.includes('www.')) {
+        throw new Error(
+          language === 'es' 
+            ? 'El mensaje no puede contener enlaces.' 
+            : 'Message cannot contain links.'
+        );
+      }
 
       // Send email via Supabase edge function
       const { data, error } = await supabase.functions.invoke('send-contact-email', {
@@ -54,7 +95,7 @@ export const ContactForm = ({ className = '' }: ContactFormProps) => {
       });
 
       if (error) {
-        console.error('Error sending email:', error);
+        console.error('Error sending email:', error.message);
         throw new Error(error.message || 'Error al enviar el mensaje');
       }
 
@@ -74,7 +115,7 @@ export const ContactForm = ({ className = '' }: ContactFormProps) => {
       });
 
     } catch (error: any) {
-      console.error('Contact form error:', error);
+      console.error('Contact form error:', error.message);
       
       let errorMessage = language === 'es' 
         ? 'Error al enviar el mensaje. Por favor, intenta de nuevo.' 
@@ -82,6 +123,8 @@ export const ContactForm = ({ className = '' }: ContactFormProps) => {
 
       if (error instanceof z.ZodError) {
         errorMessage = error.errors[0].message;
+      } else if (error.message) {
+        errorMessage = error.message;
       }
 
       toast({

@@ -150,13 +150,6 @@ const AuthorProfile = ({ name, bio, books, image }: AuthorProfileProps) => {
                       >
                         {t('buyOnAmazon')}
                       </Button>
-                      <Button
-                        size="sm"
-                        variant="outline"
-                        onClick={() => handlePreview(book.title)}
-                      >
-                        {t('preview')}
-                      </Button>
                     </div>
                   )}
                 </div>

@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { Loader2, Search, ShoppingCart as ShoppingCartIcon, RefreshCw, AlertTriangle, Clock } from 'lucide-react';
+import { Loader2, Search, ShoppingCart as ShoppingCartIcon } from 'lucide-react';
 import Navigation from '@/components/Navigation';
 import { ProductCard } from '@/components/store/ProductCard';
 import { CategoryFilter } from '@/components/store/CategoryFilter';
@@ -24,20 +24,12 @@ const Store = () => {
   const [selectedCategory, setSelectedCategory] = useState<string>();
   const [searchQuery, setSearchQuery] = useState('');
   const [hasAttemptedSync, setHasAttemptedSync] = useState(false);
-  const [lastSyncTime, setLastSyncTime] = useState<string | null>(null);
-  const [priceDiscrepancies, setPriceDiscrepancies] = useState<any[]>([]);
-  const [showDiscrepancies, setShowDiscrepancies] = useState(false);
 
   useEffect(() => {
     fetchProducts();
     fetchCategories();
-    loadLastSyncTime();
   }, []);
 
-  const loadLastSyncTime = () => {
-    const stored = localStorage.getItem('lastProductSync');
-    setLastSyncTime(stored);
-  };
 
   const fetchProducts = async () => {
     try {
@@ -114,84 +106,7 @@ const Store = () => {
     navigate(`/store/product/${product.id}`);
   };
 
-  const handleSyncProducts = async () => {
-    setHasAttemptedSync(true);
-    setLoading(true);
-    try {
-      const { data, error } = await supabase.functions.invoke('sync-printify-products');
-      if (error) throw error;
-      
-      console.log('Sync result:', data);
-      const now = new Date().toISOString();
-      localStorage.setItem('lastProductSync', now);
-      setLastSyncTime(now);
-      
-      await fetchProducts(); // Refresh products list
-      
-      // Show success message with details
-      if (data?.deactivatedCount > 0) {
-        console.log(`Deactivated ${data.deactivatedCount} products that no longer exist in Printify`);
-      }
-    } catch (error) {
-      console.error('Error syncing products:', error);
-    } finally {
-      setLoading(false);
-    }
-  };
 
-  const checkPriceDiscrepancies = async () => {
-    try {
-      const { data, error } = await supabase.functions.invoke('check-price-discrepancies');
-      if (error) throw error;
-      
-      setPriceDiscrepancies(data.discrepancies || []);
-      setShowDiscrepancies(true);
-      console.log('Price discrepancies:', data);
-    } catch (error) {
-      console.error('Error checking price discrepancies:', error);
-    }
-  };
-
-  const cleanupProductData = async () => {
-    setLoading(true);
-    try {
-      const { data, error } = await supabase.functions.invoke('cleanup-product-data');
-      if (error) throw error;
-      
-      console.log('Cleanup result:', data);
-      await fetchProducts(); // Refresh products list
-      
-      alert(`Successfully cleaned up ${data.updatedCount} products`);
-    } catch (error) {
-      console.error('Error cleaning up product data:', error);
-      alert('Error cleaning up product data');
-    } finally {
-      setLoading(false);
-    }
-  };
-
-  const formatDate = (dateString: string) => {
-    return new Date(dateString).toLocaleString(language === 'es' ? 'es-ES' : 'en-US');
-  };
-
-  const formatPrice = (cents: number) => {
-    return (cents / 100).toFixed(2);
-  };
-
-  const handleManageProduct = async (productId: string, action: 'deactivate' | 'activate' | 'delete') => {
-    try {
-      const { data, error } = await supabase.functions.invoke('manage-product', {
-        body: { action, productId }
-      });
-      
-      if (error) throw error;
-      
-      console.log(`Product ${action}d successfully:`, data);
-      await fetchProducts(); // Refresh products list
-    } catch (error) {
-      console.error(`Error ${action}ing product:`, error);
-    }
-  };
 
   console.log('Store render - loading:', loading, 'products:', products.length);
   
@@ -259,49 +174,6 @@ const Store = () => {
           
         </div>
 
-        {/* Last Sync Time */}
-        {lastSyncTime && (
-          <div className="flex items-center gap-2 mb-4 text-sm text-muted-foreground">
-            <Clock className="h-4 w-4" />
-            {language === 'es' ? 'Última sincronización:' : 'Last sync:'} {formatDate(lastSyncTime)}
-          </div>
-        )}
-
-        {/* Price Discrepancies Alert */}
-        {showDiscrepancies && priceDiscrepancies.length > 0 && (
-          <div className="mb-6 p-4 border rounded-lg bg-yellow-50 dark:bg-yellow-900/20 border-yellow-200 dark:border-yellow-800">
-            <div className="flex items-start gap-3">
-              <AlertTriangle className="h-5 w-5 text-yellow-600 dark:text-yellow-400 mt-0.5" />
-              <div className="flex-1">
-                <h3 className="font-semibold text-yellow-800 dark:text-yellow-200 mb-2">
-                  {language === 'es' ? 'Discrepancias de precios encontradas' : 'Price discrepancies found'}
-                </h3>
-                <div className="space-y-2">
-                  {priceDiscrepancies.slice(0, 3).map((discrepancy, index) => (
-                    <div key={index} className="text-sm text-yellow-700 dark:text-yellow-300">
-                      <strong>{discrepancy.title?.es || discrepancy.title?.en || 'Product'}:</strong> 
-                      {' '}${formatPrice(discrepancy.database_price_cents)} → ${formatPrice(discrepancy.printify_min_price_cents)}
-                      {discrepancy.variant_count > 1 && ` (${discrepancy.variant_count} variants)`}
-                    </div>
-                  ))}
-                  {priceDiscrepancies.length > 3 && (
-                    <div className="text-sm text-yellow-700 dark:text-yellow-300">
-                      {language === 'es' ? `+${priceDiscrepancies.length - 3} más` : `+${priceDiscrepancies.length - 3} more`}
-                    </div>
-                  )}
-                </div>
-                <Button 
-                  onClick={() => setShowDiscrepancies(false)}
-                  variant="link" 
-                  size="sm"
-                  className="mt-2 p-0 h-auto text-yellow-700 dark:text-yellow-300"
-                >
-                  {language === 'es' ? 'Cerrar' : 'Close'}
-                </Button>
-              </div>
-            </div>
-          </div>
-        )}
 
         {/* Category Filter */}
         <CategoryFilter 
@@ -322,8 +194,8 @@ const Store = () => {
             {products.length === 0 && (
               <p className="text-muted-foreground text-sm mt-2">
                 {language === 'es' 
-                  ? 'Haz clic en "Sincronizar productos" para cargar los productos desde Printify.'
-                  : 'Click "Sync products" to load products from Printify.'
+                  ? 'No hay productos disponibles en este momento.'
+                  : 'No products available at this moment.'
                 }
               </p>
             )}

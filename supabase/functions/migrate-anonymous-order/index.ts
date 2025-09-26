@@ -61,9 +61,9 @@ serve(async (req) => {
     })
 
   } catch (err) {
-    console.error('Migration error:', err.message)
+    console.error('Migration error:', err instanceof Error ? err.message : String(err))
     return new Response(JSON.stringify({ 
-      error: err.message 
+      error: err instanceof Error ? err.message : 'Unknown error occurred'
     }), {
       headers: { ...corsHeaders, 'Content-Type': 'application/json' },
       status: 400,

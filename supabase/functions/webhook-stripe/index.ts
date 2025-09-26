@@ -48,7 +48,7 @@ serve(async (req) => {
       event = stripe.webhooks.constructEvent(body, signature, webhookSecret)
       console.log('Webhook event constructed successfully:', event.type)
     } catch (webhookError) {
-      console.error('Webhook signature verification failed:', webhookError.message)
+      console.error('Webhook signature verification failed:', webhookError instanceof Error ? webhookError.message : String(webhookError))
       return new Response(JSON.stringify({ error: 'Webhook signature verification failed' }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 400,
@@ -129,10 +129,10 @@ serve(async (req) => {
             }
 
             const productsWithInfo = orderItems?.map(item => ({
-              product_name: item.products?.title?.es || item.products?.title?.en || 'Producto',
+              product_name: (item.products as any)?.title?.es || (item.products as any)?.title?.en || 'Producto',
               quantity: item.quantity,
               unit_price_cents: item.unit_price_cents,
-              image_url: item.products?.images?.[0] || null
+              image_url: (item.products as any)?.images?.[0] || null
             })) || []
 
             // Usar supabase.functions.invoke en lugar de fetch directo
@@ -203,10 +203,12 @@ serve(async (req) => {
     })
 
   } catch (err) {
-    console.error('Webhook error:', err.message, err.stack)
+    const errorMsg = err instanceof Error ? err.message : String(err);
+    const errorStack = err instanceof Error ? err.stack : '';
+    console.error('Webhook error:', errorMsg, errorStack)
     
     // For webhook signature errors, return 400
-    if (err.message.includes('signature') || err.message.includes('timestamp')) {
+    if (errorMsg.includes('signature') || errorMsg.includes('timestamp')) {
       return new Response(JSON.stringify({ error: 'Webhook signature verification failed' }), {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 400,

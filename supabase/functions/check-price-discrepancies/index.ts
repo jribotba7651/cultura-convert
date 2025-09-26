@@ -85,10 +85,10 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Create a map for quick lookup
     const printifyMap = new Map();
-    printifyProducts.forEach(product => {
-      const availableVariants = (product.variants || []).filter(v => v.available);
+    printifyProducts.forEach((product: any) => {
+      const availableVariants = (product.variants || []).filter((v: any) => v.available);
       if (availableVariants.length > 0) {
-        const prices = availableVariants.map(v => {
+        const prices = availableVariants.map((v: any) => {
           const rawPrice = v.price ?? 15.99;
           return Number.isFinite(rawPrice)
             ? ((Number.isInteger(rawPrice) && rawPrice >= 100)
@@ -106,8 +106,8 @@ const handler = async (req: Request): Promise<Response> => {
     });
 
     // Check for discrepancies
-    const discrepancies = [];
-    const missingInPrintify = [];
+    const discrepancies: any[] = [];
+    const missingInPrintify: any[] = [];
 
     dbProducts.forEach(dbProduct => {
       if (!dbProduct.printify_product_id) return;

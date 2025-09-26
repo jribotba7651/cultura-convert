@@ -109,7 +109,7 @@ const handler = async (req: Request): Promise<Response> => {
       .eq('is_active', true)
       .not('printify_product_id', 'is', null);
 
-    const printifyProductIds = new Set(printifyProducts.map(p => p.id));
+    const printifyProductIds = new Set(printifyProducts.map((p: any) => p.id));
     const deletedProducts = (currentProducts || []).filter(
       p => p.printify_product_id && !printifyProductIds.has(p.printify_product_id)
     );
@@ -221,7 +221,7 @@ const handler = async (req: Request): Promise<Response> => {
         console.log(`Product ${detailedProduct.title} has ${availableVariants.length} available variants`);
 
         // Normalize all variant prices to cents
-        const normalizedVariants = availableVariants.map(variant => {
+        const normalizedVariants = availableVariants.map((variant: any) => {
           const rawPrice = variant.price ?? 15.99;
           const normalized_price_cents = Number.isFinite(rawPrice)
             ? ((Number.isInteger(rawPrice) && (rawPrice as number) >= 100)
@@ -236,8 +236,8 @@ const handler = async (req: Request): Promise<Response> => {
         });
 
         // Get minimum price from available variants for product base price
-        const minPrice = Math.min(...normalizedVariants.map(v => v.price));
-        const maxPrice = Math.max(...normalizedVariants.map(v => v.price));
+        const minPrice = Math.min(...normalizedVariants.map((v: any) => v.price));
+        const maxPrice = Math.max(...normalizedVariants.map((v: any) => v.price));
 
         const productData = {
           printify_product_id: product.id,
@@ -252,7 +252,7 @@ const handler = async (req: Request): Promise<Response> => {
           category_id: categoryId,
           price_cents: minPrice,
           compare_at_price_cents: maxPrice > minPrice ? maxPrice : Math.round(minPrice * 1.2),
-          images: (detailedProduct.images || []).map(img => typeof img === 'string' ? img : img.src).filter(Boolean),
+          images: (detailedProduct.images || []).map((img: any) => typeof img === 'string' ? img : img.src).filter(Boolean),
           variants: normalizedVariants,
           tags: detailedProduct.tags || ['puerto rico', 'artisanal'],
           is_active: true,

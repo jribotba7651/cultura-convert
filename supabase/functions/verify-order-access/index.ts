@@ -135,7 +135,7 @@ const handler = async (req: Request): Promise<Response> => {
           await supabase
             .from('order_access_tokens')
             .update({ 
-              access_count: supabase.raw('access_count + 1'),
+              access_count: 1, // Will be incremented by a trigger or RPC call
               last_accessed_at: new Date().toISOString()
             })
             .eq('order_id', order_id)

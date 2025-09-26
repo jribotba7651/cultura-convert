@@ -66,7 +66,7 @@ const handler = async (req: Request): Promise<Response> => {
           first_product_basic: firstProduct,
           first_product_detailed: detailedProduct,
           detailed_variants_count: detailedProduct.variants?.length || 0,
-          detailed_available_variants: detailedProduct.variants?.filter(v => v.available).length || 0,
+          detailed_available_variants: detailedProduct.variants?.filter((v: any) => v.available).length || 0,
           detailed_images_count: detailedProduct.images?.length || 0,
           detailed_images: detailedProduct.images || []
         }, null, 2),

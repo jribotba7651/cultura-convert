@@ -3,6 +3,7 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { blogPosts } from "@/data/blogPosts";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
+import { AdSenseAd } from "@/components/AdSenseAd";
 import { ArrowLeft } from "lucide-react";
 import Navigation from "@/components/Navigation";
 
@@ -67,6 +68,9 @@ const BlogPost = () => {
             </div>
           </header>
 
+          {/* Ad at article start */}
+          <AdSenseAd adSlot="3456789012" adFormat="rectangle" className="my-6" />
+
           <div className="text-foreground leading-relaxed space-y-6">
             {post.content[language].split('\n\n').map((paragraph, index) => (
               <p key={index} className="text-lg">
@@ -74,6 +78,9 @@ const BlogPost = () => {
               </p>
             ))}
           </div>
+
+          {/* Ad at article end */}
+          <AdSenseAd adSlot="4567890123" adFormat="horizontal" className="my-6" />
         </article>
 
         <div className="mt-12 pt-8 border-t border-border">

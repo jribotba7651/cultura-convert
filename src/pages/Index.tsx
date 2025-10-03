@@ -1,6 +1,7 @@
 import AuthorProfile from "@/components/AuthorProfile";
 import Navigation from "@/components/Navigation";
 import { ContactForm } from "@/components/ContactForm";
+import { AdSenseAd } from "@/components/AdSenseAd";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Book } from "@/types/Book";
 import juanProfileImage from "@/assets/juan-c-ribot-profile.jpg";
@@ -78,6 +79,11 @@ const Index = () => {
         </div>
       </section>
 
+      {/* Ad after hero */}
+      <div className="max-w-4xl mx-auto px-4 py-8">
+        <AdSenseAd adSlot="1234567890" adFormat="auto" className="my-4" />
+      </div>
+
       {/* Authors Section */}
       <section className="authors py-16 px-4">
         <div className="max-w-6xl mx-auto">
@@ -92,6 +98,12 @@ const Index = () => {
               books={rosnelmaBooks}
               image={rosnelmaProfileImage}
             />
+            
+            {/* Ad between authors */}
+            <div className="py-4">
+              <AdSenseAd adSlot="2345678901" adFormat="horizontal" className="my-4" />
+            </div>
+            
             <AuthorProfile
               name="Juan C. Ribot Guzmán"
               bio={{

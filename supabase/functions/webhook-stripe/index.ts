@@ -135,7 +135,7 @@ serve(async (req) => {
               image_url: (item.products as any)?.images?.[0] || null
             })) || []
 
-            // Usar supabase.functions.invoke en lugar de fetch directo
+            // Send customer confirmation email
             const { data: emailData, error: emailError } = await supabase.functions.invoke('send-auth-email', {
               body: {
                 type: 'order_confirmation',
@@ -152,9 +152,37 @@ serve(async (req) => {
             })
 
             if (emailError) {
-              console.error('Error sending email via function:', emailError)
+              console.error('Error sending customer confirmation email:', emailError)
             } else {
-              console.log('Confirmation email sent successfully:', emailData)
+              console.log('Customer confirmation email sent successfully:', emailData)
+            }
+
+            // Send admin notification email
+            const shippingAddress = order.shipping_address || {}
+            const billingAddress = order.billing_address || {}
+            
+            const { data: adminEmailData, error: adminEmailError } = await supabase.functions.invoke('send-auth-email', {
+              body: {
+                type: 'admin_new_order',
+                email: 'jribot@gmail.com',
+                data: {
+                  customerName: customerName || 'Cliente',
+                  customerEmail: customerEmail,
+                  customerPhone: order.customer_phone || 'No proporcionado',
+                  orderId: order.id,
+                  amount: (paymentIntent.amount / 100).toFixed(2),
+                  items: productsWithInfo,
+                  orderDate: new Date().toLocaleDateString('es-PR'),
+                  shippingAddress,
+                  billingAddress
+                }
+              }
+            })
+
+            if (adminEmailError) {
+              console.error('Error sending admin notification email:', adminEmailError)
+            } else {
+              console.log('Admin notification email sent successfully:', adminEmailData)
             }
           } else {
             console.log('No customer email found for order:', order.id)

@@ -10,6 +10,126 @@ const corsHeaders = {
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',
 };
 
+// HTML template for admin new order notification
+const getAdminNewOrderHTML = (data: any) => {
+  const { customerName, customerEmail, customerPhone, orderId, amount, items, orderDate, shippingAddress, billingAddress } = data;
+  
+  const itemsList = items?.map((item: any) => `
+    <tr>
+      <td style="padding: 12px; border-bottom: 1px solid #eee;">
+        ${item.image_url ? `<img src="${item.image_url}" alt="${item.product_name}" style="width: 50px; height: 50px; object-fit: cover; margin-right: 10px; border-radius: 4px; vertical-align: middle;">` : ''}
+        <strong>${item.product_name || 'Producto'}</strong><br>
+        <small>Cantidad: ${item.quantity}</small>
+      </td>
+      <td style="padding: 12px; border-bottom: 1px solid #eee; text-align: right;">
+        $${((item.unit_price_cents || 0) / 100).toFixed(2)}
+      </td>
+    </tr>
+  `).join('') || '';
+
+  const formatAddress = (addr: any) => {
+    if (!addr) return 'No proporcionada';
+    return `
+      ${addr.name || ''}<br>
+      ${addr.line1 || ''}<br>
+      ${addr.line2 ? `${addr.line2}<br>` : ''}
+      ${addr.city || ''}, ${addr.state || ''} ${addr.postal_code || ''}<br>
+      ${addr.country || ''}
+    `;
+  };
+
+  return `
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Nueva Orden Recibida</title>
+    <style>
+        body { font-family: Arial, sans-serif; background-color: #f5f5f5; margin: 0; padding: 0; }
+        .container { max-width: 700px; margin: 20px auto; background-color: white; border-radius: 10px; overflow: hidden; box-shadow: 0 4px 20px rgba(0,0,0,0.1); }
+        .header { background: linear-gradient(135deg, #10b981, #059669); color: white; padding: 30px; text-align: center; }
+        .content { padding: 30px; }
+        .info-box { background: #f8f9fa; padding: 20px; border-radius: 8px; margin: 20px 0; }
+        .products-table { width: 100%; border-collapse: collapse; margin: 20px 0; }
+        .footer { background-color: #f8f9fa; padding: 20px; text-align: center; font-size: 12px; color: #666; }
+        .alert { background: #e8f4fd; padding: 15px; border-radius: 8px; border-left: 4px solid #2563eb; margin: 20px 0; }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <div class="header">
+            <h1 style="margin: 0;">🎉 Nueva Orden Recibida</h1>
+            <p style="margin: 10px 0 0 0; opacity: 0.9;">Orden #${orderId}</p>
+        </div>
+        <div class="content">
+            <div class="info-box">
+                <h2 style="margin-top: 0; color: #1f2937;">Información del Cliente</h2>
+                <table style="width: 100%;">
+                    <tr>
+                        <td style="padding: 8px 0; font-weight: bold; width: 150px;">Nombre:</td>
+                        <td style="padding: 8px 0;">${customerName}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px 0; font-weight: bold;">Email:</td>
+                        <td style="padding: 8px 0;">${customerEmail}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px 0; font-weight: bold;">Teléfono:</td>
+                        <td style="padding: 8px 0;">${customerPhone}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px 0; font-weight: bold;">Fecha:</td>
+                        <td style="padding: 8px 0;">${orderDate}</td>
+                    </tr>
+                    <tr>
+                        <td style="padding: 8px 0; font-weight: bold; font-size: 18px; color: #10b981;">Total:</td>
+                        <td style="padding: 8px 0; font-weight: bold; font-size: 18px; color: #10b981;">$${amount}</td>
+                    </tr>
+                </table>
+            </div>
+
+            <h2 style="color: #1f2937; border-bottom: 2px solid #10b981; padding-bottom: 10px;">Productos Ordenados</h2>
+            <table class="products-table">
+              ${itemsList}
+            </table>
+
+            <div class="info-box">
+                <h3 style="margin-top: 0; color: #1f2937;">📦 Dirección de Envío</h3>
+                <div style="line-height: 1.8;">
+                    ${formatAddress(shippingAddress)}
+                </div>
+            </div>
+
+            <div class="alert">
+                <h4 style="margin-top: 0; color: #1976d2;">📋 Próximos Pasos</h4>
+                <ol style="margin: 10px 0; padding-left: 20px;">
+                    <li>Preparar el libro autografiado personalizado</li>
+                    <li>Entrar al panel de admin para actualizar el status</li>
+                    <li>Marcar como "processing" mientras se prepara</li>
+                    <li>Agregar número de tracking cuando se envíe</li>
+                    <li>Marcar como "shipped" (se enviará email automático al cliente)</li>
+                </ol>
+            </div>
+
+            <div style="text-align: center; margin: 30px 0;">
+                <a href="https://cultura-convert.lovable.app/admin/orders" style="display: inline-block; background: linear-gradient(135deg, #2d5a87, #1e3a5f); color: white; padding: 15px 30px; text-decoration: none; border-radius: 25px; font-weight: bold;">
+                    Ver en Panel de Admin
+                </a>
+            </div>
+        </div>
+        <div class="footer">
+            <p><strong>Sistema de Órdenes - Jíbaro en la Luna</strong></p>
+            <p style="margin-top: 10px;">
+                Este es un email automático de notificación.
+            </p>
+        </div>
+    </div>
+</body>
+</html>
+  `;
+};
+
 // HTML template for confirmation email
 const getConfirmationEmailHTML = (token: string, supabaseUrl: string, redirectTo: string, tokenHash: string) => `
 <!DOCTYPE html>
@@ -258,6 +378,31 @@ const handler = async (req: Request): Promise<Response> => {
       });
 
       console.log('Order confirmation email sent:', emailResponse);
+
+      return new Response(JSON.stringify({ success: true, data: emailResponse }), {
+        status: 200,
+        headers: {
+          'Content-Type': 'application/json',
+          ...corsHeaders,
+        },
+      });
+    }
+
+    // Check if this is an admin new order notification (direct call)
+    if (data.type === 'admin_new_order') {
+      console.log('Processing admin new order notification email');
+      
+      const { email, data: orderData } = data;
+      const emailHtml = getAdminNewOrderHTML(orderData);
+      
+      const emailResponse = await resend.emails.send({
+        from: 'Sistema de Órdenes <noreply@resend.dev>',
+        to: [email],
+        subject: `🎉 Nueva Orden - ${orderData.customerName} ($${orderData.amount})`,
+        html: emailHtml,
+      });
+
+      console.log('Admin notification email sent:', emailResponse);
 
       return new Response(JSON.stringify({ success: true, data: emailResponse }), {
         status: 200,

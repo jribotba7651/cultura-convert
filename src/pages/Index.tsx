@@ -10,9 +10,20 @@ import jibaraEnLaLunaCover from "@/assets/jibara-en-la-luna-cover.jpg";
 import lasAventurasLunaAvoCover from "@/assets/las-aventuras-luna-avo-cover.jpg";
 import sofiaMariePalomaCover from "@/assets/sofia-marie-paloma-cover.jpg";
 import cartasDeNewarkCover from "@/assets/cartas-de-newark-cover.jpg";
+import raicesEnTierraAjenaCover from "@/assets/raices-en-tierra-ajena-cover.jpg";
 
 // Datos de ejemplo para los libros de Juan C. Ribot Guzmán
 const juanBooks: Book[] = [
+  {
+    title: "Raíces En Tierra Ajena",
+    description: {
+      es: "Una historia poderosa sobre familia, supervivencia y esperanza en la América dividida de hoy. Los Ramírez sacrificaron todo por el sueño americano. Ahora viven con miedo diario en Kenner, Louisiana. Al otro lado de la calle viven los Davis. Familia blanca, republicana, con sus propios prejuicios y certezas. Dos mundos separados por más que una cerca de jardín. Pero cuando las amistades inesperadas florecen entre los hijos, todo cambia. Una novela sobre identidad, exilio y la fuerza transformadora del amor humano. Perfecta para lectores de Jeanine Cummins, Julia Alvarez y Reyna Grande.",
+      en: "A powerful story about family, survival, and hope in today's divided America. The Ramírez family sacrificed everything for the American dream. Now they live in daily fear in Kenner, Louisiana. Across the street live the Davis family. White, Republican, with their own prejudices and certainties. Two worlds separated by more than a garden fence. But when unexpected friendships bloom between the children, everything changes. A novel about identity, exile, and the transformative power of human love. Perfect for readers of Jeanine Cummins, Julia Alvarez, and Reyna Grande."
+    },
+    status: "published" as const,
+    amazonUrl: "https://a.co/d/d47VqsO",
+    coverImage: raicesEnTierraAjenaCover,
+  },
   {
     title: "Cartas de Newark",
     description: {

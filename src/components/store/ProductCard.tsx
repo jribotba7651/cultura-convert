@@ -9,6 +9,32 @@ import { Product } from '@/types/Store';
 import { useToast } from '@/hooks/use-toast';
 import { truncateText } from '@/utils/htmlCleaner';
 
+// Import book cover images
+import raicesCover from '@/assets/raices-en-tierra-ajena-cover.jpg';
+import sofiaCover from '@/assets/sofia-marie-paloma-cover.jpg';
+import jibaraCover from '@/assets/jibara-en-la-luna-cover.jpg';
+import cartasCover from '@/assets/cartas-de-newark-cover.jpg';
+
+// Helper to resolve image paths
+const resolveImagePath = (path: string): string => {
+  if (!path) return '/placeholder.svg';
+  
+  // If it's already a full URL (e.g., from Printify), return as-is
+  if (path.startsWith('http://') || path.startsWith('https://')) {
+    return path;
+  }
+  
+  // Map /src/assets paths to imported images
+  const imageMap: Record<string, string> = {
+    '/src/assets/raices-en-tierra-ajena-cover.jpg': raicesCover,
+    '/src/assets/sofia-marie-paloma-cover.jpg': sofiaCover,
+    '/src/assets/jibara-en-la-luna-cover.jpg': jibaraCover,
+    '/src/assets/cartas-de-newark-cover.jpg': cartasCover,
+  };
+  
+  return imageMap[path] || '/placeholder.svg';
+};
+
 interface ProductCardProps {
   product: Product;
   onProductClick?: (product: Product) => void;
@@ -54,7 +80,8 @@ export const ProductCard = ({ product, onProductClick }: ProductCardProps) => {
       <CardContent className="p-0">
         <div className="relative overflow-hidden rounded-t-lg">
           {(() => {
-            const primaryImage = product.images?.[0] || product.printify_data?.images?.[0]?.src || '/placeholder.svg';
+            const rawImage = product.images?.[0] || product.printify_data?.images?.[0]?.src || '/placeholder.svg';
+            const primaryImage = resolveImagePath(rawImage);
             return (
               <img
                 src={primaryImage}

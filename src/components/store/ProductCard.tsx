@@ -87,7 +87,7 @@ export const ProductCard = ({ product, onProductClick }: ProductCardProps) => {
                 src={primaryImage}
                 alt={`${product.title[language]} product image`}
                 loading="lazy"
-                className="w-full h-64 object-cover transition-transform duration-300 group-hover:scale-105"
+                className="w-full h-64 object-contain bg-muted transition-transform duration-300 group-hover:scale-105"
               />
             );
           })()}

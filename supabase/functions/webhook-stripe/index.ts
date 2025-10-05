@@ -148,6 +148,9 @@ serve(async (req) => {
                   orderDate: new Date().toLocaleDateString('es-PR'),
                   trackingUrl: `https://cultura-convert.lovable.app/order-confirmation/${order.id}`
                 }
+              },
+              headers: {
+                Authorization: `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`
               }
             })
 
@@ -176,6 +179,9 @@ serve(async (req) => {
                   shippingAddress,
                   billingAddress
                 }
+              },
+              headers: {
+                Authorization: `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`
               }
             })
 

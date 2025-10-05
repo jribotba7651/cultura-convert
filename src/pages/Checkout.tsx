@@ -191,6 +191,7 @@ const CheckoutForm = () => {
   const [paymentRequest, setPaymentRequest] = useState(null);
   
   const [loading, setLoading] = useState(false);
+  const [applePayProcessing, setApplePayProcessing] = useState(false);
   const [addressErrors, setAddressErrors] = useState<{[key: string]: string[]}>({});
   const [addressWarnings, setAddressWarnings] = useState<{[key: string]: string[]}>({});
   const [formData, setFormData] = useState<CheckoutFormData>({
@@ -232,6 +233,7 @@ const CheckoutForm = () => {
   // Initialize Payment Request for Apple Pay/Google Pay
   useEffect(() => {
     if (stripe) {
+      console.log('🍎 Initializing Apple Pay/Google Pay Payment Request');
       const pr = stripe.paymentRequest({
         country: 'US',
         currency: 'usd',
@@ -256,21 +258,54 @@ const CheckoutForm = () => {
       // Check if Payment Request is available
       pr.canMakePayment().then((result) => {
         if (result) {
+          console.log('✅ Apple Pay/Google Pay is available:', result);
           setPaymentRequest(pr);
+        } else {
+          console.log('❌ Apple Pay/Google Pay is NOT available on this device');
         }
+      }).catch((error) => {
+        console.error('❌ Error checking Apple Pay availability:', error);
+      });
+
+      // Handle shipping address change to update total dynamically
+      pr.on('shippingaddresschange', (ev) => {
+        console.log('📍 Shipping address changed:', ev.shippingAddress);
+        
+        // You can update shipping options based on address here
+        ev.updateWith({
+          status: 'success',
+          shippingOptions: [
+            {
+              id: 'standard',
+              label: language === 'es' ? 'Envío estándar' : 'Standard Shipping',
+              detail: language === 'es' ? '5-7 días laborales' : '5-7 business days',
+              amount: shippingCost,
+            },
+          ],
+        });
       });
 
       pr.on('paymentmethod', async (ev) => {
+        console.log('💳 Apple Pay payment method received');
+        setApplePayProcessing(true);
+        
         try {
-          // Set form data from Payment Request
+          // Validate and extract shipping address
           const shippingAddress = {
             line1: ev.shippingAddress?.addressLine?.[0] || '',
             line2: ev.shippingAddress?.addressLine?.[1] || '',
             city: ev.shippingAddress?.city || '',
             state: ev.shippingAddress?.region || '',
             postal_code: ev.shippingAddress?.postalCode || '',
-            country: ev.shippingAddress?.country || 'US',
+            country: ev.shippingAddress?.country?.toUpperCase() || 'US',
           };
+
+          // Validate required fields
+          if (!shippingAddress.line1 || !shippingAddress.city || !shippingAddress.postal_code) {
+            throw new Error(language === 'es' 
+              ? 'Dirección de envío incompleta' 
+              : 'Incomplete shipping address');
+          }
 
           const updatedFormData = {
             email: ev.payerEmail || '',
@@ -280,6 +315,8 @@ const CheckoutForm = () => {
             billingAddress: shippingAddress,
             sameAsShipping: true,
           };
+
+          console.log('📦 Creating payment intent for Apple Pay order');
 
           // Create payment intent
           const { data, error } = await supabase.functions.invoke('create-stripe-payment-intent', {
@@ -303,7 +340,12 @@ const CheckoutForm = () => {
             }
           });
 
-          if (error) throw error;
+          if (error) {
+            console.error('❌ Payment intent creation error:', error);
+            throw error;
+          }
+
+          console.log('✅ Payment intent created, confirming payment...');
 
           // Confirm payment
           const { error: confirmError } = await stripe.confirmCardPayment(
@@ -313,13 +355,16 @@ const CheckoutForm = () => {
           );
 
           if (confirmError) {
+            console.error('❌ Payment confirmation error:', confirmError);
             ev.complete('fail');
             toast({
               title: language === 'es' ? 'Error en el pago' : 'Payment error',
               description: confirmError.message,
               variant: 'destructive',
             });
+            setApplePayProcessing(false);
           } else {
+            console.log('✅ Payment successful! Order ID:', data.order_id);
             ev.complete('success');
             clearCart();
             
@@ -334,16 +379,25 @@ const CheckoutForm = () => {
                 ? 'Tu pedido ha sido procesado correctamente.'
                 : 'Your order has been processed successfully.',
             });
+            
+            setApplePayProcessing(false);
             navigate(`/order-confirmation/${data.order_id}`);
           }
         } catch (error: any) {
+          console.error('❌ Apple Pay payment error:', error);
           ev.complete('fail');
-          console.error('Payment error:', error);
+          
+          const errorMessage = error.message || (language === 'es' 
+            ? 'Error procesando el pago con Apple Pay' 
+            : 'Error processing Apple Pay payment');
+          
           toast({
             title: language === 'es' ? 'Error en el pago' : 'Payment error',
-            description: error.message,
+            description: errorMessage,
             variant: 'destructive',
           });
+          
+          setApplePayProcessing(false);
         }
       });
     }

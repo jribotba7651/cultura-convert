@@ -21,9 +21,7 @@ const supabase = createClient(
   }
 );
 
-const stripe = new Stripe(Deno.env.get('STRIPE_SECRET_KEY') ?? '', {
-  apiVersion: '2023-10-16',
-});
+// Stripe client will be initialized inside the handler after validating the secret
 
 interface CartItem {
   id: string;
@@ -277,6 +275,17 @@ const handler = async (req: Request): Promise<Response> => {
         { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
+
+    // Extra safety: ensure we are not accidentally using the webhook secret
+    if (!stripeKey.startsWith('sk_')) {
+      console.error('STRIPE_SECRET_KEY appears misconfigured (expected to start with sk_)');
+      return new Response(
+        JSON.stringify({ error: 'Payment processor misconfigured (contact support)' }),
+        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
+    const stripe = new Stripe(stripeKey, { apiVersion: '2023-10-16' });
 
     if (!Number.isFinite(totalAmount) || totalAmount <= 0) {
       console.error('Invalid total amount for payment intent:', totalAmount);

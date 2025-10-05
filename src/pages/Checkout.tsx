@@ -1,7 +1,7 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { ArrowLeft, CreditCard, Loader2 } from 'lucide-react';
-import { loadStripe } from '@stripe/stripe-js';
+import { loadStripe, type Stripe } from '@stripe/stripe-js';
 import { Elements, CardElement, useStripe, useElements, PaymentRequestButtonElement } from '@stripe/react-stripe-js';
 import Navigation from '@/components/Navigation';
 import { Button } from '@/components/ui/button';
@@ -17,8 +17,8 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { sanitizeText, validateInput } from '@/utils/sanitize';
 import { validateAddress, formatZipCode } from '@/utils/addressValidation';
-
-const stripePromise = loadStripe(import.meta.env.VITE_STRIPE_PUBLISHABLE_KEY || 'pk_test_51QdK4IGfIcOJCKx4mhHTfOcE6lRN6yyF9sZUYi7YdktKGqzksQkGEJzPL5ZVEFhyO8KMCaVOHnfJPLhAhOLNJK2v00T5qdgVrR');
+// NOTE: We now fetch the publishable key from a secure Edge Function to avoid env mismatches
+let initialStripePromise: Promise<Stripe | null> | null = null;
 
 interface CheckoutFormData {
   email: string;
@@ -1112,6 +1112,35 @@ const CheckoutForm = () => {
 };
 
 const Checkout = () => {
+  const [stripePromise, setStripePromise] = useState<Promise<Stripe | null> | null>(initialStripePromise);
+
+  useEffect(() => {
+    let cancelled = false;
+    const load = async () => {
+      try {
+        // Fetch publishable key from Edge Function
+        const { data, error } = await supabase.functions.invoke('get-stripe-publishable-key');
+        if (error) throw error;
+        const key = (data as any)?.publishableKey;
+        if (typeof key === 'string' && key.startsWith('pk_')) {
+          const p = loadStripe(key);
+          if (!cancelled) setStripePromise(p);
+        } else {
+          // Fallback to test key if misconfigured
+          const p = loadStripe('pk_test_51QdK4IGfIcOJCKx4mhHTfOcE6lRN6yyF9sZUYi7YdktKGqzksQkGEJzPL5ZVEFhyO8KMCaVOHnfJPLhAhOLNJK2v00T5qdgVrR');
+          if (!cancelled) setStripePromise(p);
+        }
+      } catch (e) {
+        const p = loadStripe('pk_test_51QdK4IGfIcOJCKx4mhHTfOcE6lRN6yyF9sZUYi7YdktKGqzksQkGEJzPL5ZVEFhyO8KMCaVOHnfJPLhAhOLNJK2v00T5qdgVrR');
+        if (!cancelled) setStripePromise(p);
+      }
+    };
+    load();
+    return () => { cancelled = true; };
+  }, []);
+
+  if (!stripePromise) return null; // Avoid rendering until Stripe is ready
+
   return (
     <Elements stripe={stripePromise}>
       <CheckoutForm />

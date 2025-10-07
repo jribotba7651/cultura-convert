@@ -28,44 +28,50 @@ const queryClient = new QueryClient();
 
 const App = () => {
   console.log('App component rendering...');
-  return (
-  <ErrorBoundary>
-    <LanguageProvider>
-      <AuthProvider>
-        <SecurityProvider>
-          <CartProvider>
-            <QueryClientProvider client={queryClient}>
-              <TooltipProvider>
-              <Toaster />
-              <Sonner />
-              <BrowserRouter>
-                <ShoppingCart />
-                <Routes>
-                  <Route path="/" element={<Index />} />
-                  <Route path="/blog" element={<Blog />} />
-                  <Route path="/blog/:slug" element={<BlogPost />} />
-                  <Route path="/store" element={<Store />} />
-                  <Route path="/store/product/:id" element={<ProductDetails />} />
-                  <Route path="/services" element={<Services />} />
-                  <Route path="/checkout" element={<Checkout />} />
-                  <Route path="/order-confirmation/:orderId" element={<OrderConfirmation />} />
-                  <Route path="/auth" element={<Auth />} />
-                  <Route path="/mis-pedidos" element={<MyOrders />} />
-                  <Route path="/admin/orders" element={<AdminOrders />} />
-                  <Route path="/admin/analytics" element={<AdminAnalytics />} />
-                  <Route path="/test" element={<TestComponent />} />
-                  {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                  <Route path="*" element={<NotFound />} />
-                </Routes>
-              </BrowserRouter>
-              </TooltipProvider>
-            </QueryClientProvider>
-          </CartProvider>
-        </SecurityProvider>
-      </AuthProvider>
-    </LanguageProvider>
-  </ErrorBoundary>
-  );
+  
+  try {
+    return (
+    <ErrorBoundary>
+      <LanguageProvider>
+        <AuthProvider>
+          <SecurityProvider>
+            <CartProvider>
+              <QueryClientProvider client={queryClient}>
+                <TooltipProvider>
+                <Toaster />
+                <Sonner />
+                <BrowserRouter>
+                  <ShoppingCart />
+                  <Routes>
+                    <Route path="/" element={<Index />} />
+                    <Route path="/blog" element={<Blog />} />
+                    <Route path="/blog/:slug" element={<BlogPost />} />
+                    <Route path="/store" element={<Store />} />
+                    <Route path="/store/product/:id" element={<ProductDetails />} />
+                    <Route path="/services" element={<Services />} />
+                    <Route path="/checkout" element={<Checkout />} />
+                    <Route path="/order-confirmation/:orderId" element={<OrderConfirmation />} />
+                    <Route path="/auth" element={<Auth />} />
+                    <Route path="/mis-pedidos" element={<MyOrders />} />
+                    <Route path="/admin/orders" element={<AdminOrders />} />
+                    <Route path="/admin/analytics" element={<AdminAnalytics />} />
+                    <Route path="/test" element={<TestComponent />} />
+                    {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+                    <Route path="*" element={<NotFound />} />
+                  </Routes>
+                </BrowserRouter>
+                </TooltipProvider>
+              </QueryClientProvider>
+            </CartProvider>
+          </SecurityProvider>
+        </AuthProvider>
+      </LanguageProvider>
+    </ErrorBoundary>
+    );
+  } catch (error) {
+    console.error('CRITICAL ERROR in App component:', error);
+    throw error;
+  }
 };
 
 export default App;

@@ -4,6 +4,7 @@ import { useAuth } from '@/contexts/AuthContext';
 import Navigation from '@/components/Navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
+import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
@@ -39,6 +40,7 @@ const AdminAnalytics = () => {
   const [bounceRate, setBounceRate] = useState(0);
   const [deviceData, setDeviceData] = useState<DeviceData[]>([]);
   const [topPages, setTopPages] = useState<PageData[]>([]);
+  const [usingMock, setUsingMock] = useState(false);
 
   useEffect(() => {
     // Check if user is admin
@@ -89,8 +91,7 @@ const AdminAnalytics = () => {
     } catch (error) {
       console.error('Error fetching analytics:', error);
       toast.error('Error al cargar los datos de analytics');
-      
-      // Mock data for development
+      setUsingMock(true);
       setMockData();
     } finally {
       setLoading(false);
@@ -98,9 +99,9 @@ const AdminAnalytics = () => {
   };
 
   const processAnalyticsData = (data: any) => {
+    setUsingMock(false);
     // This would process real data from your analytics endpoint
     // For now, using the data structure from the analytics tool
-    
     // Transform daily data for chart
     const chartData: AnalyticsData[] = [];
     let visitors = 0;
@@ -146,40 +147,45 @@ const AdminAnalytics = () => {
   };
 
   const setMockData = () => {
-    // Mock data based on the real data we fetched earlier
-    const mockChartData: AnalyticsData[] = [
-      { date: 'Sep 7', visitors: 2, pageViews: 8 },
-      { date: 'Sep 8', visitors: 0, pageViews: 0 },
-      { date: 'Sep 9', visitors: 1, pageViews: 4 },
-      { date: 'Sep 10', visitors: 2, pageViews: 7 },
-      { date: 'Sep 11', visitors: 8, pageViews: 30 },
-      { date: 'Sep 12', visitors: 5, pageViews: 19 },
-      { date: 'Sep 13', visitors: 12, pageViews: 45 },
-      { date: 'Sep 14', visitors: 6, pageViews: 22 },
-      { date: 'Sep 15', visitors: 4, pageViews: 15 },
-      { date: 'Sep 16', visitors: 32, pageViews: 120 },
-      { date: 'Sep 17', visitors: 8, pageViews: 30 },
-      { date: 'Sep 18', visitors: 3, pageViews: 11 },
-    ];
+    const endDate = new Date();
+    const days = timeRange === '7d' ? 7 : timeRange === '90d' ? 90 : 30;
+
+    const mockChartData: AnalyticsData[] = [];
+    let visitorsTotal = 0;
+    let pageViewsTotal = 0;
+
+    for (let i = days - 1; i >= 0; i--) {
+      const d = new Date(endDate);
+      d.setDate(endDate.getDate() - i);
+      const visitors = Math.floor(Math.random() * 20);
+      const pageViews = visitors * (2 + Math.floor(Math.random() * 4));
+      mockChartData.push({
+        date: d.toLocaleDateString('es-ES', { month: 'short', day: 'numeric' }),
+        visitors,
+        pageViews,
+      });
+      visitorsTotal += visitors;
+      pageViewsTotal += pageViews;
+    }
 
     setAnalyticsData(mockChartData);
-    setTotalVisitors(66);
-    setTotalPageViews(246);
-    setAvgSessionDuration(11);
+    setTotalVisitors(visitorsTotal);
+    setTotalPageViews(pageViewsTotal);
+    setAvgSessionDuration(Math.max(1, Math.round((pageViewsTotal / Math.max(1, visitorsTotal)) * 2.5)));
     setBounceRate(32);
-    
+
     setDeviceData([
-      { name: 'Desktop', value: 44 },
-      { name: 'Móvil iOS', value: 21 },
-      { name: 'Otros', value: 1 }
+      { name: 'Desktop', value: Math.round(visitorsTotal * 0.67) },
+      { name: 'Móvil iOS', value: Math.round(visitorsTotal * 0.32) },
+      { name: 'Otros', value: Math.round(visitorsTotal * 0.01) }
     ]);
 
     setTopPages([
-      { page: '/', views: 110, visitors: 26 },
-      { page: '/store', views: 62, visitors: 20 },
-      { page: '/services', views: 37, visitors: 10 },
-      { page: '/blog', views: 25, visitors: 7 },
-      { page: '/otros', views: 12, visitors: 3 }
+      { page: '/', views: Math.round(pageViewsTotal * 0.45), visitors: Math.round(visitorsTotal * 0.40) },
+      { page: '/store', views: Math.round(pageViewsTotal * 0.25), visitors: Math.round(visitorsTotal * 0.30) },
+      { page: '/services', views: Math.round(pageViewsTotal * 0.15), visitors: Math.round(visitorsTotal * 0.15) },
+      { page: '/blog', views: Math.round(pageViewsTotal * 0.10), visitors: Math.round(visitorsTotal * 0.10) },
+      { page: '/otros', views: Math.round(pageViewsTotal * 0.05), visitors: Math.round(visitorsTotal * 0.05) }
     ]);
   };
 
@@ -231,6 +237,15 @@ const AdminAnalytics = () => {
               </SelectContent>
             </Select>
           </div>
+
+          {usingMock && (
+            <Alert variant="destructive" className="mt-4">
+              <AlertTitle>Mostrando datos de ejemplo</AlertTitle>
+              <AlertDescription>
+                No pudimos conectar con el servicio de analytics en tiempo real. Estoy revisando la conexión.
+              </AlertDescription>
+            </Alert>
+          )}
         </div>
 
         {/* Key Metrics */}

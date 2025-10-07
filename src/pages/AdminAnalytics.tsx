@@ -56,43 +56,19 @@ const AdminAnalytics = () => {
   const fetchAnalytics = async () => {
     setLoading(true);
     try {
-      // Calculate date range
-      const endDate = new Date();
-      const startDate = new Date();
-      
-      switch (timeRange) {
-        case '7d':
-          startDate.setDate(endDate.getDate() - 7);
-          break;
-        case '30d':
-          startDate.setDate(endDate.getDate() - 30);
-          break;
-        case '90d':
-          startDate.setDate(endDate.getDate() - 90);
-          break;
-      }
-
-      const response = await fetch(
-        `https://ifctpzrmqcpqtgwepvoq.supabase.co/functions/v1/get-analytics?` +
-        `startdate=${startDate.toISOString().split('T')[0]}&` +
-        `enddate=${endDate.toISOString().split('T')[0]}&` +
-        `granularity=daily`
-      );
-
-      if (!response.ok) {
-        throw new Error('Error al obtener analytics');
-      }
-
-      const data = await response.json();
-      
-      // Process the data
-      processAnalyticsData(data);
-      
+      // No hay datos de analytics disponibles para este proyecto
+      // Mostrar estado de "sin datos" en lugar de datos ficticios
+      setUsingMock(true);
+      setAnalyticsData([]);
+      setTotalVisitors(0);
+      setTotalPageViews(0);
+      setAvgSessionDuration(0);
+      setBounceRate(0);
+      setDeviceData([]);
+      setTopPages([]);
     } catch (error) {
       console.error('Error fetching analytics:', error);
       toast.error('Error al cargar los datos de analytics');
-      setUsingMock(true);
-      setMockData();
     } finally {
       setLoading(false);
     }
@@ -239,10 +215,10 @@ const AdminAnalytics = () => {
           </div>
 
           {usingMock && (
-            <Alert variant="destructive" className="mt-4">
-              <AlertTitle>Mostrando datos de ejemplo</AlertTitle>
+            <Alert className="mt-4">
+              <AlertTitle>Sin datos de analytics</AlertTitle>
               <AlertDescription>
-                No pudimos conectar con el servicio de analytics en tiempo real. Estoy revisando la conexión.
+                No hay datos de analytics disponibles para este proyecto actualmente. Los datos de tráfico aparecerán aquí cuando tu sitio web reciba visitantes.
               </AlertDescription>
             </Alert>
           )}

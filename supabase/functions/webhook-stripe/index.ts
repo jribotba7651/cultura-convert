@@ -164,10 +164,14 @@ serve(async (req) => {
             const shippingAddress = order.shipping_address || {}
             const billingAddress = order.billing_address || {}
             
-            const { data: adminEmailData, error: adminEmailError } = await supabase.functions.invoke('send-auth-email', {
-              body: {
-                type: 'admin_new_order',
-                email: 'jribot@gmail.com',
+            const adminEmail = Deno.env.get('ADMIN_EMAIL');
+            if (!adminEmail) {
+              console.warn('ADMIN_EMAIL not configured, skipping admin notification');
+            } else {
+              const { data: adminEmailData, error: adminEmailError } = await supabase.functions.invoke('send-auth-email', {
+                body: {
+                  type: 'admin_new_order',
+                  email: adminEmail,
                 data: {
                   customerName: customerName || 'Cliente',
                   customerEmail: customerEmail,
@@ -185,10 +189,11 @@ serve(async (req) => {
               }
             })
 
-            if (adminEmailError) {
-              console.error('Error sending admin notification email:', adminEmailError)
-            } else {
-              console.log('Admin notification email sent successfully:', adminEmailData)
+              if (adminEmailError) {
+                console.error('Error sending admin notification email:', adminEmailError)
+              } else {
+                console.log('Admin notification email sent successfully:', adminEmailData)
+              }
             }
           } else {
             console.log('No customer email found for order:', order.id)

@@ -11,7 +11,7 @@ import {
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { User, LogOut } from 'lucide-react';
+import { User, LogOut, BarChart3, Package } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const UserMenu = () => {
@@ -47,6 +47,7 @@ const UserMenu = () => {
   }
 
   const initials = user.email ? user.email.substring(0, 2).toUpperCase() : 'U';
+  const isAdmin = user.email === 'jribot@gmail.com';
 
   return (
     <DropdownMenu>
@@ -71,6 +72,23 @@ const UserMenu = () => {
             <span>{t('myOrders')}</span>
           </Link>
         </DropdownMenuItem>
+        {isAdmin && (
+          <>
+            <DropdownMenuSeparator />
+            <DropdownMenuItem asChild>
+              <Link to="/admin/analytics" className="flex items-center cursor-pointer">
+                <BarChart3 className="mr-2 h-4 w-4" />
+                <span>Dashboard Analytics</span>
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link to="/admin/orders" className="flex items-center cursor-pointer">
+                <Package className="mr-2 h-4 w-4" />
+                <span>Gestionar Pedidos</span>
+              </Link>
+            </DropdownMenuItem>
+          </>
+        )}
         <DropdownMenuItem onClick={handleSignOut}>
           <LogOut className="mr-2 h-4 w-4" />
           <span>{t('signOut')}</span>

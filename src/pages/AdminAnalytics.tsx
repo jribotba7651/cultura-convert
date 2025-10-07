@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { useAuth } from '@/contexts/AuthContext';
+import { useAdminCheck } from '@/hooks/useAdminCheck';
 import Navigation from '@/components/Navigation';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
@@ -30,7 +30,7 @@ interface PageData {
 
 const AdminAnalytics = () => {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { isAdmin, loading: adminLoading } = useAdminCheck();
   const [loading, setLoading] = useState(true);
   const [timeRange, setTimeRange] = useState('30d');
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData[]>([]);
@@ -43,15 +43,10 @@ const AdminAnalytics = () => {
   const [usingMock, setUsingMock] = useState(false);
 
   useEffect(() => {
-    // Check if user is admin
-    if (user?.email !== 'jribot@gmail.com') {
-      toast.error('No tienes permisos para acceder a esta página');
-      navigate('/');
-      return;
+    if (isAdmin) {
+      fetchAnalytics();
     }
-
-    fetchAnalytics();
-  }, [user, navigate, timeRange]);
+  }, [isAdmin, timeRange]);
 
   const fetchAnalytics = async () => {
     setLoading(true);
@@ -167,15 +162,19 @@ const AdminAnalytics = () => {
 
   const COLORS = ['hsl(var(--primary))', 'hsl(var(--secondary))', 'hsl(var(--accent))'];
 
-  if (loading) {
+  if (adminLoading || loading) {
     return (
       <div className="min-h-screen bg-background">
         <Navigation />
         <div className="flex items-center justify-center h-screen">
-          <div className="animate-pulse text-xl">Cargando analytics...</div>
+          <div className="animate-pulse text-xl">Verificando permisos...</div>
         </div>
       </div>
     );
+  }
+
+  if (!isAdmin) {
+    return null;
   }
 
   return (

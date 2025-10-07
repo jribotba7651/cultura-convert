@@ -1,6 +1,7 @@
 import React from 'react';
 import { Link } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
+import { supabase } from '@/integrations/supabase/client';
 import {
   DropdownMenu,
   DropdownMenuContent,
@@ -46,8 +47,24 @@ const UserMenu = () => {
     );
   }
 
+  const [isAdmin, setIsAdmin] = React.useState(false);
   const initials = user.email ? user.email.substring(0, 2).toUpperCase() : 'U';
-  const isAdmin = user.email === 'jribot@gmail.com';
+
+  React.useEffect(() => {
+    const checkAdmin = async () => {
+      if (!user) return;
+      
+      try {
+        const { data } = await supabase.functions.invoke('check-admin-access');
+        setIsAdmin(data?.isAdmin || false);
+      } catch (error) {
+        console.error('Error checking admin status:', error);
+        setIsAdmin(false);
+      }
+    };
+
+    checkAdmin();
+  }, [user]);
 
   return (
     <DropdownMenu>

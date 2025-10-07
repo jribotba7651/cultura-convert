@@ -1,7 +1,7 @@
 import { useEffect, useState } from "react";
 import { useNavigate } from "react-router-dom";
 import { supabase } from "@/integrations/supabase/client";
-import { useAuth } from "@/contexts/AuthContext";
+import { useAdminCheck } from "@/hooks/useAdminCheck";
 import { Order } from "@/types/Store";
 import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
@@ -13,26 +13,17 @@ import OrderDetailsCard from "@/components/admin/OrderDetailsCard";
 
 export default function AdminOrders() {
   const navigate = useNavigate();
-  const { user } = useAuth();
+  const { isAdmin, loading: adminLoading } = useAdminCheck();
   const [orders, setOrders] = useState<Order[]>([]);
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [filter, setFilter] = useState<string>("all");
 
   useEffect(() => {
-    // Check if user is admin
-    if (!user || user.email !== "jribot@gmail.com") {
-      toast({
-        title: "Acceso denegado",
-        description: "No tienes permisos para acceder a esta página",
-        variant: "destructive",
-      });
-      navigate("/");
-      return;
+    if (isAdmin) {
+      fetchOrders();
     }
-
-    fetchOrders();
-  }, [user, navigate]);
+  }, [isAdmin]);
 
   const fetchOrders = async () => {
     try {
@@ -76,12 +67,17 @@ export default function AdminOrders() {
     return order.status === filter;
   });
 
-  if (loading) {
+  if (adminLoading || loading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        <span className="ml-2">Verificando permisos...</span>
       </div>
     );
+  }
+
+  if (!isAdmin) {
+    return null;
   }
 
   if (selectedOrder) {

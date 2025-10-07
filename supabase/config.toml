@@ -1,5 +1,8 @@
 project_id = "ifctpzrmqcpqtgwepvoq"
 
+[functions.check-admin-access]
+verify_jwt = false
+
 [functions.sync-printify-products]
 verify_jwt = false
 

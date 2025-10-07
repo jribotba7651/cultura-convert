@@ -2,6 +2,9 @@ import AuthorProfile from "@/components/AuthorProfile";
 import Navigation from "@/components/Navigation";
 import { ContactForm } from "@/components/ContactForm";
 import { AdSenseAd } from "@/components/AdSenseAd";
+import { BooksHero } from "@/components/BooksHero";
+import { BooksGrid } from "@/components/BooksGrid";
+import { FeaturedBook } from "@/components/FeaturedBook";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Book } from "@/types/Book";
 import juanProfileImage from "@/assets/juan-c-ribot-profile.jpg";
@@ -71,32 +74,37 @@ const rosnelmaBooks: Book[] = [
 ];
 
 const Index = () => {
-  const { t } = useLanguage();
+  const { t, language } = useLanguage();
+
+  // Combine all books for the hero and grid
+  const allBooks = [...rosnelmaBooks, ...juanBooks];
 
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
 
-      {/* Hero Section */}
-      <section className="hero relative py-24 px-4 text-center">
-        <div className="absolute inset-0 bg-gradient-to-br from-primary/20 via-secondary/10 to-accent/20"></div>
-        <div className="relative z-10 max-w-4xl mx-auto">
-          <h2 className="text-5xl md:text-6xl font-bold text-foreground mb-6 leading-tight">
-            {t('heroTitle')}
-          </h2>
-          <p className="text-xl text-muted-foreground mb-8 max-w-2xl mx-auto leading-relaxed">
-            {t('heroSubtitle')}
-          </p>
-        </div>
-      </section>
+      {/* Hero Section with Featured Books Carousel */}
+      <BooksHero books={allBooks} featured={[0, 3, 2]} />
 
-      {/* Ad after hero */}
+      {/* Featured Bestseller */}
+      <FeaturedBook 
+        book={rosnelmaBooks[0]} 
+        badge={language === 'es' ? '⭐ Bestseller en Liderazgo' : '⭐ Leadership Bestseller'}
+      />
+
+      {/* All Books Grid */}
+      <BooksGrid 
+        books={allBooks}
+        title={language === 'es' ? 'Todos Nuestros Libros' : 'All Our Books'}
+      />
+
+      {/* Ad before authors */}
       <div className="max-w-4xl mx-auto px-4 py-8">
         <AdSenseAd adSlot="1234567890" adFormat="auto" className="my-4" />
       </div>
 
-      {/* Authors Section */}
-      <section className="authors py-16 px-4">
+      {/* Authors Section - Now below books */}
+      <section className="authors py-16 px-4 bg-muted/30">
         <div className="max-w-6xl mx-auto">
           <h3 className="text-4xl font-bold text-center mb-12 text-foreground">{t('authorsTitle')}</h3>
           <div className="space-y-20">

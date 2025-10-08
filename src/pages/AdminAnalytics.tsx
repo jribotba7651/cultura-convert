@@ -51,8 +51,49 @@ const AdminAnalytics = () => {
   const fetchAnalytics = async () => {
     setLoading(true);
     try {
-      // No hay datos de analytics disponibles para este proyecto
-      // Mostrar estado de "sin datos" en lugar de datos ficticios
+      const endDate = new Date();
+      const days = timeRange === '7d' ? 7 : timeRange === '90d' ? 90 : 30;
+      const startDate = new Date(endDate);
+      startDate.setDate(endDate.getDate() - days);
+
+      const startDateStr = startDate.toISOString().split('T')[0];
+      const endDateStr = endDate.toISOString().split('T')[0];
+      
+      console.log('Fetching analytics from:', startDateStr, 'to', endDateStr);
+
+      const response = await fetch(
+        `https://ifctpzrmqcpqtgwepvoq.supabase.co/functions/v1/get-analytics?startdate=${startDateStr}&enddate=${endDateStr}&granularity=daily`,
+        {
+          method: 'GET',
+          headers: {
+            'Content-Type': 'application/json',
+          },
+        }
+      );
+
+      if (!response.ok) {
+        throw new Error(`Error al obtener analytics: ${response.status}`);
+      }
+
+      const data = await response.json();
+      console.log('Analytics data received:', data);
+
+      if (data && data.result && data.result.data && data.result.data.length > 0) {
+        processAnalyticsData(data);
+      } else {
+        console.log('No analytics data available');
+        setUsingMock(true);
+        setAnalyticsData([]);
+        setTotalVisitors(0);
+        setTotalPageViews(0);
+        setAvgSessionDuration(0);
+        setBounceRate(0);
+        setDeviceData([]);
+        setTopPages([]);
+      }
+    } catch (error) {
+      console.error('Error fetching analytics:', error);
+      toast.error('Error al cargar los datos de analytics');
       setUsingMock(true);
       setAnalyticsData([]);
       setTotalVisitors(0);
@@ -61,9 +102,6 @@ const AdminAnalytics = () => {
       setBounceRate(0);
       setDeviceData([]);
       setTopPages([]);
-    } catch (error) {
-      console.error('Error fetching analytics:', error);
-      toast.error('Error al cargar los datos de analytics');
     } finally {
       setLoading(false);
     }

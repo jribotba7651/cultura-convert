@@ -9,6 +9,7 @@ import { CartProvider } from "./contexts/CartContext";
 import { AuthProvider } from "./contexts/AuthContext";
 import { SecurityProvider } from "./components/SecurityProvider";
 import { ShoppingCart } from "./components/store/ShoppingCart";
+import { useAnalytics } from "./hooks/useAnalytics";
 import Index from "./pages/Index";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
@@ -27,6 +28,9 @@ import TestComponent from "./components/TestComponent";
 const queryClient = new QueryClient();
 
 const AppContent = () => {
+  // Track page views for analytics
+  useAnalytics();
+  
   return (
     <>
       <ShoppingCart />

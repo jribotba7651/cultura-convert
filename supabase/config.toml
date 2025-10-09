@@ -1,5 +1,11 @@
 project_id = "ifctpzrmqcpqtgwepvoq"
 
+[functions.track-pageview]
+verify_jwt = false
+
+[functions.get-internal-analytics]
+verify_jwt = true
+
 [functions.check-admin-access]
 verify_jwt = false
 

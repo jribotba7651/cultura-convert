@@ -21,10 +21,10 @@ serve(async (req) => {
     }
 
     // Call Lovable Analytics API
-    const analyticsUrl = `https://lovable.app/api/analytics/v1/page-analytics?` +
-      `website=www.jibaroenlaluna.com&` +
-      `startdate=${startdate}&` +
-      `enddate=${enddate}&` +
+    const analyticsUrl = `https://lovable.app/api/projects/analytics/page-analytics?` +
+      `projectId=2b0eec6d-0491-4219-a6e7-e1a0e05dadf3&` +
+      `startDate=${startdate}&` +
+      `endDate=${enddate}&` +
       `granularity=${granularity}`;
 
     console.log('Fetching analytics from:', analyticsUrl);

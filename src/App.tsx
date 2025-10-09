@@ -9,7 +9,6 @@ import { CartProvider } from "./contexts/CartContext";
 import { AuthProvider } from "./contexts/AuthContext";
 import { SecurityProvider } from "./components/SecurityProvider";
 import { ShoppingCart } from "./components/store/ShoppingCart";
-import { useVersionCheck } from "./hooks/useVersionCheck";
 import Index from "./pages/Index";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
@@ -28,9 +27,6 @@ import TestComponent from "./components/TestComponent";
 const queryClient = new QueryClient();
 
 const AppContent = () => {
-  // Hook para detectar actualizaciones de versión
-  useVersionCheck();
-
   return (
     <>
       <ShoppingCart />

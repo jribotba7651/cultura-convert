@@ -9,6 +9,7 @@ import { CartProvider } from "./contexts/CartContext";
 import { AuthProvider } from "./contexts/AuthContext";
 import { SecurityProvider } from "./components/SecurityProvider";
 import { ShoppingCart } from "./components/store/ShoppingCart";
+import { useVersionCheck } from "./hooks/useVersionCheck";
 import Index from "./pages/Index";
 import Blog from "./pages/Blog";
 import BlogPost from "./pages/BlogPost";
@@ -26,6 +27,34 @@ import TestComponent from "./components/TestComponent";
 
 const queryClient = new QueryClient();
 
+const AppContent = () => {
+  // Hook para detectar actualizaciones de versión
+  useVersionCheck();
+
+  return (
+    <>
+      <ShoppingCart />
+      <Routes>
+        <Route path="/" element={<Index />} />
+        <Route path="/blog" element={<Blog />} />
+        <Route path="/blog/:slug" element={<BlogPost />} />
+        <Route path="/store" element={<Store />} />
+        <Route path="/store/product/:id" element={<ProductDetails />} />
+        <Route path="/services" element={<Services />} />
+        <Route path="/checkout" element={<Checkout />} />
+        <Route path="/order-confirmation/:orderId" element={<OrderConfirmation />} />
+        <Route path="/auth" element={<Auth />} />
+        <Route path="/mis-pedidos" element={<MyOrders />} />
+        <Route path="/admin/orders" element={<AdminOrders />} />
+        <Route path="/admin/analytics" element={<AdminAnalytics />} />
+        <Route path="/test" element={<TestComponent />} />
+        {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
+        <Route path="*" element={<NotFound />} />
+      </Routes>
+    </>
+  );
+};
+
 const App = () => {
   console.log('App component rendering...');
   
@@ -41,24 +70,7 @@ const App = () => {
                 <Toaster />
                 <Sonner />
                 <BrowserRouter>
-                  <ShoppingCart />
-                  <Routes>
-                    <Route path="/" element={<Index />} />
-                    <Route path="/blog" element={<Blog />} />
-                    <Route path="/blog/:slug" element={<BlogPost />} />
-                    <Route path="/store" element={<Store />} />
-                    <Route path="/store/product/:id" element={<ProductDetails />} />
-                    <Route path="/services" element={<Services />} />
-                    <Route path="/checkout" element={<Checkout />} />
-                    <Route path="/order-confirmation/:orderId" element={<OrderConfirmation />} />
-                    <Route path="/auth" element={<Auth />} />
-                    <Route path="/mis-pedidos" element={<MyOrders />} />
-                    <Route path="/admin/orders" element={<AdminOrders />} />
-                    <Route path="/admin/analytics" element={<AdminAnalytics />} />
-                    <Route path="/test" element={<TestComponent />} />
-                    {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
-                    <Route path="*" element={<NotFound />} />
-                  </Routes>
+                  <AppContent />
                 </BrowserRouter>
                 </TooltipProvider>
               </QueryClientProvider>

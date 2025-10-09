@@ -10,10 +10,30 @@ if ('serviceWorker' in navigator && import.meta.env.PROD) {
       .then((registration) => {
         console.log('[SW] Service Worker registrado:', registration);
         
-        // Verificar actualizaciones periódicamente
+        // Detectar cuando hay un nuevo SW disponible
+        registration.onupdatefound = () => {
+          const newWorker = registration.installing;
+          if (!newWorker) return;
+          
+          newWorker.addEventListener('statechange', () => {
+            if (newWorker.state === 'installed' && navigator.serviceWorker.controller) {
+              // Hay un nuevo SW listo, pedirle que tome control
+              console.log('[SW] Nuevo Service Worker detectado, activando...');
+              newWorker.postMessage({ type: 'SKIP_WAITING' });
+            }
+          });
+        };
+        
+        // Cuando el nuevo SW toma control, recargar para usar recursos frescos
+        navigator.serviceWorker.addEventListener('controllerchange', () => {
+          console.log('[SW] Nuevo Service Worker tomó control, recargando...');
+          window.location.reload();
+        });
+        
+        // Verificar actualizaciones periódicamente (cada 5 minutos)
         setInterval(() => {
           registration.update();
-        }, 60000); // Cada minuto
+        }, 5 * 60 * 1000);
       })
       .catch((error) => {
         console.log('[SW] Error al registrar Service Worker:', error);

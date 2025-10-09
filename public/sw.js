@@ -1,16 +1,16 @@
 // Service Worker para gestión de caché y detección de actualizaciones
-const CACHE_VERSION = 'v1';
+const CACHE_VERSION = 'v3';
 const CACHE_NAME = `escritores-pr-${CACHE_VERSION}`;
 
 // Instalar el service worker
 self.addEventListener('install', (event) => {
-  console.log('[SW] Installing service worker...');
+  console.log('[SW] Installing service worker v3...');
   self.skipWaiting(); // Activar inmediatamente
 });
 
 // Activar el service worker
 self.addEventListener('activate', (event) => {
-  console.log('[SW] Activating service worker...');
+  console.log('[SW] Activating service worker v3...');
   
   event.waitUntil(
     caches.keys().then((cacheNames) => {
@@ -40,52 +40,39 @@ self.addEventListener('fetch', (event) => {
     return;
   }
 
-  // Estrategia: Network first para HTML, Cache first para assets
+  // HTML y navegaciones: network-first con no-store
   if (request.mode === 'navigate' || url.pathname.endsWith('.html')) {
-    // Network first para navegación
     event.respondWith(
-      fetch(request)
+      fetch(request, { cache: 'no-store' })
         .then((response) => {
-          // Clonar y cachear la respuesta
-          const responseClone = response.clone();
-          caches.open(CACHE_NAME).then((cache) => {
-            cache.put(request, responseClone);
-          });
+          const clone = response.clone();
+          caches.open(CACHE_NAME).then(cache => cache.put(request, clone));
           return response;
         })
-        .catch(() => {
-          // Fallback a caché si no hay red
-          return caches.match(request);
+        .catch(async () => {
+          const cached = await caches.match(request);
+          return cached || Response.error();
         })
     );
-  } else {
-    // Cache first para assets estáticos
-    event.respondWith(
-      caches.match(request).then((cachedResponse) => {
-        if (cachedResponse) {
-          // Si está en caché, devolverlo pero actualizar en background
-          fetch(request).then((response) => {
-            caches.open(CACHE_NAME).then((cache) => {
-              cache.put(request, response);
-            });
-          }).catch(() => {});
-          
-          return cachedResponse;
-        }
+    return;
+  }
 
-        // Si no está en caché, obtener de la red
-        return fetch(request).then((response) => {
-          // Cachear para próxima vez
-          if (response.status === 200) {
-            const responseClone = response.clone();
-            caches.open(CACHE_NAME).then((cache) => {
-              cache.put(request, responseClone);
-            });
-          }
-          return response;
-        });
-      })
-    );
+  // JS/CSS/estáticos: network-first con fallback a caché
+  const isStatic = /\.(js|css|json|png|jpg|jpeg|gif|svg|webp|ico|woff2?|ttf|eot)$/.test(url.pathname);
+  if (isStatic) {
+    event.respondWith((async () => {
+      try {
+        const networkResponse = await fetch(request, { cache: 'no-store' });
+        const cache = await caches.open(CACHE_NAME);
+        cache.put(request, networkResponse.clone());
+        return networkResponse;
+      } catch {
+        const cached = await caches.match(request);
+        if (cached) return cached;
+        // Último intento sin no-store
+        return fetch(request);
+      }
+    })());
   }
 });
 

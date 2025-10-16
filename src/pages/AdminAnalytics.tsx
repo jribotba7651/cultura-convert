@@ -9,7 +9,7 @@ import { Alert, AlertDescription, AlertTitle } from '@/components/ui/alert';
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
-import { ArrowLeft, Users, Eye, Clock, TrendingUp, Smartphone, Monitor, Globe } from 'lucide-react';
+import { ArrowLeft, Users, Eye, Clock, TrendingUp, Smartphone, Monitor, Globe, ShoppingCart, DollarSign, TrendingDown } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface AnalyticsData {
@@ -29,6 +29,25 @@ interface PageData {
   visitors: number;
 }
 
+interface SalesData {
+  date: string;
+  orders: number;
+  revenue: number;
+  paidOrders: number;
+}
+
+interface StatusData {
+  name: string;
+  value: number;
+  color: string;
+}
+
+interface ProductData {
+  product: string;
+  quantity: number;
+  revenue: number;
+}
+
 const AdminAnalytics = () => {
   const navigate = useNavigate();
   const { isAdmin, loading: adminLoading } = useAdminCheck();
@@ -43,9 +62,22 @@ const AdminAnalytics = () => {
   const [topPages, setTopPages] = useState<PageData[]>([]);
   const [usingMock, setUsingMock] = useState(false);
 
+  // Sales state
+  const [salesData, setSalesData] = useState<SalesData[]>([]);
+  const [totalOrders, setTotalOrders] = useState(0);
+  const [totalRevenue, setTotalRevenue] = useState(0);
+  const [avgOrderValue, setAvgOrderValue] = useState(0);
+  const [conversionRate, setConversionRate] = useState(0);
+  const [orderStatusData, setOrderStatusData] = useState<StatusData[]>([]);
+  const [topProducts, setTopProducts] = useState<ProductData[]>([]);
+  const [paidOrders, setPaidOrders] = useState(0);
+  const [pendingOrders, setPendingOrders] = useState(0);
+  const [failedOrders, setFailedOrders] = useState(0);
+
   useEffect(() => {
     if (isAdmin) {
       fetchAnalytics();
+      fetchSalesAnalytics();
     }
   }, [isAdmin, timeRange]);
 
@@ -160,6 +192,74 @@ const AdminAnalytics = () => {
     setTopPages(topPagesFromAPI);
   };
 
+  const fetchSalesAnalytics = async () => {
+    try {
+      const endDate = new Date();
+      const days = timeRange === '7d' ? 7 : timeRange === '90d' ? 90 : 30;
+      const startDate = new Date(endDate);
+      startDate.setDate(endDate.getDate() - days);
+
+      const startDateStr = startDate.toISOString().split('T')[0];
+      const endDateStr = endDate.toISOString().split('T')[0];
+      
+      console.log('Fetching sales analytics from:', startDateStr, 'to', endDateStr);
+
+      const { data, error } = await supabase.functions.invoke('get-sales-analytics', {
+        body: {
+          startdate: startDateStr,
+          enddate: endDateStr,
+          granularity: 'daily',
+        },
+      });
+
+      if (error) {
+        console.error('Error fetching sales analytics:', error);
+        toast.error('Error al cargar los datos de ventas');
+        setSalesData([]);
+        setTotalOrders(0);
+        setTotalRevenue(0);
+        setAvgOrderValue(0);
+        setConversionRate(0);
+        setOrderStatusData([]);
+        setTopProducts([]);
+        return;
+      }
+
+      if (data) {
+        console.log('Processing sales data:', data);
+        
+        // Transform series data for the chart
+        const chartData: SalesData[] = (data.series || []).map((item: any) => ({
+          date: new Date(item.period).toLocaleDateString('es-ES', { month: 'short', day: 'numeric' }),
+          orders: item.orders || 0,
+          revenue: (item.revenue || 0) / 100, // Convert cents to dollars
+          paidOrders: item.paidOrders || 0,
+        }));
+
+        setSalesData(chartData);
+        setTotalOrders(data.totalOrders || 0);
+        setTotalRevenue((data.totalRevenue || 0) / 100); // Convert cents to dollars
+        setAvgOrderValue((data.avgOrderValue || 0) / 100); // Convert cents to dollars
+        setConversionRate(data.conversionRate || 0);
+        setOrderStatusData(data.orderStatusData || []);
+        setPaidOrders(data.paidOrders || 0);
+        setPendingOrders(data.pendingOrders || 0);
+        setFailedOrders(data.failedOrders || 0);
+
+        // Transform top products data
+        const productsData: ProductData[] = (data.topProducts || []).map((item: any) => ({
+          product: item.product,
+          quantity: item.quantity,
+          revenue: (item.revenue || 0) / 100, // Convert cents to dollars
+        }));
+        setTopProducts(productsData);
+      }
+    } catch (error) {
+      console.error('Error in fetchSalesAnalytics:', error);
+      toast.error('Error al cargar los datos de ventas');
+    }
+  };
+
   const setMockData = () => {
     const endDate = new Date();
     const days = timeRange === '7d' ? 7 : timeRange === '90d' ? 90 : 30;
@@ -204,6 +304,12 @@ const AdminAnalytics = () => {
   };
 
   const COLORS = ['hsl(var(--primary))', 'hsl(var(--secondary))', 'hsl(var(--accent))'];
+  const STATUS_COLORS = {
+    paid: '#10b981',
+    pending: '#f59e0b',
+    failed: '#ef4444',
+    cancelled: '#6b7280',
+  };
 
   if (adminLoading || loading) {
     return (
@@ -289,7 +395,7 @@ const AdminAnalytics = () => {
             <CardContent>
               <div className="text-2xl font-bold">{totalPageViews}</div>
               <p className="text-xs text-muted-foreground">
-                {(totalPageViews / totalVisitors).toFixed(1)} páginas por visita
+                {totalVisitors > 0 ? (totalPageViews / totalVisitors).toFixed(1) : '0'} páginas por visita
               </p>
             </CardContent>
           </Card>
@@ -321,12 +427,68 @@ const AdminAnalytics = () => {
           </Card>
         </div>
 
+        {/* Sales Metrics */}
+        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4 mb-8">
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Total Órdenes</CardTitle>
+              <ShoppingCart className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{totalOrders}</div>
+              <p className="text-xs text-muted-foreground">
+                {paidOrders} pagadas, {pendingOrders} pendientes
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Ingresos Totales</CardTitle>
+              <DollarSign className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">${totalRevenue.toFixed(2)}</div>
+              <p className="text-xs text-muted-foreground">
+                Solo órdenes pagadas
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Valor Promedio</CardTitle>
+              <TrendingUp className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">${avgOrderValue.toFixed(2)}</div>
+              <p className="text-xs text-muted-foreground">
+                Por orden pagada
+              </p>
+            </CardContent>
+          </Card>
+
+          <Card>
+            <CardHeader className="flex flex-row items-center justify-between space-y-0 pb-2">
+              <CardTitle className="text-sm font-medium">Tasa de Conversión</CardTitle>
+              <TrendingDown className="h-4 w-4 text-muted-foreground" />
+            </CardHeader>
+            <CardContent>
+              <div className="text-2xl font-bold">{conversionRate.toFixed(1)}%</div>
+              <p className="text-xs text-muted-foreground">
+                Órdenes pagadas / total
+              </p>
+            </CardContent>
+          </Card>
+        </div>
+
         {/* Charts */}
         <Tabs defaultValue="traffic" className="space-y-4">
           <TabsList>
             <TabsTrigger value="traffic">Tráfico</TabsTrigger>
             <TabsTrigger value="devices">Dispositivos</TabsTrigger>
             <TabsTrigger value="pages">Páginas</TabsTrigger>
+            <TabsTrigger value="sales">Ventas</TabsTrigger>
           </TabsList>
 
           <TabsContent value="traffic" className="space-y-4">
@@ -481,6 +643,154 @@ const AdminAnalytics = () => {
                 </div>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="sales" className="space-y-4">
+            {totalOrders === 0 ? (
+              <Card>
+                <CardContent className="pt-6">
+                  <p className="text-center text-muted-foreground">
+                    No hay ventas registradas en este período
+                  </p>
+                </CardContent>
+              </Card>
+            ) : (
+              <>
+                <Card>
+                  <CardHeader>
+                    <CardTitle>Ventas en el Tiempo</CardTitle>
+                    <CardDescription>
+                      Ingresos y número de órdenes por día
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent className="pt-4">
+                    <ResponsiveContainer width="100%" height={400}>
+                      <LineChart data={salesData}>
+                        <CartesianGrid strokeDasharray="3 3" />
+                        <XAxis dataKey="date" />
+                        <YAxis yAxisId="left" />
+                        <YAxis yAxisId="right" orientation="right" />
+                        <Tooltip 
+                          formatter={(value: any, name: string) => {
+                            if (name === 'Ingresos') return `$${value.toFixed(2)}`;
+                            return value;
+                          }}
+                        />
+                        <Legend />
+                        <Line 
+                          yAxisId="left"
+                          type="monotone" 
+                          dataKey="revenue" 
+                          stroke="#10b981" 
+                          name="Ingresos"
+                          strokeWidth={2}
+                        />
+                        <Line 
+                          yAxisId="right"
+                          type="monotone" 
+                          dataKey="orders" 
+                          stroke="hsl(var(--primary))" 
+                          name="Órdenes"
+                          strokeWidth={2}
+                        />
+                      </LineChart>
+                    </ResponsiveContainer>
+                  </CardContent>
+                </Card>
+
+                <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Estado de Órdenes</CardTitle>
+                      <CardDescription>
+                        Distribución por estado
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="pt-4">
+                      <ResponsiveContainer width="100%" height={300}>
+                        <PieChart>
+                          <Pie
+                            data={orderStatusData}
+                            cx="50%"
+                            cy="50%"
+                            labelLine={false}
+                            label={({ name, percent }) => `${name}: ${(percent * 100).toFixed(0)}%`}
+                            outerRadius={80}
+                            fill="#8884d8"
+                            dataKey="value"
+                          >
+                            {orderStatusData.map((entry, index) => (
+                              <Cell key={`cell-${index}`} fill={entry.color} />
+                            ))}
+                          </Pie>
+                          <Tooltip />
+                        </PieChart>
+                      </ResponsiveContainer>
+                    </CardContent>
+                  </Card>
+
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Estadísticas de Órdenes</CardTitle>
+                      <CardDescription>
+                        Resumen por estado
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="pt-4">
+                      <div className="space-y-4">
+                        <div className="flex items-center justify-between p-3 rounded-lg bg-green-50 dark:bg-green-950">
+                          <span className="font-medium text-green-700 dark:text-green-300">Pagadas</span>
+                          <span className="text-2xl font-bold text-green-700 dark:text-green-300">{paidOrders}</span>
+                        </div>
+                        <div className="flex items-center justify-between p-3 rounded-lg bg-yellow-50 dark:bg-yellow-950">
+                          <span className="font-medium text-yellow-700 dark:text-yellow-300">Pendientes</span>
+                          <span className="text-2xl font-bold text-yellow-700 dark:text-yellow-300">{pendingOrders}</span>
+                        </div>
+                        <div className="flex items-center justify-between p-3 rounded-lg bg-red-50 dark:bg-red-950">
+                          <span className="font-medium text-red-700 dark:text-red-300">Fallidas</span>
+                          <span className="text-2xl font-bold text-red-700 dark:text-red-300">{failedOrders}</span>
+                        </div>
+                      </div>
+                    </CardContent>
+                  </Card>
+                </div>
+
+                {topProducts.length > 0 && (
+                  <Card>
+                    <CardHeader>
+                      <CardTitle>Productos Más Vendidos</CardTitle>
+                      <CardDescription>
+                        Top 10 productos por ingresos
+                      </CardDescription>
+                    </CardHeader>
+                    <CardContent className="pt-4">
+                      <div className="overflow-x-auto">
+                        <table className="w-full">
+                          <thead>
+                            <tr className="border-b">
+                              <th className="text-left py-3 px-4">Producto</th>
+                              <th className="text-right py-3 px-4">Cantidad</th>
+                              <th className="text-right py-3 px-4">Ingresos</th>
+                            </tr>
+                          </thead>
+                          <tbody>
+                            {topProducts.map((product, index) => (
+                              <tr key={index} className="border-b">
+                                <td className="py-3 px-4">{product.product}</td>
+                                <td className="text-right py-3 px-4">{product.quantity}</td>
+                                <td className="text-right py-3 px-4 font-medium">
+                                  ${product.revenue.toFixed(2)}
+                                </td>
+                              </tr>
+                            ))}
+                          </tbody>
+                        </table>
+                      </div>
+                    </CardContent>
+                  </Card>
+                )}
+              </>
+            )}
           </TabsContent>
         </Tabs>
       </div>

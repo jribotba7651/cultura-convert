@@ -42,10 +42,20 @@ const juanBooks: Book[] = [
 // Datos de ejemplo para los libros de Rosnelma García Amalbert
 const rosnelmaBooks: Book[] = [
   {
-    title: "JÍBARA EN LA LUNA: Transformando Desafíos en Oportunidades: 22 Años de Liderazgo Consciente",
+    title: "JÍBARA EN LA LUNA: Transforming Challenges into Opportunities",
+    description: {
+      es: "¿Qué pasaría si una jíbara de Puerto Rico pudiera alcanzar la luna sin perder su esencia? Rosnelma García comparte su extraordinario viaje de 22 años navegando Corporate America—desde una planta farmacéutica en Puerto Rico hasta oficinas ejecutivas en California. Una guía práctica y honesta para el liderazgo consciente con estrategias comprobadas, técnicas para navegar el bullying corporativo, y herramientas para integrar la maternidad con la ambición profesional. Perfecta para profesionales Latinas, madres trabajadoras y líderes que buscan autenticidad.",
+      en: "What would happen if a jíbara from Puerto Rico could reach the moon without losing her essence? Rosnelma García shares her extraordinary 22-year journey navigating Corporate America—from a pharmaceutical plant in Puerto Rico to executive offices in California. A practical, honest guide to conscious leadership with proven strategies, techniques for navigating corporate bullying, and tools for integrating motherhood with professional ambition. Perfect for Latina professionals, working mothers, and leaders seeking authenticity."
+    },
+    status: "published" as const,
+    amazonUrl: "https://a.co/d/7QKyJOu",
+    coverImage: jibaraEnLaLunaCover,
+  },
+  {
+    title: "JÍBARA EN LA LUNA: Transformando Desafíos en Oportunidades (Edición Español)",
     description: {
       es: "¿Qué pasaría si una jíbara de Puerto Rico pudiera llegar a la luna sin perder su esencia? Una guía práctica y honesta para el liderazgo consciente con estrategias comprobadas para convertir desafíos en oportunidades, técnicas para navegar el bullying corporativo, y herramientas para usar la perspectiva bicultural como ventaja competitiva.",
-      en: "What would happen if a jíbara from Puerto Rico could reach the moon without losing her essence? A practical and honest guide to conscious leadership with proven strategies to turn challenges into opportunities, techniques to navigate corporate bullying, and tools to use bicultural perspective as a competitive advantage."
+      en: "What would happen if a jíbara from Puerto Rico could reach the moon without losing her essence? A practical and honest guide to conscious leadership with proven strategies to turn challenges into opportunities, techniques to navigate corporate bullying, and tools to use bicultural perspective as a competitive advantage. (Spanish Edition)"
     },
     status: "published" as const,
     amazonUrl: "https://a.co/d/23apCTx",
@@ -89,7 +99,7 @@ const Index = () => {
       {/* Featured Bestseller */}
       <FeaturedBook 
         book={rosnelmaBooks[0]} 
-        badge={language === 'es' ? '⭐ Bestseller en Liderazgo' : '⭐ Leadership Bestseller'}
+        badge={language === 'es' ? '🆕 NUEVO - Primer Libro en Inglés' : '🆕 NEW - First Book in English'}
       />
 
       {/* All Books Grid */}

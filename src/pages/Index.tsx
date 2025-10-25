@@ -10,6 +10,7 @@ import { Book } from "@/types/Book";
 import juanProfileImage from "@/assets/juan-c-ribot-profile.jpg";
 import rosnelmaProfileImage from "@/assets/rosnelma-garcia-profile.jpg";
 import jibaraEnLaLunaCover from "@/assets/jibara-en-la-luna-cover.jpg";
+import jibaraEnLaLunaEnglishCover from "@/assets/jibara-en-la-luna-english-cover.jpg";
 import lasAventurasLunaAvoCover from "@/assets/las-aventuras-luna-avo-cover.jpg";
 import sofiaMariePalomaCover from "@/assets/sofia-marie-paloma-cover.jpg";
 import cartasDeNewarkCover from "@/assets/cartas-de-newark-cover.jpg";
@@ -49,7 +50,7 @@ const rosnelmaBooks: Book[] = [
     },
     status: "published" as const,
     amazonUrl: "https://a.co/d/7QKyJOu",
-    coverImage: jibaraEnLaLunaCover,
+    coverImage: jibaraEnLaLunaEnglishCover,
   },
   {
     title: "JÍBARA EN LA LUNA: Transformando Desafíos en Oportunidades (Edición Español)",

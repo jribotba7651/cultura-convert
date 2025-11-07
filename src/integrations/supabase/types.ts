@@ -44,6 +44,72 @@ export type Database = {
         }
         Relationships: []
       }
+      blog_posts: {
+        Row: {
+          author_id: string | null
+          category_en: string
+          category_es: string
+          content_en: string
+          content_es: string
+          cover_image: string | null
+          created_at: string | null
+          date: string | null
+          excerpt_en: string | null
+          excerpt_es: string | null
+          featured: boolean | null
+          id: string
+          images: Json | null
+          published: boolean | null
+          slug: string
+          tags: string[] | null
+          title_en: string
+          title_es: string
+          updated_at: string | null
+        }
+        Insert: {
+          author_id?: string | null
+          category_en: string
+          category_es: string
+          content_en: string
+          content_es: string
+          cover_image?: string | null
+          created_at?: string | null
+          date?: string | null
+          excerpt_en?: string | null
+          excerpt_es?: string | null
+          featured?: boolean | null
+          id?: string
+          images?: Json | null
+          published?: boolean | null
+          slug: string
+          tags?: string[] | null
+          title_en: string
+          title_es: string
+          updated_at?: string | null
+        }
+        Update: {
+          author_id?: string | null
+          category_en?: string
+          category_es?: string
+          content_en?: string
+          content_es?: string
+          cover_image?: string | null
+          created_at?: string | null
+          date?: string | null
+          excerpt_en?: string | null
+          excerpt_es?: string | null
+          featured?: boolean | null
+          id?: string
+          images?: Json | null
+          published?: boolean | null
+          slug?: string
+          tags?: string[] | null
+          title_en?: string
+          title_es?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       categories: {
         Row: {
           created_at: string
@@ -110,7 +176,7 @@ export type Database = {
           created_at: string
           error_message: string | null
           id: string
-          ip_address: unknown | null
+          ip_address: unknown
           order_id: string
           success: boolean
           user_agent: string | null
@@ -120,7 +186,7 @@ export type Database = {
           created_at?: string
           error_message?: string | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           order_id: string
           success?: boolean
           user_agent?: string | null
@@ -130,7 +196,7 @@ export type Database = {
           created_at?: string
           error_message?: string | null
           id?: string
-          ip_address?: unknown | null
+          ip_address?: unknown
           order_id?: string
           success?: boolean
           user_agent?: string | null

@@ -93,15 +93,21 @@ const UserMenu = () => {
           <>
             <DropdownMenuSeparator />
             <DropdownMenuItem asChild>
-              <Link to="/admin/analytics" className="flex items-center cursor-pointer">
-                <BarChart3 className="mr-2 h-4 w-4" />
-                <span>Dashboard Analytics</span>
+              <Link to="/admin/blog" className="flex items-center cursor-pointer">
+                <Package className="mr-2 h-4 w-4" />
+                <span>Gestionar Blog</span>
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
               <Link to="/admin/orders" className="flex items-center cursor-pointer">
                 <Package className="mr-2 h-4 w-4" />
                 <span>Gestionar Pedidos</span>
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link to="/admin/analytics" className="flex items-center cursor-pointer">
+                <BarChart3 className="mr-2 h-4 w-4" />
+                <span>Dashboard Analytics</span>
               </Link>
             </DropdownMenuItem>
           </>

@@ -1,17 +1,69 @@
 import { useParams, Link } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
-import { blogPosts } from "@/data/blogPosts";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { AdSenseAd } from "@/components/AdSenseAd";
-import { ArrowLeft } from "lucide-react";
+import { ArrowLeft, Loader2 } from "lucide-react";
 import Navigation from "@/components/Navigation";
+import { supabase } from '@/integrations/supabase/client';
+import { useEffect, useState } from 'react';
+
+interface BlogPostData {
+  id: string;
+  title_en: string;
+  title_es: string;
+  excerpt_en: string;
+  excerpt_es: string;
+  content_en: string;
+  content_es: string;
+  category_en: string;
+  category_es: string;
+  slug: string;
+  tags: string[];
+  date: string;
+  cover_image?: string;
+}
 
 const BlogPost = () => {
   const { slug } = useParams();
   const { language } = useLanguage();
-  
-  const post = blogPosts.find(p => p.slug === slug);
+  const [post, setPost] = useState<BlogPostData | null>(null);
+  const [loading, setLoading] = useState(true);
+
+  useEffect(() => {
+    const fetchPost = async () => {
+      try {
+        const { data, error } = await supabase
+          .from('blog_posts')
+          .select('*')
+          .eq('slug', slug)
+          .eq('published', true)
+          .single();
+
+        if (error) throw error;
+        setPost(data);
+      } catch (error) {
+        console.error('Error fetching post:', error);
+      } finally {
+        setLoading(false);
+      }
+    };
+
+    if (slug) {
+      fetchPost();
+    }
+  }, [slug]);
+
+  if (loading) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navigation />
+        <div className="container mx-auto px-4 py-8 flex justify-center">
+          <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </div>
+    );
+  }
 
   if (!post) {
     return (
@@ -44,7 +96,7 @@ const BlogPost = () => {
           <header className="mb-8 not-prose">
             <div className="flex items-center gap-4 mb-4">
               <Badge variant="secondary">
-                {post.category[language]}
+                {language === 'es' ? post.category_es : post.category_en}
               </Badge>
               <span className="text-muted-foreground">
                 {new Date(post.date).toLocaleDateString(language === 'es' ? 'es-ES' : 'en-US')}
@@ -52,27 +104,37 @@ const BlogPost = () => {
             </div>
             
             <h1 className="text-4xl md:text-5xl font-bold text-primary mb-4 leading-tight">
-              {post.title[language]}
+              {language === 'es' ? post.title_es : post.title_en}
             </h1>
             
             <p className="text-xl text-muted-foreground mb-6">
-              {post.excerpt[language]}
+              {language === 'es' ? post.excerpt_es : post.excerpt_en}
             </p>
             
-            <div className="flex flex-wrap gap-2">
-              {post.tags.map((tag) => (
-                <Badge key={tag} variant="outline">
-                  {tag}
-                </Badge>
-              ))}
-            </div>
+            {post.tags && post.tags.length > 0 && (
+              <div className="flex flex-wrap gap-2">
+                {post.tags.map((tag) => (
+                  <Badge key={tag} variant="outline">
+                    {tag}
+                  </Badge>
+                ))}
+              </div>
+            )}
           </header>
+
+          {post.cover_image && (
+            <img
+              src={post.cover_image}
+              alt={language === 'es' ? post.title_es : post.title_en}
+              className="w-full h-auto rounded-lg mb-8"
+            />
+          )}
 
           {/* Ad at article start */}
           <AdSenseAd adSlot="3456789012" adFormat="rectangle" className="my-6" />
 
           <div className="text-foreground leading-relaxed space-y-6">
-            {post.content[language].split('\n\n').map((paragraph, index) => (
+            {(language === 'es' ? post.content_es : post.content_en).split('\n\n').map((paragraph, index) => (
               <p key={index} className="text-lg">
                 {paragraph}
               </p>

@@ -19,6 +19,7 @@ const UserMenu = () => {
   const { user, signOut } = useAuth();
   const { t } = useLanguage();
   const { toast } = useToast();
+  const [isAdmin, setIsAdmin] = React.useState(false);
 
   const handleSignOut = async () => {
     const { error } = await signOut();
@@ -47,7 +48,6 @@ const UserMenu = () => {
     );
   }
 
-  const [isAdmin, setIsAdmin] = React.useState(false);
   const initials = user.email ? user.email.substring(0, 2).toUpperCase() : 'U';
 
   React.useEffect(() => {

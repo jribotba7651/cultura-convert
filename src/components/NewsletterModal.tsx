@@ -10,6 +10,7 @@ import { Form, FormControl, FormField, FormItem, FormLabel, FormMessage } from '
 import { useToast } from '@/hooks/use-toast';
 import { BookOpen, X } from 'lucide-react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { supabase } from '@/integrations/supabase/client';
 
 const STORAGE_KEY = 'newsletter_modal_dismissed';
 const DISMISS_DURATION = 7 * 24 * 60 * 60 * 1000; // 7 days in milliseconds
@@ -116,23 +117,16 @@ export const NewsletterModal = ({ webhookEndpoint }: NewsletterModalProps) => {
     try {
       console.log('Newsletter subscription:', data);
 
-      // If webhook endpoint is provided, send data there
-      if (webhookEndpoint) {
-        const response = await fetch(webhookEndpoint, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            ...data,
-            timestamp: new Date().toISOString(),
-            language,
-          }),
-        });
+      const { error } = await supabase.functions.invoke('subscribe-newsletter', {
+        body: {
+          ...data,
+          language,
+          webhookEndpoint,
+        },
+      });
 
-        if (!response.ok) {
-          throw new Error('Subscription failed');
-        }
+      if (error) {
+        throw error;
       }
 
       toast({

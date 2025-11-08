@@ -12,7 +12,7 @@ import {
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { User, LogOut, BarChart3, Package } from 'lucide-react';
+import { User, LogOut, BarChart3, Package, Mail } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const UserMenu = () => {
@@ -96,6 +96,12 @@ const UserMenu = () => {
               <Link to="/admin/blog" className="flex items-center cursor-pointer">
                 <Package className="mr-2 h-4 w-4" />
                 <span>Gestionar Blog</span>
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
+              <Link to="/admin/newsletter" className="flex items-center cursor-pointer">
+                <Mail className="mr-2 h-4 w-4" />
+                <span>Gestionar Newsletter</span>
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>

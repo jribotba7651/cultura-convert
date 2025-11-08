@@ -23,6 +23,7 @@ import MyOrders from "./pages/MyOrders";
 import AdminOrders from "./pages/AdminOrders";
 import AdminAnalytics from "./pages/AdminAnalytics";
 import AdminBlog from "./pages/AdminBlog";
+import AdminNewsletter from "./pages/AdminNewsletter";
 import NotFound from "./pages/NotFound";
 import TestComponent from "./components/TestComponent";
 
@@ -48,7 +49,8 @@ const AppContent = () => {
         <Route path="/mis-pedidos" element={<MyOrders />} />
         <Route path="/admin/orders" element={<AdminOrders />} />
         <Route path="/admin/analytics" element={<AdminAnalytics />} />
-        <Route path="/admin/blog" element={<AdminBlog />} />
+            <Route path="/admin/blog" element={<AdminBlog />} />
+            <Route path="/admin/newsletter" element={<AdminNewsletter />} />
         <Route path="/test" element={<TestComponent />} />
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />

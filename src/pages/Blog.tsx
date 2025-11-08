@@ -2,6 +2,7 @@ import { Link } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
+import { NewsletterModal } from "@/components/NewsletterModal";
 import Navigation from "@/components/Navigation";
 import { supabase } from '@/integrations/supabase/client';
 import { useEffect, useState } from 'react';
@@ -53,6 +54,7 @@ const Blog = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
+      <NewsletterModal />
       
       <main className="container mx-auto px-4 py-8">
         <div className="text-center mb-12">

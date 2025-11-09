@@ -19,6 +19,7 @@ import Checkout from "./pages/Checkout";
 import OrderConfirmation from "./pages/OrderConfirmation";
 import Auth from "./pages/Auth";
 import Services from "./pages/Services";
+import Consulting from "./pages/Consulting";
 import MyOrders from "./pages/MyOrders";
 import AdminOrders from "./pages/AdminOrders";
 import AdminAnalytics from "./pages/AdminAnalytics";
@@ -43,6 +44,7 @@ const AppContent = () => {
         <Route path="/store" element={<Store />} />
         <Route path="/store/product/:id" element={<ProductDetails />} />
         <Route path="/services" element={<Services />} />
+        <Route path="/consulting" element={<Consulting />} />
         <Route path="/checkout" element={<Checkout />} />
         <Route path="/order-confirmation/:orderId" element={<OrderConfirmation />} />
         <Route path="/auth" element={<Auth />} />

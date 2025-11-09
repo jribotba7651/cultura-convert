@@ -140,6 +140,72 @@ export type Database = {
         }
         Relationships: []
       }
+      consulting_leads: {
+        Row: {
+          company: string
+          company_size: string | null
+          created_at: string
+          email: string
+          id: string
+          industry: string | null
+          main_challenge: string | null
+          name: string
+          resource_downloaded: string | null
+          role: string
+          updated_at: string
+        }
+        Insert: {
+          company: string
+          company_size?: string | null
+          created_at?: string
+          email: string
+          id?: string
+          industry?: string | null
+          main_challenge?: string | null
+          name: string
+          resource_downloaded?: string | null
+          role: string
+          updated_at?: string
+        }
+        Update: {
+          company?: string
+          company_size?: string | null
+          created_at?: string
+          email?: string
+          id?: string
+          industry?: string | null
+          main_challenge?: string | null
+          name?: string
+          resource_downloaded?: string | null
+          role?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
+      contact_inquiries: {
+        Row: {
+          created_at: string
+          email: string
+          id: string
+          message: string
+          name: string
+        }
+        Insert: {
+          created_at?: string
+          email: string
+          id?: string
+          message: string
+          name: string
+        }
+        Update: {
+          created_at?: string
+          email?: string
+          id?: string
+          message?: string
+          name?: string
+        }
+        Relationships: []
+      }
       newsletter_subscriptions: {
         Row: {
           created_at: string

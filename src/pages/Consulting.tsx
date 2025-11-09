@@ -94,11 +94,11 @@ const Consulting = () => {
 
   const services = [
     {
-      icon: <Database className="w-8 h-8 text-primary" />,
-      title: language === "es" ? "Master Data Governance & ERP Integration" : "Master Data Governance & ERP Integration",
-      description: language === "es" 
-        ? "Frameworks de gobernanza, integración con SAP/ERP, configuración de vendor master controls y ASL, workflows de qualification y change control."
-        : "Governance frameworks, SAP/ERP integration, vendor master controls and ASL configuration, qualification and change control workflows.",
+      icon: <Shield className="w-8 h-8 text-primary" />,
+      title: language === "es" ? "Regulatory Compliance Consulting" : "Regulatory Compliance Consulting",
+      description: language === "es"
+        ? "Implementación de FDA 21 CFR 820.50, ISO 13485, EU MDR; compliance para productos combinados; estrategia y documentación regulatoria; preparación y remediación de auditorías."
+        : "FDA 21 CFR 820.50, ISO 13485, EU MDR implementation; combination product compliance; regulatory strategy and documentation; audit preparation and remediation.",
     },
     {
       icon: <FileCheck className="w-8 h-8 text-primary" />,
@@ -106,13 +106,6 @@ const Consulting = () => {
       description: language === "es"
         ? "Transformación digital de procesos de calidad, integración bidireccional ERP–eQMS, controles de cumplimiento automatizados, monitorización en tiempo real."
         : "Digital transformation of quality processes, bidirectional ERP-eQMS integration, automated compliance controls, real-time monitoring.",
-    },
-    {
-      icon: <Shield className="w-8 h-8 text-primary" />,
-      title: language === "es" ? "Regulatory Compliance Consulting" : "Regulatory Compliance Consulting",
-      description: language === "es"
-        ? "Implementación de FDA 21 CFR 820.50, ISO 13485, EU MDR; compliance para productos combinados; estrategia y documentación regulatoria; preparación y remediación de auditorías."
-        : "FDA 21 CFR 820.50, ISO 13485, EU MDR implementation; combination product compliance; regulatory strategy and documentation; audit preparation and remediation.",
     },
     {
       icon: <TrendingUp className="w-8 h-8 text-primary" />,
@@ -134,6 +127,13 @@ const Consulting = () => {
       description: language === "es"
         ? "Más de 22 años de experiencia en empresas multinacionales y startups de dispositivos médicos, productos combinados y biotecnología."
         : "22+ years of experience in multinational companies and startups in medical devices, combination products, and biotechnology.",
+    },
+    {
+      icon: <Database className="w-8 h-8 text-primary" />,
+      title: language === "es" ? "Master Data Governance & ERP Integration" : "Master Data Governance & ERP Integration",
+      description: language === "es" 
+        ? "Frameworks de gobernanza, integración con SAP/ERP, configuración de vendor master controls y ASL, workflows de qualification y change control."
+        : "Governance frameworks, SAP/ERP integration, vendor master controls and ASL configuration, qualification and change control workflows.",
     },
   ];
 
@@ -190,18 +190,21 @@ const Consulting = () => {
           <div className="mb-16 p-8 bg-card rounded-lg shadow-lg border border-border">
             <div className="flex flex-col md:flex-row items-center justify-center gap-4 md:gap-8">
               <div className="flex items-center gap-2">
-                <Database className="w-12 h-12 text-primary" />
-                <span className="font-semibold">Master Data</span>
+                <Shield className="w-12 h-12 text-primary" />
+                <span className="font-semibold">Compliance</span>
               </div>
               <div className="hidden md:block text-4xl text-muted-foreground">→</div>
               <div className="flex items-center gap-2">
                 <FileCheck className="w-12 h-12 text-primary" />
-                <span className="font-semibold">ERP</span>
+                <span className="font-semibold">eQMS</span>
               </div>
               <div className="hidden md:block text-4xl text-muted-foreground">→</div>
-              <div className="flex items-center gap-2">
-                <Shield className="w-12 h-12 text-primary" />
-                <span className="font-semibold">Compliance</span>
+              <div className="flex items-center gap-3">
+                <Database className="w-12 h-12 text-primary" />
+                <div className="flex flex-col">
+                  <span className="font-semibold">Master Data</span>
+                  <span className="text-sm text-muted-foreground">& ERP</span>
+                </div>
               </div>
             </div>
           </div>

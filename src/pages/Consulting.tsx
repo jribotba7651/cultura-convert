@@ -17,7 +17,7 @@ import {
 } from "@/components/ui/dialog";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { 
+import {
   Database, 
   Shield, 
   FileCheck, 
@@ -26,7 +26,8 @@ import {
   Award,
   Download,
   CheckCircle2,
-  Mail
+  Mail,
+  FileText
 } from "lucide-react";
 
 const Consulting = () => {
@@ -116,10 +117,65 @@ const Consulting = () => {
         es: "Navegue con confianza los complejos requisitos de FDA 21 CFR 820.50, ISO 13485:2016, y EU MDR 2017/745 con nuestra consultoría especializada en cumplimiento regulatorio. Nuestro enfoque integrado asegura que su organización no solo cumpla con los estándares actuales, sino que anticipe cambios regulatorios futuros. Ofrecemos evaluaciones exhaustivas de brechas (gap analysis) que identifican vulnerabilidades en sus sistemas de calidad antes de que se conviertan en hallazgos de inspección. Nuestro equipo desarrolla estrategias de implementación personalizadas que alinean las regulaciones con sus procesos operativos reales, eliminando la duplicación de esfuerzos entre múltiples marcos regulatorios. Especializados en productos de combinación (drug-device, biologic-device), proporcionamos guía experta para navegar los requisitos duales de GMP y QSR. Preparamos a su equipo para inspecciones regulatorias mediante auditorías simuladas, desarrollo de documentación robusta, y entrenamiento específico para interacciones con inspectores. Nuestros servicios incluyen: remediación de warning letters, preparación para auditorías de Notified Body, desarrollo de políticas y procedimientos conforme a regulaciones, y estrategia regulatoria para entrada a nuevos mercados.",
         en: "Navigate with confidence the complex requirements of FDA 21 CFR 820.50, ISO 13485:2016, and EU MDR 2017/745 with our specialized regulatory compliance consulting. Our integrated approach ensures your organization not only meets current standards but anticipates future regulatory changes. We offer comprehensive gap analyses that identify vulnerabilities in your quality systems before they become inspection findings. Our team develops customized implementation strategies that align regulations with your actual operational processes, eliminating duplication of efforts across multiple regulatory frameworks. Specialized in combination products (drug-device, biologic-device), we provide expert guidance to navigate the dual requirements of GMP and QSR. We prepare your team for regulatory inspections through mock audits, robust documentation development, and specific training for inspector interactions. Our services include: warning letter remediation, Notified Body audit preparation, development of regulation-compliant policies and procedures, and regulatory strategy for new market entry."
       },
-      realCase: {
-        es: "Una empresa mediana de dispositivos médicos Clase III recibió un warning letter de FDA citando deficiencias en controles de compra y gestión de proveedores. Los hallazgos incluían falta de documentación en evaluaciones de proveedores, ausencia de acuerdos de calidad, y especificaciones de compra inadecuadas. Implementamos un programa de remediación integral: rediseñamos la jerarquía documental (política-procedimiento-instrucción de trabajo), establecimos matrices de clasificación de riesgo para proveedores, y desarrollamos templates estandarizados para acuerdos de calidad y evaluaciones. Entrenamos al equipo en la ejecución del nuevo sistema y preparamos el paquete de respuesta a FDA con evidencia objetiva de correcciones sistémicas. El resultado: FDA aceptó la respuesta en la primera revisión y cerró el warning letter en 8 meses—significativamente por debajo del promedio de 18-24 meses. La empresa pasó su siguiente inspección de rutina sin observaciones relacionadas con purchasing controls.",
-        en: "A mid-sized Class III medical device company received an FDA warning letter citing deficiencies in purchasing controls and supplier management. Findings included lack of documentation in supplier evaluations, absence of quality agreements, and inadequate purchasing specifications. We implemented a comprehensive remediation program: redesigned the documentation hierarchy (policy-procedure-work instruction), established risk classification matrices for suppliers, and developed standardized templates for quality agreements and evaluations. We trained the team on executing the new system and prepared the FDA response package with objective evidence of systemic corrections. The result: FDA accepted the response on first review and closed the warning letter in 8 months—significantly below the 18-24 month average. The company passed its next routine inspection with no observations related to purchasing controls."
-      },
+      cases: [
+        {
+          id: "case-1-warning-letter",
+          title: {
+            es: "Remediación de Warning Letter de FDA",
+            en: "FDA Warning Letter Remediation"
+          },
+          situation: {
+            es: "Empresa mediana de dispositivos Clase III recibió warning letter de FDA citando deficiencias críticas en purchasing controls: falta de documentación en evaluaciones de proveedores, ausencia de acuerdos de calidad formales, especificaciones de compra inadecuadas, y uso de proveedores no calificados para componentes críticos. La empresa enfrentaba riesgo de consent decree si no remediaba sistémicamente.",
+            en: "Mid-sized Class III device company received FDA warning letter citing critical purchasing control deficiencies: lack of documentation in supplier evaluations, absence of formal quality agreements, inadequate purchasing specifications, and use of unqualified suppliers for critical components. The company faced consent decree risk if not systematically remediated."
+          },
+          solution: {
+            es: "Implementamos programa de remediación integral: (1) Rediseñamos jerarquía documental completa (política-procedimiento-work instructions-records), (2) Establecimos matrices de clasificación de riesgo para proveedores con criterios objetivos, (3) Desarrollamos templates estandarizados para quality agreements, supplier surveys, y audit reports, (4) Re-evaluamos todos los proveedores activos según nuevos criterios, (5) Entrenamos equipos de Quality, Procurement, y Engineering en nuevos procesos, (6) Preparamos paquete de respuesta a FDA con evidencia objetiva de correcciones sistémicas y effectiveness checks.",
+            en: "We implemented comprehensive remediation program: (1) Redesigned complete documentation hierarchy (policy-procedure-work instructions-records), (2) Established supplier risk classification matrices with objective criteria, (3) Developed standardized templates for quality agreements, supplier surveys, and audit reports, (4) Re-evaluated all active suppliers per new criteria, (5) Trained Quality, Procurement, and Engineering teams on new processes, (6) Prepared FDA response package with objective evidence of systemic corrections and effectiveness checks."
+          },
+          results: {
+            es: "FDA aceptó la respuesta en primera revisión sin requerir información adicional. Warning letter cerrado en 8 meses vs promedio industria de 18-24 meses (reducción 60%). La empresa pasó su siguiente inspección de rutina sin observaciones relacionadas con purchasing controls. Sistema implementado previno recurrencia: cero hallazgos similares en inspecciones subsecuentes durante 4+ años.",
+            en: "FDA accepted response on first review without requiring additional information. Warning letter closed in 8 months vs industry average of 18-24 months (60% reduction). Company passed its next routine inspection with no observations related to purchasing controls. Implemented system prevented recurrence: zero similar findings in subsequent inspections over 4+ years."
+          }
+        },
+        {
+          id: "case-2-notified-body-prep",
+          title: {
+            es: "Preparación para Auditoría de Notified Body bajo MDR",
+            en: "Notified Body Audit Preparation under MDR"
+          },
+          situation: {
+            es: "Fabricante de dispositivos Clase IIb perseguía transición de MDD a MDR para mantener CE marking. Notified Body indicó que auditoría de recertificación incluiría evaluación exhaustiva de supplier management, área históricamente débil con múltiples observaciones en auditorías previas. Empresa carecía de documentación robusta de supplier risk assessment, quality agreements incompletos, y proceso informal de change notification de proveedores.",
+            en: "Class IIb device manufacturer pursued MDD to MDR transition to maintain CE marking. Notified Body indicated recertification audit would include exhaustive supplier management evaluation, historically weak area with multiple observations in previous audits. Company lacked robust supplier risk assessment documentation, incomplete quality agreements, and informal supplier change notification process."
+          },
+          solution: {
+            es: "Ejecutamos preparación intensiva de 5 meses: (1) Realizamos gap assessment detallado contra Annex IX Section 2.3 y Article 10(9) de MDR, (2) Implementamos matriz de riesgo de proveedores considerando clase de dispositivo y criticidad de componente, (3) Actualizamos quality agreements con cláusulas MDR-específicas incluyendo preparedness para auditorías no anunciadas, (4) Establecimos proceso formal de change notification con evaluación de impacto en conformidad, (5) Preparamos proveedores críticos para posibles auditorías de Notified Body, (6) Condujimos mock audit completo identificando y cerrando gaps finales.",
+            en: "We executed intensive 5-month preparation: (1) Conducted detailed gap assessment against Annex IX Section 2.3 and MDR Article 10(9), (2) Implemented supplier risk matrix considering device class and component criticality, (3) Updated quality agreements with MDR-specific clauses including unannounced audit preparedness, (4) Established formal change notification process with conformity impact evaluation, (5) Prepared critical suppliers for possible Notified Body audits, (6) Conducted complete mock audit identifying and closing final gaps."
+          },
+          results: {
+            es: "Auditoría de Notified Body resultó en cero hallazgos mayores en supplier management (vs 3 observaciones mayores en auditoría previa). CE marking otorgado en primera revisión. Notified Body condujo auditoría no anunciada a proveedor crítico de sterilización—proveedor estaba completamente preparado y auditoría concluyó sin findings. Sistema implementado posicionó a la empresa para cumplimiento MDR sostenible.",
+            en: "Notified Body audit resulted in zero major findings in supplier management (vs 3 major observations in previous audit). CE marking granted on first review. Notified Body conducted unannounced audit at critical sterilization supplier—supplier was fully prepared and audit concluded without findings. Implemented system positioned company for sustainable MDR compliance."
+          }
+        },
+        {
+          id: "case-3-combination-product",
+          title: {
+            es: "Cumplimiento Dual GMP/QSR para Producto de Combinación",
+            en: "Dual GMP/QSR Compliance for Combination Product"
+          },
+          situation: {
+            es: "Startup desarrollando drug-device combination product (biologic-device) preparaba first-in-human clinical trial. FDA indicó que inspección pre-clinical incluiría evaluación de controles tanto de device manufacturing (21 CFR 820) como de biologic component (21 CFR 600). Empresa tenía expertise fuerte en biologics pero experiencia limitada en device QMS. Supplier management especialmente débil: faltaban evaluaciones formales de proveedores de componentes de device, y calificación de contract manufacturer de device assembly era insuficiente.",
+            en: "Startup developing drug-device combination product (biologic-device) prepared for first-in-human clinical trial. FDA indicated pre-clinical inspection would include evaluation of both device manufacturing controls (21 CFR 820) and biologic component (21 CFR 600). Company had strong biologics expertise but limited device QMS experience. Supplier management especially weak: formal evaluations of device component suppliers were missing, and device assembly contract manufacturer qualification was insufficient."
+          },
+          solution: {
+            es: "Diseñamos e implementamos programa de purchasing controls híbrido: (1) Desarrollamos templates específicos para combination products abordando ambos device y biologic requirements, (2) Establecimos dual-track supplier qualification: proveedores de device components evaluados contra 21 CFR 820.50, proveedores de raw materials biológicos contra 21 CFR 600 y USP requirements, (3) Calificamos contract manufacturer de device assembly con auditoría comprehensiva y quality agreement robusto, (4) Implementamos material traceability system linking device components a lotes de biologic, (5) Entrenamos equipo en thinking like FDA inspector para ambos CDER y CDRH perspectives.",
+            en: "We designed and implemented hybrid purchasing controls program: (1) Developed combination product-specific templates addressing both device and biologic requirements, (2) Established dual-track supplier qualification: device component suppliers evaluated against 21 CFR 820.50, biologic raw material suppliers against 21 CFR 600 and USP requirements, (3) Qualified device assembly contract manufacturer with comprehensive audit and robust quality agreement, (4) Implemented material traceability system linking device components to biologic lots, (5) Trained team in thinking like FDA inspector for both CDER and CDRH perspectives."
+          },
+          results: {
+            es: "Inspección pre-clinical de FDA (4 días, equipo dual CDER/CDRH) resultó en solo 2 observaciones menores no relacionadas con purchasing controls. Clinical trial authorization otorgada sin delay. FDA inspectors comentaron que supplier management approach era 'modelo ejemplar' para combination products. Empresa posteriormente obtuvo aprobación comercial usando mismo framework de purchasing controls sin findings adicionales en pre-approval inspection.",
+            en: "FDA pre-clinical inspection (4 days, dual CDER/CDRH team) resulted in only 2 minor observations unrelated to purchasing controls. Clinical trial authorization granted without delay. FDA inspectors commented that supplier management approach was 'exemplary model' for combination products. Company subsequently obtained commercial approval using same purchasing controls framework without additional findings in pre-approval inspection."
+          }
+        }
+      ],
       impactMetric: {
         es: "Reducción de 60% en tiempo de cierre de warning letters (8 vs 18-24 meses promedio) • 100% tasa de aceptación de respuestas regulatorias en primera revisión • Cero hallazgos repetidos en inspecciones subsecuentes",
         en: "60% reduction in warning letter closure time (8 vs 18-24 months average) • 100% first-time acceptance rate for regulatory responses • Zero repeat findings in subsequent inspections"
@@ -380,16 +436,47 @@ const Consulting = () => {
                                 {service.detailedDescription[language]}
                               </p>
                               
-                              {/* Caso real */}
-                              {service.realCase && (
-                                <div className="bg-muted/50 p-5 rounded-lg border border-border">
-                                  <h4 className="font-semibold text-foreground mb-3 flex items-center gap-2">
-                                    <CheckCircle2 className="w-5 h-5 text-primary" />
-                                    {language === "es" ? "Caso Real de Éxito" : "Real Success Story"}
+                              {/* Casos de éxito */}
+                              {service.cases && service.cases.length > 0 && (
+                                <div className="space-y-4">
+                                  <h4 className="font-semibold text-lg flex items-center gap-2">
+                                    <FileText className="w-5 h-5 text-primary" />
+                                    {language === "es" ? "Casos de Éxito Reales" : "Real Success Cases"}
                                   </h4>
-                                  <p className="text-sm text-foreground/80 leading-relaxed">
-                                    {service.realCase[language]}
-                                  </p>
+                                  {service.cases.map((caseStudy) => (
+                                    <div key={caseStudy.id} className="bg-muted/50 p-5 rounded-lg border border-border space-y-3">
+                                      <h5 className="font-semibold text-primary">
+                                        {caseStudy.title[language]}
+                                      </h5>
+                                      
+                                      <div>
+                                        <p className="text-xs font-medium text-foreground/70 mb-1">
+                                          {language === "es" ? "Situación:" : "Situation:"}
+                                        </p>
+                                        <p className="text-sm text-foreground/80 leading-relaxed">
+                                          {caseStudy.situation[language]}
+                                        </p>
+                                      </div>
+
+                                      <div>
+                                        <p className="text-xs font-medium text-foreground/70 mb-1">
+                                          {language === "es" ? "Solución:" : "Solution:"}
+                                        </p>
+                                        <p className="text-sm text-foreground/80 leading-relaxed">
+                                          {caseStudy.solution[language]}
+                                        </p>
+                                      </div>
+
+                                      <div className="bg-primary/5 p-3 rounded border border-primary/10">
+                                        <p className="text-xs font-medium text-foreground/70 mb-1">
+                                          {language === "es" ? "Resultados:" : "Results:"}
+                                        </p>
+                                        <p className="text-sm text-foreground/90 leading-relaxed">
+                                          {caseStudy.results[language]}
+                                        </p>
+                                      </div>
+                                    </div>
+                                  ))}
                                 </div>
                               )}
                               

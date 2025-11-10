@@ -2,8 +2,9 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation, useNavigate } from "react-router-dom";
 import ErrorBoundary from "./components/ErrorBoundary";
+import { useEffect } from "react";
 import { LanguageProvider } from "./contexts/LanguageContext";
 import { CartProvider } from "./contexts/CartContext";
 import { AuthProvider } from "./contexts/AuthContext";
@@ -30,6 +31,22 @@ import TestComponent from "./components/TestComponent";
 
 const queryClient = new QueryClient();
 
+const CanonicalPathGuard = () => {
+  const location = useLocation();
+  const navigate = useNavigate();
+
+  useEffect(() => {
+    const { pathname, search, hash } = location;
+    const lower = pathname.toLowerCase();
+    const noTrailing = lower !== "/" && lower.endsWith("/") ? lower.slice(0, -1) : lower;
+    if (pathname !== noTrailing) {
+      navigate({ pathname: noTrailing, search, hash }, { replace: true });
+    }
+  }, [location, navigate]);
+
+  return null;
+};
+
 const AppContent = () => {
   // Track page views for analytics
   useAnalytics();
@@ -37,8 +54,8 @@ const AppContent = () => {
   return (
     <>
       <ShoppingCart />
+      <CanonicalPathGuard />
       <Routes>
-        <Route path="/" element={<Index />} />
         <Route path="/blog" element={<Blog />} />
         <Route path="/blog/:slug" element={<BlogPost />} />
         <Route path="/store" element={<Store />} />

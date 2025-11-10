@@ -118,10 +118,6 @@ const Consulting = () => {
         en: "Navigate with confidence the complex requirements of FDA 21 CFR 820.50, ISO 13485:2016, and EU MDR 2017/745 with our specialized regulatory compliance consulting. Our integrated approach ensures your organization not only meets current standards but anticipates future regulatory changes. We offer comprehensive gap analyses that identify vulnerabilities in your quality systems before they become inspection findings. Our team develops customized implementation strategies that align regulations with your actual operational processes, eliminating duplication of efforts across multiple regulatory frameworks. Specialized in combination products (drug-device, biologic-device), we provide expert guidance to navigate the dual requirements of GMP and QSR. We prepare your team for regulatory inspections through mock audits, robust documentation development, and specific training for inspector interactions. Our services include: warning letter remediation, Notified Body audit preparation, development of regulation-compliant policies and procedures, and regulatory strategy for new market entry."
       },
       cases: [],
-      impactMetric: {
-        es: "Reducción de 60% en tiempo de cierre de warning letters (8 vs 18-24 meses promedio) • 100% tasa de aceptación de respuestas regulatorias en primera revisión • Cero hallazgos repetidos en inspecciones subsecuentes",
-        en: "60% reduction in warning letter closure time (8 vs 18-24 months average) • 100% first-time acceptance rate for regulatory responses • Zero repeat findings in subsequent inspections"
-      },
       ctaText: {
         es: "Descargar Guía: Cómo Preparar su QMS para Inspecciones FDA/Notified Body",
         en: "Download Guide: How to Prepare Your QMS for FDA/Notified Body Inspections"

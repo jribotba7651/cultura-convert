@@ -47,9 +47,7 @@
     }
   ],
   "rewrites": [
-    {
-      "source": "/((?!assets/|.*\\.(js|css|png|jpg|jpeg|gif|svg|ico|woff2?|ttf|eot)$).*)",
-      "destination": "/index.html"
-    }
+    { "source": "/(.*)", "destination": "/index.html" }
   ]
 }
+

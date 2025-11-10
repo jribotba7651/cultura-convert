@@ -22,3 +22,9 @@
   for = "/*.css"
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
+
+# Redirects para SPA - todas las rutas deben servir index.html
+[[redirects]]
+  from = "/*"
+  to = "/index.html"
+  status = 200

@@ -28,6 +28,7 @@ import AdminBlog from "./pages/AdminBlog";
 import AdminNewsletter from "./pages/AdminNewsletter";
 import NotFound from "./pages/NotFound";
 import TestComponent from "./components/TestComponent";
+import SPARecovery from "./components/SPARecovery";
 
 const queryClient = new QueryClient();
 
@@ -54,6 +55,7 @@ const AppContent = () => {
   return (
     <>
       <ShoppingCart />
+      <SPARecovery />
       <CanonicalPathGuard />
       <Routes>
         <Route path="/blog" element={<Blog />} />

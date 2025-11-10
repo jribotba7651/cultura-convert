@@ -1,0 +1,25 @@
+<!doctype html>
+<html lang="es">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Redirigiendo…</title>
+  <meta name="robots" content="noindex, nofollow" />
+  <link rel="canonical" href="/" />
+  <script>
+    (function(){
+      try {
+        var path = location.pathname + location.search + location.hash;
+        sessionStorage.setItem('SPA_REDIRECT', path);
+      } catch(e) {}
+      location.replace('/');
+    })();
+  </script>
+  <noscript>
+    <meta http-equiv="refresh" content="0; url=/" />
+  </noscript>
+</head>
+<body>
+  Redirigiendo…
+</body>
+</html>

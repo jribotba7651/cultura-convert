@@ -28,6 +28,7 @@ import AdminBlog from "./pages/AdminBlog";
 import AdminNewsletter from "./pages/AdminNewsletter";
 import AdminResources from "./pages/AdminResources";
 import NotFound from "./pages/NotFound";
+import ResourceDownload from "./pages/ResourceDownload";
 import TestComponent from "./components/TestComponent";
 import SPARecovery from "./components/SPARecovery";
 
@@ -66,6 +67,8 @@ const AppContent = () => {
         <Route path="/store/product/:id" element={<ProductDetails />} />
         <Route path="/services" element={<Services />} />
         <Route path="/consulting" element={<Consulting />} />
+        <Route path="/recursos/:slug" element={<ResourceDownload />} />
+        <Route path="/resources/:slug" element={<ResourceDownload />} />
         <Route path="/checkout" element={<Checkout />} />
         <Route path="/order-confirmation/:orderId" element={<OrderConfirmation />} />
         <Route path="/auth" element={<Auth />} />

@@ -48,6 +48,15 @@ const Consulting = () => {
   const { language } = useLanguage();
   const [downloadableResources, setDownloadableResources] = useState<ConsultingResource[]>([]);
   const [loadingResources, setLoadingResources] = useState(true);
+  const [selectedResource, setSelectedResource] = useState<ConsultingResource | null>(null);
+  const [isDownloadDialogOpen, setIsDownloadDialogOpen] = useState(false);
+  const [downloadFormData, setDownloadFormData] = useState({
+    name: "",
+    email: "",
+    company: "",
+    role: "",
+  });
+  const [isSubmittingDownload, setIsSubmittingDownload] = useState(false);
   const [leadFormData, setLeadFormData] = useState({
     name: "",
     email: "",
@@ -98,17 +107,56 @@ const Consulting = () => {
   };
 
   const handleDownload = async (resource: ConsultingResource) => {
-    // Increment download count
+    setSelectedResource(resource);
+    setIsDownloadDialogOpen(true);
+  };
+
+  const handleDownloadSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setIsSubmittingDownload(true);
+
     try {
-      await supabase
-        .from('consulting_resources')
-        .update({ download_count: resource.download_count + 1 })
-        .eq('id', resource.id);
+      // Guardar lead en la base de datos
+      const { error } = await supabase.functions.invoke("submit-consulting-lead", {
+        body: { 
+          ...downloadFormData,
+          resourceDownloaded: selectedResource?.title_es || selectedResource?.title_en 
+        },
+      });
+
+      if (error) throw error;
+
+      // Incrementar contador de descargas
+      if (selectedResource) {
+        await supabase
+          .from('consulting_resources')
+          .update({ download_count: selectedResource.download_count + 1 })
+          .eq('id', selectedResource.id);
+        
+        // Abrir descarga
+        window.open(getPublicUrl(selectedResource.file_path), '_blank');
+        
+        toast.success(
+          language === "es" 
+            ? "¡Descarga iniciada! Revisa tu email para más recursos." 
+            : "Download started! Check your email for more resources."
+        );
+      }
+
+      // Limpiar y cerrar
+      setDownloadFormData({ name: "", email: "", company: "", role: "" });
+      setIsDownloadDialogOpen(false);
+      setSelectedResource(null);
       
-      // Open download link
-      window.open(getPublicUrl(resource.file_path), '_blank');
     } catch (error) {
-      console.error('Error updating download count:', error);
+      console.error("Error submitting download:", error);
+      toast.error(
+        language === "es" 
+          ? "Error al procesar. Intenta de nuevo." 
+          : "Error processing. Please try again."
+      );
+    } finally {
+      setIsSubmittingDownload(false);
     }
   };
 
@@ -409,6 +457,148 @@ const Consulting = () => {
         </div>
       </section>
 
+      {/* Free Resources Section - MOVED TO TOP */}
+      {downloadableResources.length > 0 && (
+        <section className="py-16 px-4 bg-gradient-to-b from-primary/5 to-background">
+          <div className="container mx-auto max-w-6xl">
+            <h2 className="text-3xl font-bold text-center mb-4">
+              {language === "es" ? "📥 Recursos Gratuitos para Descargar" : "📥 Free Resources to Download"}
+            </h2>
+            <p className="text-center text-muted-foreground mb-12 max-w-2xl mx-auto">
+              {language === "es"
+                ? "Accede a guías, plantillas y herramientas exclusivas. Solo necesitas proporcionar tu información para descargar."
+                : "Access exclusive guides, templates and tools. Just provide your information to download."}
+            </p>
+            
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {downloadableResources.map((resource) => (
+                <Card key={resource.id} className={resource.is_featured ? "border-primary border-2 shadow-lg" : "hover:shadow-md transition-shadow"}>
+                  <CardHeader>
+                    {resource.is_featured && (
+                      <div className="text-xs bg-primary text-primary-foreground px-3 py-1 rounded-full w-fit mb-3 font-semibold">
+                        ⭐ {language === "es" ? "Destacado" : "Featured"}
+                      </div>
+                    )}
+                    <CardTitle className="text-lg flex items-start gap-3">
+                      <FileText className="h-6 w-6 text-primary flex-shrink-0 mt-1" />
+                      <span>{language === "es" ? resource.title_es : resource.title_en}</span>
+                    </CardTitle>
+                    <CardDescription className="mt-2">
+                      {language === "es" ? resource.description_es : resource.description_en}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-4">
+                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
+                        <div className="flex items-center gap-2">
+                          <FileText className="h-4 w-4" />
+                          <span>PDF</span>
+                        </div>
+                        <div className="flex items-center gap-2">
+                          <Download className="h-4 w-4" />
+                          <span>{resource.download_count} {language === "es" ? "descargas" : "downloads"}</span>
+                        </div>
+                      </div>
+                      <Button 
+                        onClick={() => handleDownload(resource)}
+                        className="w-full"
+                        variant={resource.is_featured ? "default" : "outline"}
+                        size="lg"
+                      >
+                        <Download className="h-4 w-4 mr-2" />
+                        {language === "es" ? "Descargar Gratis" : "Download Free"}
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
+
+      {/* Download Form Dialog */}
+      <Dialog open={isDownloadDialogOpen} onOpenChange={setIsDownloadDialogOpen}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>
+              {language === "es" ? "Descargar Recurso" : "Download Resource"}
+            </DialogTitle>
+            <DialogDescription>
+              {language === "es" 
+                ? "Por favor completa tu información para descargar el recurso. Te enviaremos una copia a tu email." 
+                : "Please complete your information to download the resource. We'll send a copy to your email."}
+            </DialogDescription>
+          </DialogHeader>
+          <form onSubmit={handleDownloadSubmit} className="space-y-4">
+            <div>
+              <Label htmlFor="download-name">{language === "es" ? "Nombre Completo" : "Full Name"} *</Label>
+              <Input
+                id="download-name"
+                required
+                value={downloadFormData.name}
+                onChange={(e) => setDownloadFormData({ ...downloadFormData, name: e.target.value })}
+                placeholder={language === "es" ? "Tu nombre" : "Your name"}
+              />
+            </div>
+            <div>
+              <Label htmlFor="download-email">{language === "es" ? "Email Corporativo" : "Business Email"} *</Label>
+              <Input
+                id="download-email"
+                type="email"
+                required
+                value={downloadFormData.email}
+                onChange={(e) => setDownloadFormData({ ...downloadFormData, email: e.target.value })}
+                placeholder={language === "es" ? "tu@empresa.com" : "you@company.com"}
+              />
+            </div>
+            <div>
+              <Label htmlFor="download-company">{language === "es" ? "Empresa" : "Company"} *</Label>
+              <Input
+                id="download-company"
+                required
+                value={downloadFormData.company}
+                onChange={(e) => setDownloadFormData({ ...downloadFormData, company: e.target.value })}
+                placeholder={language === "es" ? "Nombre de tu empresa" : "Your company name"}
+              />
+            </div>
+            <div>
+              <Label htmlFor="download-role">{language === "es" ? "Puesto/Rol" : "Job Title/Role"} *</Label>
+              <Input
+                id="download-role"
+                required
+                value={downloadFormData.role}
+                onChange={(e) => setDownloadFormData({ ...downloadFormData, role: e.target.value })}
+                placeholder={language === "es" ? "Ej: Gerente de Calidad" : "Ex: Quality Manager"}
+              />
+            </div>
+            <div className="flex gap-2 pt-4">
+              <Button
+                type="button"
+                variant="outline"
+                className="flex-1"
+                onClick={() => {
+                  setIsDownloadDialogOpen(false);
+                  setDownloadFormData({ name: "", email: "", company: "", role: "" });
+                }}
+              >
+                {language === "es" ? "Cancelar" : "Cancel"}
+              </Button>
+              <Button type="submit" className="flex-1" disabled={isSubmittingDownload}>
+                {isSubmittingDownload ? (
+                  <>{language === "es" ? "Procesando..." : "Processing..."}</>
+                ) : (
+                  <>
+                    <Download className="h-4 w-4 mr-2" />
+                    {language === "es" ? "Descargar" : "Download"}
+                  </>
+                )}
+              </Button>
+            </div>
+          </form>
+        </DialogContent>
+      </Dialog>
+
       {/* Services Section */}
       <section className="py-16 px-4 bg-secondary/5">
         <div className="container mx-auto max-w-6xl">
@@ -677,63 +867,6 @@ const Consulting = () => {
           </div>
         </div>
       </section>
-
-      {/* Free Resources Section */}
-      {downloadableResources.length > 0 && (
-        <section className="py-16 px-4 bg-secondary/10">
-          <div className="container mx-auto max-w-6xl">
-            <h2 className="text-3xl font-bold text-center mb-4">
-              {language === "es" ? "Recursos Gratuitos" : "Free Resources"}
-            </h2>
-            <p className="text-center text-muted-foreground mb-12">
-              {language === "es"
-                ? "Descarga guías, plantillas y herramientas para mejorar tus procesos de calidad"
-                : "Download guides, templates and tools to improve your quality processes"}
-            </p>
-            
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
-              {downloadableResources.map((resource) => (
-                <Card key={resource.id} className={resource.is_featured ? "border-primary" : ""}>
-                  <CardHeader>
-                    {resource.is_featured && (
-                      <div className="text-xs bg-primary text-primary-foreground px-2 py-1 rounded w-fit mb-2">
-                        {language === "es" ? "Destacado" : "Featured"}
-                      </div>
-                    )}
-                    <CardTitle className="text-lg flex items-start gap-2">
-                      <FileText className="h-5 w-5 text-primary flex-shrink-0 mt-1" />
-                      <span>{language === "es" ? resource.title_es : resource.title_en}</span>
-                    </CardTitle>
-                    <CardDescription>
-                      {language === "es" ? resource.description_es : resource.description_en}
-                    </CardDescription>
-                  </CardHeader>
-                  <CardContent>
-                    <div className="space-y-3">
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <FileText className="h-4 w-4" />
-                        <span>PDF • {formatFileSize(resource.file_size_bytes)}</span>
-                      </div>
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <Download className="h-4 w-4" />
-                        <span>{resource.download_count} {language === "es" ? "descargas" : "downloads"}</span>
-                      </div>
-                      <Button 
-                        onClick={() => handleDownload(resource)}
-                        className="w-full mt-4"
-                        variant={resource.is_featured ? "default" : "outline"}
-                      >
-                        <Download className="h-4 w-4 mr-2" />
-                        {language === "es" ? "Descargar Gratis" : "Download Free"}
-                      </Button>
-                    </div>
-                  </CardContent>
-                </Card>
-              ))}
-            </div>
-          </div>
-        </section>
-      )}
 
       {/* Contact Section */}
       <section className="py-16 px-4 bg-secondary/5">

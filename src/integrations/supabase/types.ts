@@ -182,6 +182,57 @@ export type Database = {
         }
         Relationships: []
       }
+      consulting_resources: {
+        Row: {
+          created_at: string | null
+          created_by: string | null
+          description_en: string
+          description_es: string
+          display_order: number | null
+          download_count: number | null
+          file_name: string
+          file_path: string
+          file_size_bytes: number
+          id: string
+          is_featured: boolean | null
+          title_en: string
+          title_es: string
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          created_by?: string | null
+          description_en: string
+          description_es: string
+          display_order?: number | null
+          download_count?: number | null
+          file_name: string
+          file_path: string
+          file_size_bytes: number
+          id?: string
+          is_featured?: boolean | null
+          title_en: string
+          title_es: string
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          created_by?: string | null
+          description_en?: string
+          description_es?: string
+          display_order?: number | null
+          download_count?: number | null
+          file_name?: string
+          file_path?: string
+          file_size_bytes?: number
+          id?: string
+          is_featured?: boolean | null
+          title_en?: string
+          title_es?: string
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       contact_inquiries: {
         Row: {
           created_at: string

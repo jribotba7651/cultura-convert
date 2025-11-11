@@ -26,6 +26,7 @@ import AdminOrders from "./pages/AdminOrders";
 import AdminAnalytics from "./pages/AdminAnalytics";
 import AdminBlog from "./pages/AdminBlog";
 import AdminNewsletter from "./pages/AdminNewsletter";
+import AdminResources from "./pages/AdminResources";
 import NotFound from "./pages/NotFound";
 import TestComponent from "./components/TestComponent";
 import SPARecovery from "./components/SPARecovery";
@@ -72,6 +73,7 @@ const AppContent = () => {
         <Route path="/admin/analytics" element={<AdminAnalytics />} />
             <Route path="/admin/blog" element={<AdminBlog />} />
             <Route path="/admin/newsletter" element={<AdminNewsletter />} />
+            <Route path="/admin/resources" element={<AdminResources />} />
         <Route path="/test" element={<TestComponent />} />
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />

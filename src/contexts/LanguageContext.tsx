@@ -198,14 +198,30 @@ const translations = {
 };
 
 export const LanguageProvider: React.FC<{ children: ReactNode }> = ({ children }) => {
-  const [language, setLanguage] = useState<Language>('es');
+  const [language, setLanguage] = useState<Language>(() => {
+    // 1. Try to get from localStorage
+    const saved = localStorage.getItem('preferred-language');
+    if (saved === 'es' || saved === 'en') return saved;
+    
+    // 2. Detect browser language
+    const browserLang = navigator.language.toLowerCase();
+    if (browserLang.startsWith('es')) return 'es';
+    
+    // 3. Default to Spanish
+    return 'es';
+  });
+
+  const handleSetLanguage = (lang: Language) => {
+    setLanguage(lang);
+    localStorage.setItem('preferred-language', lang);
+  };
 
   const t = (key: string): string => {
     return translations[language][key as keyof typeof translations['es']] || key;
   };
 
   return (
-    <LanguageContext.Provider value={{ language, setLanguage, t }}>
+    <LanguageContext.Provider value={{ language, setLanguage: handleSetLanguage, t }}>
       {children}
     </LanguageContext.Provider>
   );

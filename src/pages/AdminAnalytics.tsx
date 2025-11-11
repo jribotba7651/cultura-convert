@@ -11,6 +11,7 @@ import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, CartesianGrid, Tooltip, Legend, ResponsiveContainer } from 'recharts';
 import { ArrowLeft, Users, Eye, Clock, TrendingUp, Smartphone, Monitor, Globe, ShoppingCart, DollarSign, TrendingDown } from 'lucide-react';
 import { toast } from 'sonner';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface AnalyticsData {
   date: string;
@@ -51,6 +52,7 @@ interface ProductData {
 const AdminAnalytics = () => {
   const navigate = useNavigate();
   const { isAdmin, loading: adminLoading } = useAdminCheck();
+  const { language } = useLanguage();
   const [loading, setLoading] = useState(true);
   const [timeRange, setTimeRange] = useState('30d');
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData[]>([]);
@@ -73,6 +75,24 @@ const AdminAnalytics = () => {
   const [paidOrders, setPaidOrders] = useState(0);
   const [pendingOrders, setPendingOrders] = useState(0);
   const [failedOrders, setFailedOrders] = useState(0);
+
+  // Helper function to get display name for pages
+  const getPageDisplayName = (path: string): string => {
+    const pageNames: Record<string, Record<string, string>> = {
+      '/': { es: 'Página Principal', en: 'Home' },
+      '/store': { es: 'Tienda', en: 'Store' },
+      '/consulting': { es: 'Consultoría', en: 'Consulting' },
+      '/services': { es: 'Servicios', en: 'Services' },
+      '/blog': { es: 'Blog', en: 'Blog' },
+      '/recursos': { es: 'Recursos', en: 'Resources' },
+      '/resources': { es: 'Recursos', en: 'Resources' },
+      '/auth': { es: 'Autenticación', en: 'Authentication' },
+      '/checkout': { es: 'Pago', en: 'Checkout' },
+      '/my-orders': { es: 'Mis Pedidos', en: 'My Orders' },
+    };
+    
+    return pageNames[path]?.[language] || path;
+  };
 
   useEffect(() => {
     if (isAdmin) {
@@ -601,9 +621,15 @@ const AdminAnalytics = () => {
                 <ResponsiveContainer width="100%" height={400}>
                   <BarChart data={topPages}>
                     <CartesianGrid strokeDasharray="3 3" />
-                    <XAxis dataKey="page" />
+                    <XAxis 
+                      dataKey="page" 
+                      tickFormatter={(value) => getPageDisplayName(value)}
+                    />
                     <YAxis />
-                    <Tooltip />
+                    <Tooltip 
+                      formatter={(value, name, props) => [value, name]}
+                      labelFormatter={(label) => getPageDisplayName(label)}
+                    />
                     <Legend />
                     <Bar dataKey="views" fill="hsl(var(--primary))" name="Vistas" />
                     <Bar dataKey="visitors" fill="hsl(var(--secondary))" name="Visitantes" />
@@ -630,7 +656,7 @@ const AdminAnalytics = () => {
                     <tbody>
                       {topPages.map((page, index) => (
                         <tr key={index} className="border-b">
-                          <td className="py-3 px-4 font-medium">{page.page}</td>
+                          <td className="py-3 px-4 font-medium">{getPageDisplayName(page.page)}</td>
                           <td className="text-right py-3 px-4">{page.views}</td>
                           <td className="text-right py-3 px-4">{page.visitors}</td>
                           <td className="text-right py-3 px-4">

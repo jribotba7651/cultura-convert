@@ -95,31 +95,31 @@ const UserMenu = () => {
             <DropdownMenuItem asChild>
               <Link to="/admin/blog" className="flex items-center cursor-pointer">
                 <Package className="mr-2 h-4 w-4" />
-                <span>Gestionar Blog</span>
+                <span>{t('manageBlog')}</span>
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
               <Link to="/admin/resources" className="flex items-center cursor-pointer">
                 <FileText className="mr-2 h-4 w-4" />
-                <span>Gestionar Recursos</span>
+                <span>{t('manageResources')}</span>
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
               <Link to="/admin/newsletter" className="flex items-center cursor-pointer">
                 <Mail className="mr-2 h-4 w-4" />
-                <span>Gestionar Newsletter</span>
+                <span>{t('manageNewsletter')}</span>
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
               <Link to="/admin/orders" className="flex items-center cursor-pointer">
                 <Package className="mr-2 h-4 w-4" />
-                <span>Gestionar Pedidos</span>
+                <span>{t('manageOrders')}</span>
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
               <Link to="/admin/analytics" className="flex items-center cursor-pointer">
                 <BarChart3 className="mr-2 h-4 w-4" />
-                <span>Dashboard Analytics</span>
+                <span>{t('dashboardAnalytics')}</span>
               </Link>
             </DropdownMenuItem>
           </>

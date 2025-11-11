@@ -89,6 +89,11 @@ const translations = {
     
     // Orders
     myOrders: "Mis Pedidos",
+    manageBlog: "Gestionar Blog",
+    manageResources: "Gestionar Recursos",
+    manageNewsletter: "Gestionar Newsletter",
+    manageOrders: "Gestionar Pedidos",
+    dashboardAnalytics: "Dashboard Analytics",
     orderStatus: "Estado",
     orderDate: "Fecha",
     orderTotal: "Total",
@@ -181,6 +186,11 @@ const translations = {
     
     // Orders
     myOrders: "My Orders",
+    manageBlog: "Manage Blog",
+    manageResources: "Manage Resources",
+    manageNewsletter: "Manage Newsletter",
+    manageOrders: "Manage Orders",
+    dashboardAnalytics: "Analytics Dashboard",
     orderStatus: "Status",
     orderDate: "Date",
     orderTotal: "Total",

@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import Navigation from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
@@ -30,8 +30,24 @@ import {
   FileText
 } from "lucide-react";
 
+interface ConsultingResource {
+  id: string;
+  title_es: string;
+  title_en: string;
+  description_es: string;
+  description_en: string;
+  file_path: string;
+  file_name: string;
+  file_size_bytes: number;
+  download_count: number;
+  is_featured: boolean;
+  display_order: number;
+}
+
 const Consulting = () => {
   const { language } = useLanguage();
+  const [downloadableResources, setDownloadableResources] = useState<ConsultingResource[]>([]);
+  const [loadingResources, setLoadingResources] = useState(true);
   const [leadFormData, setLeadFormData] = useState({
     name: "",
     email: "",
@@ -49,6 +65,52 @@ const Consulting = () => {
   const [isSubmittingLead, setIsSubmittingLead] = useState(false);
   const [isSubmittingContact, setIsSubmittingContact] = useState(false);
   const [leadSubmitted, setLeadSubmitted] = useState(false);
+
+  useEffect(() => {
+    fetchResources();
+  }, []);
+
+  const fetchResources = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('consulting_resources')
+        .select('*')
+        .order('display_order', { ascending: true });
+
+      if (error) throw error;
+      setDownloadableResources(data || []);
+    } catch (error) {
+      console.error('Error fetching resources:', error);
+    } finally {
+      setLoadingResources(false);
+    }
+  };
+
+  const getPublicUrl = (filePath: string) => {
+    const { data } = supabase.storage
+      .from('consulting-resources')
+      .getPublicUrl(filePath);
+    return data.publicUrl;
+  };
+
+  const formatFileSize = (bytes: number) => {
+    return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+  };
+
+  const handleDownload = async (resource: ConsultingResource) => {
+    // Increment download count
+    try {
+      await supabase
+        .from('consulting_resources')
+        .update({ download_count: resource.download_count + 1 })
+        .eq('id', resource.id);
+      
+      // Open download link
+      window.open(getPublicUrl(resource.file_path), '_blank');
+    } catch (error) {
+      console.error('Error updating download count:', error);
+    }
+  };
 
   const handleLeadSubmit = async (e: React.FormEvent, resourceDownloaded: string) => {
     e.preventDefault();
@@ -615,6 +677,63 @@ const Consulting = () => {
           </div>
         </div>
       </section>
+
+      {/* Free Resources Section */}
+      {downloadableResources.length > 0 && (
+        <section className="py-16 px-4 bg-secondary/10">
+          <div className="container mx-auto max-w-6xl">
+            <h2 className="text-3xl font-bold text-center mb-4">
+              {language === "es" ? "Recursos Gratuitos" : "Free Resources"}
+            </h2>
+            <p className="text-center text-muted-foreground mb-12">
+              {language === "es"
+                ? "Descarga guías, plantillas y herramientas para mejorar tus procesos de calidad"
+                : "Download guides, templates and tools to improve your quality processes"}
+            </p>
+            
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+              {downloadableResources.map((resource) => (
+                <Card key={resource.id} className={resource.is_featured ? "border-primary" : ""}>
+                  <CardHeader>
+                    {resource.is_featured && (
+                      <div className="text-xs bg-primary text-primary-foreground px-2 py-1 rounded w-fit mb-2">
+                        {language === "es" ? "Destacado" : "Featured"}
+                      </div>
+                    )}
+                    <CardTitle className="text-lg flex items-start gap-2">
+                      <FileText className="h-5 w-5 text-primary flex-shrink-0 mt-1" />
+                      <span>{language === "es" ? resource.title_es : resource.title_en}</span>
+                    </CardTitle>
+                    <CardDescription>
+                      {language === "es" ? resource.description_es : resource.description_en}
+                    </CardDescription>
+                  </CardHeader>
+                  <CardContent>
+                    <div className="space-y-3">
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <FileText className="h-4 w-4" />
+                        <span>PDF • {formatFileSize(resource.file_size_bytes)}</span>
+                      </div>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <Download className="h-4 w-4" />
+                        <span>{resource.download_count} {language === "es" ? "descargas" : "downloads"}</span>
+                      </div>
+                      <Button 
+                        onClick={() => handleDownload(resource)}
+                        className="w-full mt-4"
+                        variant={resource.is_featured ? "default" : "outline"}
+                      >
+                        <Download className="h-4 w-4 mr-2" />
+                        {language === "es" ? "Descargar Gratis" : "Download Free"}
+                      </Button>
+                    </div>
+                  </CardContent>
+                </Card>
+              ))}
+            </div>
+          </div>
+        </section>
+      )}
 
       {/* Contact Section */}
       <section className="py-16 px-4 bg-secondary/5">

@@ -500,72 +500,111 @@ const Consulting = () => {
         </div>
       </section>
 
-      {/* Free Resources Section - MOVED TO TOP */}
+      {/* Free Resources Section - ENHANCED */}
       {downloadableResources.length > 0 && (
-        <section className="py-16 px-4 bg-gradient-to-b from-primary/5 to-background">
-          <div className="container mx-auto max-w-6xl">
-            <h2 className="text-3xl font-bold text-center mb-4">
-              {language === "es" ? "📥 Recursos Gratuitos para Descargar" : "📥 Free Resources to Download"}
-            </h2>
-            <p className="text-center text-muted-foreground mb-12 max-w-2xl mx-auto">
-              {language === "es"
-                ? "Accede a guías, plantillas y herramientas exclusivas. Solo necesitas proporcionar tu información para descargar."
-                : "Access exclusive guides, templates and tools. Just provide your information to download."}
-            </p>
+        <section className="py-20 px-4" style={{ backgroundColor: '#f8f9fa' }}>
+          <div className="container mx-auto max-w-7xl">
+            <div className="text-center mb-16">
+              <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full mb-4 font-semibold">
+                <Download className="h-5 w-5" />
+                <span>{language === "es" ? "RECURSOS GRATUITOS" : "FREE RESOURCES"}</span>
+              </div>
+              <h2 className="text-4xl md:text-5xl font-bold mb-4">
+                {language === "es" 
+                  ? "Recursos Gratuitos para Descargar" 
+                  : "Free Resources to Download"}
+              </h2>
+              <p className="text-xl text-muted-foreground max-w-3xl mx-auto">
+                {language === "es" 
+                  ? "Accede a guías, plantillas y herramientas exclusivas diseñadas por expertos. Solo proporciona tu información para descargar." 
+                  : "Access exclusive guides, templates and tools designed by experts. Just provide your information to download."}
+              </p>
+            </div>
             
-            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-6">
+            <div className="grid md:grid-cols-2 lg:grid-cols-3 gap-8">
               {downloadableResources.map((resource) => (
-                <Card key={resource.id} className={resource.is_featured ? "border-primary border-2 shadow-lg" : "hover:shadow-md transition-shadow"}>
-                  <CardHeader>
-                    {resource.is_featured && (
-                      <div className="text-xs bg-primary text-primary-foreground px-3 py-1 rounded-full w-fit mb-3 font-semibold">
-                        ⭐ {language === "es" ? "Destacado" : "Featured"}
+                <Card 
+                  key={resource.id} 
+                  className="group relative overflow-hidden transition-all duration-300 hover:shadow-2xl hover:-translate-y-2 bg-background border-2"
+                  style={resource.is_featured ? { borderColor: 'hsl(var(--primary))' } : {}}
+                >
+                  {/* FREE Badge */}
+                  <div className="absolute top-4 right-4 z-10">
+                    <div className="bg-primary text-primary-foreground px-3 py-1 rounded-full text-xs font-bold shadow-lg">
+                      {language === "es" ? "GRATIS" : "FREE"}
+                    </div>
+                  </div>
+
+                  {/* Featured Badge */}
+                  {resource.is_featured && (
+                    <div className="absolute top-4 left-4 z-10">
+                      <div className="bg-gradient-to-r from-orange-500 to-orange-600 text-white px-3 py-1 rounded-full text-xs font-bold shadow-lg flex items-center gap-1">
+                        <Award className="h-3 w-3" />
+                        <span>{language === "es" ? "DESTACADO" : "FEATURED"}</span>
                       </div>
-                    )}
-                    <CardTitle className="text-lg flex items-start gap-3">
-                      <FileText className="h-6 w-6 text-primary flex-shrink-0 mt-1" />
-                      <span>{language === "es" ? resource.title_es : resource.title_en}</span>
+                    </div>
+                  )}
+
+                  <CardHeader className="pb-4 pt-16">
+                    {/* Icon Circle */}
+                    <div className="mx-auto mb-6 w-20 h-20 rounded-full bg-gradient-to-br from-primary/20 to-primary/10 flex items-center justify-center group-hover:scale-110 transition-transform duration-300">
+                      <FileText className="h-10 w-10 text-primary" />
+                    </div>
+
+                    <CardTitle className="text-xl md:text-2xl font-bold text-center mb-3 leading-tight min-h-[3.5rem] flex items-center justify-center">
+                      {language === "es" ? resource.title_es : resource.title_en}
                     </CardTitle>
-                    <CardDescription className="mt-2">
+                    
+                    <CardDescription className="text-center text-base leading-relaxed line-clamp-3 min-h-[4.5rem]">
                       {language === "es" ? resource.description_es : resource.description_en}
                     </CardDescription>
                   </CardHeader>
-                  <CardContent>
+
+                  <CardContent className="pt-2 pb-6">
                     <div className="space-y-4">
-                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                        <FileText className="h-4 w-4" />
-                        <span>PDF</span>
+                      {/* PDF Info */}
+                      <div className="flex items-center justify-center gap-3 text-sm text-muted-foreground bg-muted/50 py-2 rounded-lg">
+                        <FileText className="h-4 w-4 text-primary" />
+                        <span className="font-semibold">PDF</span>
+                        <span className="text-xs">•</span>
+                        <span>{formatFileSize(resource.file_size_bytes)}</span>
                       </div>
+
+                      {/* Buttons */}
                       <div className="flex gap-2">
                         <Button 
                           onClick={() => handleDownload(resource)}
-                          className="flex-1"
-                          variant={resource.is_featured ? "default" : "outline"}
+                          className="flex-1 h-12 text-base font-semibold shadow-lg hover:shadow-xl transition-all"
+                          variant={resource.is_featured ? "default" : "default"}
                           size="lg"
                         >
-                          <Download className="h-4 w-4 mr-2" />
+                          <Download className="h-5 w-5 mr-2" />
                           {language === "es" ? "Descargar" : "Download"}
                         </Button>
                         <DropdownMenu>
                           <DropdownMenuTrigger asChild>
-                            <Button variant="outline" size="lg">
-                              <Share2 className="h-4 w-4" />
+                            <Button 
+                              variant="outline" 
+                              size="lg"
+                              className="h-12 px-4 shadow-md hover:shadow-lg transition-all"
+                            >
+                              <Share2 className="h-5 w-5" />
                             </Button>
                           </DropdownMenuTrigger>
-                          <DropdownMenuContent align="end" className="bg-background border shadow-lg z-50">
-                            <DropdownMenuItem onClick={() => handleShareResource(resource, 'copy')}>
+                          <DropdownMenuContent align="end" className="bg-background border shadow-lg z-50 min-w-[180px]">
+                            <DropdownMenuItem onClick={() => handleShareResource(resource, 'copy')} className="cursor-pointer">
                               <Copy className="h-4 w-4 mr-2" />
                               {language === "es" ? "Copiar link" : "Copy link"}
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleShareResource(resource, 'linkedin')}>
+                            <DropdownMenuItem onClick={() => handleShareResource(resource, 'linkedin')} className="cursor-pointer">
                               <Linkedin className="h-4 w-4 mr-2" />
                               LinkedIn
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleShareResource(resource, 'twitter')}>
+                            <DropdownMenuItem onClick={() => handleShareResource(resource, 'twitter')} className="cursor-pointer">
                               <Twitter className="h-4 w-4 mr-2" />
                               Twitter / X
                             </DropdownMenuItem>
-                            <DropdownMenuItem onClick={() => handleShareResource(resource, 'email')}>
+                            <DropdownMenuItem onClick={() => handleShareResource(resource, 'email')} className="cursor-pointer">
                               <Mail className="h-4 w-4 mr-2" />
                               Email
                             </DropdownMenuItem>

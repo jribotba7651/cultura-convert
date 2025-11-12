@@ -502,7 +502,7 @@ const Consulting = () => {
 
       {/* Free Resources Section - ENHANCED */}
       {downloadableResources.length > 0 && (
-        <section className="py-20 px-4" style={{ backgroundColor: '#f8f9fa' }}>
+        <section className="py-20 px-4 bg-gradient-to-br from-primary/10 via-orange-50/50 to-background">
           <div className="container mx-auto max-w-7xl">
             <div className="text-center mb-16">
               <div className="inline-flex items-center gap-2 bg-primary/10 text-primary px-4 py-2 rounded-full mb-4 font-semibold">

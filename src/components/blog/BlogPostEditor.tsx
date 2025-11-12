@@ -88,6 +88,28 @@ export function BlogPostEditor({ postId, onClose }: BlogPostEditorProps) {
   const uploadCoverImage = async (): Promise<string | null> => {
     if (!coverImage) return coverImageUrl || null;
 
+    // Validate file size (max 5MB)
+    const maxSize = 5 * 1024 * 1024;
+    if (coverImage.size > maxSize) {
+      toast({
+        title: 'Error',
+        description: 'Image must be less than 5MB',
+        variant: 'destructive',
+      });
+      return null;
+    }
+
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp'];
+    if (!allowedTypes.includes(coverImage.type)) {
+      toast({
+        title: 'Error',
+        description: 'Only JPEG, PNG, and WebP images are allowed',
+        variant: 'destructive',
+      });
+      return null;
+    }
+
     try {
       const fileExt = coverImage.name.split('.').pop();
       const fileName = `${Date.now()}.${fileExt}`;

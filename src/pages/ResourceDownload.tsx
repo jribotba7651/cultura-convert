@@ -8,7 +8,13 @@ import { Label } from "@/components/ui/label";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Download, FileText, CheckCircle2, Users, Star } from "lucide-react";
+import { Download, FileText, CheckCircle2, Users, Star, Share2, Copy, Linkedin, Twitter, Mail } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface ConsultingResource {
   id: string;
@@ -81,6 +87,39 @@ export default function ResourceDownload() {
 
   const formatFileSize = (bytes: number) => {
     return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
+  };
+
+
+  const handleShare = (platform: string) => {
+    const currentUrl = window.location.href;
+    const title = language === "es" ? resource?.title_es : resource?.title_en;
+    const description = language === "es" ? resource?.description_es : resource?.description_en;
+
+    switch (platform) {
+      case 'copy':
+        navigator.clipboard.writeText(currentUrl);
+        toast.success(
+          language === "es" 
+            ? "¡Link copiado al portapapeles!" 
+            : "Link copied to clipboard!"
+        );
+        break;
+      case 'linkedin':
+        window.open(
+          `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(currentUrl)}`,
+          '_blank'
+        );
+        break;
+      case 'twitter':
+        window.open(
+          `https://twitter.com/intent/tweet?url=${encodeURIComponent(currentUrl)}&text=${encodeURIComponent(title || '')}`,
+          '_blank'
+        );
+        break;
+      case 'email':
+        window.location.href = `mailto:?subject=${encodeURIComponent(title || '')}&body=${encodeURIComponent(`${description}\n\n${currentUrl}`)}`;
+        break;
+    }
   };
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -164,8 +203,8 @@ export default function ResourceDownload() {
               {language === "es" ? resource.description_es : resource.description_en}
             </p>
 
-            {/* Social Proof */}
-            <div className="flex items-center justify-center gap-8 text-sm text-muted-foreground">
+            {/* Social Proof and Share */}
+            <div className="flex flex-col sm:flex-row items-center justify-center gap-4 sm:gap-8 text-sm text-muted-foreground mb-6">
               <div className="flex items-center gap-2">
                 <Download className="h-5 w-5 text-primary" />
                 <span>
@@ -183,6 +222,36 @@ export default function ResourceDownload() {
                   <span>{language === "es" ? "Destacado" : "Featured"}</span>
                 </div>
               )}
+            </div>
+
+            {/* Share Button */}
+            <div className="flex justify-center">
+              <DropdownMenu>
+                <DropdownMenuTrigger asChild>
+                  <Button variant="outline" size="sm">
+                    <Share2 className="h-4 w-4 mr-2" />
+                    {language === "es" ? "Compartir" : "Share"}
+                  </Button>
+                </DropdownMenuTrigger>
+                <DropdownMenuContent align="center">
+                  <DropdownMenuItem onClick={() => handleShare('copy')}>
+                    <Copy className="h-4 w-4 mr-2" />
+                    {language === "es" ? "Copiar link" : "Copy link"}
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleShare('linkedin')}>
+                    <Linkedin className="h-4 w-4 mr-2" />
+                    LinkedIn
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleShare('twitter')}>
+                    <Twitter className="h-4 w-4 mr-2" />
+                    Twitter / X
+                  </DropdownMenuItem>
+                  <DropdownMenuItem onClick={() => handleShare('email')}>
+                    <Mail className="h-4 w-4 mr-2" />
+                    Email
+                  </DropdownMenuItem>
+                </DropdownMenuContent>
+              </DropdownMenu>
             </div>
           </div>
 

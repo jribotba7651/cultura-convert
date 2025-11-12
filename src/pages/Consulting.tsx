@@ -489,15 +489,9 @@ const Consulting = () => {
                   </CardHeader>
                   <CardContent>
                     <div className="space-y-4">
-                      <div className="flex items-center gap-4 text-sm text-muted-foreground">
-                        <div className="flex items-center gap-2">
-                          <FileText className="h-4 w-4" />
-                          <span>PDF</span>
-                        </div>
-                        <div className="flex items-center gap-2">
-                          <Download className="h-4 w-4" />
-                          <span>{resource.download_count} {language === "es" ? "descargas" : "downloads"}</span>
-                        </div>
+                      <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                        <FileText className="h-4 w-4" />
+                        <span>PDF</span>
                       </div>
                       <Button 
                         onClick={() => handleDownload(resource)}

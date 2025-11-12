@@ -27,8 +27,18 @@ import {
   Download,
   CheckCircle2,
   Mail,
-  FileText
+  FileText,
+  Share2,
+  Copy,
+  Linkedin,
+  Twitter
 } from "lucide-react";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
 
 interface ConsultingResource {
   id: string;
@@ -209,6 +219,38 @@ const Consulting = () => {
       toast.error(language === "es" ? "Error al enviar. Intenta de nuevo." : "Error submitting. Please try again.");
     } finally {
       setIsSubmittingContact(false);
+    }
+  };
+
+  const handleShareResource = (resource: ConsultingResource, platform: string) => {
+    const resourceUrl = `${window.location.origin}/${language === "es" ? "recursos" : "resources"}/${resource.slug}`;
+    const title = language === "es" ? resource.title_es : resource.title_en;
+    const description = language === "es" ? resource.description_es : resource.description_en;
+
+    switch (platform) {
+      case 'copy':
+        navigator.clipboard.writeText(resourceUrl);
+        toast.success(
+          language === "es" 
+            ? "¡Link copiado al portapapeles!" 
+            : "Link copied to clipboard!"
+        );
+        break;
+      case 'linkedin':
+        window.open(
+          `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(resourceUrl)}`,
+          '_blank'
+        );
+        break;
+      case 'twitter':
+        window.open(
+          `https://twitter.com/intent/tweet?url=${encodeURIComponent(resourceUrl)}&text=${encodeURIComponent(title)}`,
+          '_blank'
+        );
+        break;
+      case 'email':
+        window.location.href = `mailto:?subject=${encodeURIComponent(title)}&body=${encodeURIComponent(`${description}\n\n${resourceUrl}`)}`;
+        break;
     }
   };
 
@@ -494,15 +536,42 @@ const Consulting = () => {
                         <FileText className="h-4 w-4" />
                         <span>PDF</span>
                       </div>
-                      <Button 
-                        onClick={() => handleDownload(resource)}
-                        className="w-full"
-                        variant={resource.is_featured ? "default" : "outline"}
-                        size="lg"
-                      >
-                        <Download className="h-4 w-4 mr-2" />
-                        {language === "es" ? "Descargar Gratis" : "Download Free"}
-                      </Button>
+                      <div className="flex gap-2">
+                        <Button 
+                          onClick={() => handleDownload(resource)}
+                          className="flex-1"
+                          variant={resource.is_featured ? "default" : "outline"}
+                          size="lg"
+                        >
+                          <Download className="h-4 w-4 mr-2" />
+                          {language === "es" ? "Descargar" : "Download"}
+                        </Button>
+                        <DropdownMenu>
+                          <DropdownMenuTrigger asChild>
+                            <Button variant="outline" size="lg">
+                              <Share2 className="h-4 w-4" />
+                            </Button>
+                          </DropdownMenuTrigger>
+                          <DropdownMenuContent align="end" className="bg-background border shadow-lg z-50">
+                            <DropdownMenuItem onClick={() => handleShareResource(resource, 'copy')}>
+                              <Copy className="h-4 w-4 mr-2" />
+                              {language === "es" ? "Copiar link" : "Copy link"}
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleShareResource(resource, 'linkedin')}>
+                              <Linkedin className="h-4 w-4 mr-2" />
+                              LinkedIn
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleShareResource(resource, 'twitter')}>
+                              <Twitter className="h-4 w-4 mr-2" />
+                              Twitter / X
+                            </DropdownMenuItem>
+                            <DropdownMenuItem onClick={() => handleShareResource(resource, 'email')}>
+                              <Mail className="h-4 w-4 mr-2" />
+                              Email
+                            </DropdownMenuItem>
+                          </DropdownMenuContent>
+                        </DropdownMenu>
+                      </div>
                     </div>
                   </CardContent>
                 </Card>

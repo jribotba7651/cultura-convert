@@ -42,6 +42,7 @@ interface ConsultingResource {
   download_count: number;
   is_featured: boolean;
   display_order: number;
+  slug: string;
 }
 
 const Consulting = () => {

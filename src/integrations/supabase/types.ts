@@ -195,6 +195,7 @@ export type Database = {
           file_size_bytes: number
           id: string
           is_featured: boolean | null
+          slug: string
           title_en: string
           title_es: string
           updated_at: string | null
@@ -211,6 +212,7 @@ export type Database = {
           file_size_bytes: number
           id?: string
           is_featured?: boolean | null
+          slug: string
           title_en: string
           title_es: string
           updated_at?: string | null
@@ -227,6 +229,7 @@ export type Database = {
           file_size_bytes?: number
           id?: string
           is_featured?: boolean | null
+          slug?: string
           title_en?: string
           title_es?: string
           updated_at?: string | null
@@ -652,6 +655,7 @@ export type Database = {
         Args: { order_uuid: string; token_value: string }
         Returns: boolean
       }
+      generate_slug: { Args: { title: string }; Returns: string }
       has_role: {
         Args: {
           _role: Database["public"]["Enums"]["app_role"]

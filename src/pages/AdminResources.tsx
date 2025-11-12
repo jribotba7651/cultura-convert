@@ -24,6 +24,7 @@ interface ConsultingResource {
   download_count: number;
   is_featured: boolean;
   display_order: number;
+  slug: string;
   created_at: string;
 }
 
@@ -89,6 +90,16 @@ export default function AdminResources() {
     setSelectedFile(file);
   };
 
+  
+  // Función para generar slug desde título
+  const generateSlug = (title: string): string => {
+    return title
+      .toLowerCase()
+      .replace(/[^a-z0-9]+/g, '-')
+      .replace(/^-+|-+$/g, '')
+      .substring(0, 100);
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!selectedFile && !editingResource) {
@@ -135,10 +146,12 @@ export default function AdminResources() {
         if (error) throw error;
         toast.success('Recurso actualizado exitosamente');
       } else {
+        const slug = generateSlug(formData.title_en);
         const { error } = await supabase
           .from('consulting_resources')
           .insert({
             ...formData,
+            slug,
             file_path: filePath,
             file_name: fileName,
             file_size_bytes: fileSize,

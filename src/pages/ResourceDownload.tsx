@@ -21,6 +21,7 @@ interface ConsultingResource {
   file_size_bytes: number;
   download_count: number;
   is_featured: boolean;
+  slug: string;
 }
 
 export default function ResourceDownload() {
@@ -44,14 +45,19 @@ export default function ResourceDownload() {
 
   const fetchResource = async () => {
     try {
-      // Buscar por slug en el título (convertido a slug)
       const { data, error } = await supabase
         .from('consulting_resources')
         .select('*')
-        .limit(1)
+        .eq('slug', slug)
         .single();
 
       if (error) throw error;
+      
+      if (!data) {
+        navigate('/consulting');
+        return;
+      }
+      
       setResource(data);
     } catch (error) {
       console.error('Error fetching resource:', error);

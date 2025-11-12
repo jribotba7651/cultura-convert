@@ -47,7 +47,23 @@ const translations = {
     blog: "Blog",
     services: "Servicios",
     store: "Tienda",
+    projects: "Proyectos",
     siteTitle: "Jíbaro en la Luna",
+    
+    // Projects page
+    projectsTitle: "Mis Proyectos Open Source",
+    projectsSubtitle: "Herramientas y utilidades gratuitas que he desarrollado para la comunidad",
+    chromeExtension: "Extensión de Chrome",
+    desktopApp: "Aplicación de Escritorio",
+    viewOnGitHub: "Ver en GitHub",
+    download: "Descargar",
+    install: "Instalar",
+    stars: "estrellas",
+    forks: "forks",
+    lastUpdate: "Última actualización",
+    techStack: "Tecnologías",
+    loading: "Cargando...",
+    errorLoading: "Error al cargar",
     
     // Blog
     blogDescription: "Reflexiones, historias y voces de la cultura jíbara que late en la distancia",
@@ -144,7 +160,23 @@ const translations = {
     blog: "Blog",
     services: "Services",
     store: "Store",
+    projects: "Projects",
     siteTitle: "Jíbaro en la Luna",
+    
+    // Projects page
+    projectsTitle: "My Open Source Projects",
+    projectsSubtitle: "Free tools and utilities I've developed for the community",
+    chromeExtension: "Chrome Extension",
+    desktopApp: "Desktop Application",
+    viewOnGitHub: "View on GitHub",
+    download: "Download",
+    install: "Install",
+    stars: "stars",
+    forks: "forks",
+    lastUpdate: "Last updated",
+    techStack: "Tech Stack",
+    loading: "Loading...",
+    errorLoading: "Error loading",
     
     // Blog
     blogDescription: "Reflections, stories and voices of jíbaro culture that beats in the distance",

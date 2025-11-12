@@ -21,6 +21,7 @@ import OrderConfirmation from "./pages/OrderConfirmation";
 import Auth from "./pages/Auth";
 import Services from "./pages/Services";
 import Consulting from "./pages/Consulting";
+import Projects from "./pages/Projects";
 import MyOrders from "./pages/MyOrders";
 import AdminOrders from "./pages/AdminOrders";
 import AdminAnalytics from "./pages/AdminAnalytics";
@@ -67,6 +68,8 @@ const AppContent = () => {
         <Route path="/store/product/:id" element={<ProductDetails />} />
         <Route path="/services" element={<Services />} />
         <Route path="/consulting" element={<Consulting />} />
+        <Route path="/proyectos" element={<Projects />} />
+        <Route path="/projects" element={<Projects />} />
         <Route path="/recursos/:slug" element={<ResourceDownload />} />
         <Route path="/resources/:slug" element={<ResourceDownload />} />
         <Route path="/checkout" element={<Checkout />} />

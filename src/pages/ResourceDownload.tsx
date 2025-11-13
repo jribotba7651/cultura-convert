@@ -1,5 +1,6 @@
 import { useEffect, useState } from "react";
 import { useParams, useNavigate } from "react-router-dom";
+import { Helmet } from "react-helmet";
 import { useLanguage } from "@/contexts/LanguageContext";
 import Navigation from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
@@ -181,8 +182,32 @@ export default function ResourceDownload() {
     return null;
   }
 
+  const currentUrl = typeof window !== 'undefined' ? window.location.href : '';
+  const title = language === "es" ? resource.title_es : resource.title_en;
+  const description = language === "es" ? resource.description_es : resource.description_en;
+  const ogImage = `${window.location.origin}/og-image.jpg`;
+
   return (
     <>
+      <Helmet>
+        <title>{title} | Jíbaro en la Luna</title>
+        <meta name="description" content={description} />
+        
+        {/* Open Graph Meta Tags */}
+        <meta property="og:title" content={title} />
+        <meta property="og:description" content={description} />
+        <meta property="og:image" content={ogImage} />
+        <meta property="og:url" content={currentUrl} />
+        <meta property="og:type" content="article" />
+        <meta property="og:site_name" content="Jíbaro en la Luna" />
+        
+        {/* Twitter Card Meta Tags */}
+        <meta name="twitter:card" content="summary_large_image" />
+        <meta name="twitter:title" content={title} />
+        <meta name="twitter:description" content={description} />
+        <meta name="twitter:image" content={ogImage} />
+      </Helmet>
+      
       <Navigation />
       <main className="min-h-screen bg-gradient-to-b from-primary/5 to-background pt-20">
         <div className="container mx-auto px-4 py-12 max-w-5xl">

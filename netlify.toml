@@ -23,6 +23,13 @@
   [headers.values]
     Cache-Control = "public, max-age=31536000, immutable"
 
+# Redirects para recursos compartidos con Open Graph
+[[redirects]]
+  from = "/share/resource/*"
+  to = "https://ifctpzrmqcpqtgwepvoq.supabase.co/functions/v1/share-resource?slug=:splat"
+  status = 200
+  force = true
+
 # Redirects para SPA - todas las rutas deben servir index.html
 [[redirects]]
   from = "/*"

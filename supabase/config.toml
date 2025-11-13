@@ -1,5 +1,8 @@
 project_id = "ifctpzrmqcpqtgwepvoq"
 
+[functions.share-resource]
+verify_jwt = false
+
 [functions.track-pageview]
 verify_jwt = false
 

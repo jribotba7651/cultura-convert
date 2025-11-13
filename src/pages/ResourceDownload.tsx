@@ -92,13 +92,15 @@ export default function ResourceDownload() {
 
 
   const handleShare = (platform: string) => {
-    const currentUrl = window.location.href;
-    const title = language === "es" ? resource?.title_es : resource?.title_en;
-    const description = language === "es" ? resource?.description_es : resource?.description_en;
+    if (!resource) return;
+    
+    const shareUrl = `${window.location.origin}/share/resource/${resource.slug}?lang=${language}`;
+    const title = language === "es" ? resource.title_es : resource.title_en;
+    const description = language === "es" ? resource.description_es : resource.description_en;
 
     switch (platform) {
       case 'copy':
-        navigator.clipboard.writeText(currentUrl);
+        navigator.clipboard.writeText(shareUrl);
         toast.success(
           language === "es" 
             ? "¡Link copiado al portapapeles!" 
@@ -107,18 +109,18 @@ export default function ResourceDownload() {
         break;
       case 'linkedin':
         window.open(
-          `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(currentUrl)}`,
+          `https://www.linkedin.com/sharing/share-offsite/?url=${encodeURIComponent(shareUrl)}`,
           '_blank'
         );
         break;
       case 'twitter':
         window.open(
-          `https://twitter.com/intent/tweet?url=${encodeURIComponent(currentUrl)}&text=${encodeURIComponent(title || '')}`,
+          `https://twitter.com/intent/tweet?url=${encodeURIComponent(shareUrl)}&text=${encodeURIComponent(title)}`,
           '_blank'
         );
         break;
       case 'email':
-        window.location.href = `mailto:?subject=${encodeURIComponent(title || '')}&body=${encodeURIComponent(`${description}\n\n${currentUrl}`)}`;
+        window.location.href = `mailto:?subject=${encodeURIComponent(title)}&body=${encodeURIComponent(`${description}\n\n${shareUrl}`)}`;
         break;
     }
   };

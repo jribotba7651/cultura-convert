@@ -48,7 +48,7 @@ const projects: Project[] = [
       es: "Formateo y embellecimiento de código SQL con syntax highlighting y auto-indentación",
       en: "SQL code formatting and beautification with syntax highlighting and auto-indentation"
     },
-    installUrl: "https://chrome.google.com/webstore", // Update with actual URL
+    installUrl: "https://chromewebstore.google.com/detail/sql-formatter-beautifier/epphaffkhphbolhifmndbpnplkpfadbh",
     techStack: ["JavaScript", "Chrome API", "SQL"],
     featured: true
   },

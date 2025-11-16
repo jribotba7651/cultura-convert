@@ -5,6 +5,7 @@ import { AdSenseAd } from "@/components/AdSenseAd";
 import { BooksHero } from "@/components/BooksHero";
 import { BooksGrid } from "@/components/BooksGrid";
 import { FeaturedBook } from "@/components/FeaturedBook";
+import { NewsletterModal } from "@/components/NewsletterModal";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Book } from "@/types/Book";
 import juanProfileImage from "@/assets/juan-c-ribot-profile.jpg";
@@ -93,6 +94,7 @@ const Index = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
+      <NewsletterModal />
 
       {/* Hero Section with Featured Books Carousel */}
       <BooksHero books={allBooks} featured={[0, 3, 2]} />

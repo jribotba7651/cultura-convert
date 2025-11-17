@@ -189,13 +189,21 @@ const TicTacToeSupport = () => {
             {/* Status Banner */}
             <Card className="bg-primary/5 border-primary/20 mb-12">
               <CardHeader>
-                <CardTitle className="flex items-center gap-2">
-                  <Heart className="w-5 h-5 text-primary" />
-                  {t('tictactoeStatus')}
+                <CardTitle className="flex items-center gap-2 text-2xl">
+                  <Heart className="w-6 h-6 text-primary" />
+                  Coming Soon
                 </CardTitle>
               </CardHeader>
               <CardContent>
-                <p className="text-muted-foreground">{t('tictactoeStatusDesc')}</p>
+                <p className="text-lg text-muted-foreground mb-4">
+                  {language === 'es' 
+                    ? 'Próximamente disponible en Apple App Store para iPhone y iPad'
+                    : 'Coming soon to Apple App Store for iPhone and iPad'}
+                </p>
+                <div className="flex items-center justify-center gap-2 text-primary font-semibold">
+                  <Gamepad2 className="w-5 h-5" />
+                  Apple App Store
+                </div>
               </CardContent>
             </Card>
           </div>

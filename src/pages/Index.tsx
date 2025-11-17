@@ -170,15 +170,9 @@ const Index = () => {
 
       {/* Footer */}
       <footer className="bg-muted py-8 px-4 text-center">
-        <p className="text-muted-foreground mb-2">
+        <p className="text-muted-foreground">
           {t('footerText')}
         </p>
-        <a 
-          href="/privacy-policy" 
-          className="text-sm text-muted-foreground hover:text-primary underline"
-        >
-          Privacy Policy
-        </a>
       </footer>
     </div>
   );

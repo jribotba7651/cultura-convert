@@ -19,6 +19,7 @@ const Navigation = () => {
     { path: "/consulting", label: "Consulting" },
     { path: "/proyectos", label: t('projects') },
     { path: "/store", label: t('store') },
+    { path: "/privacy-policy", label: t('language') === 'es' ? 'Privacidad' : 'Privacy' },
   ];
 
   return (

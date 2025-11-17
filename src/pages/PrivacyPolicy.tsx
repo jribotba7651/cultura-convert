@@ -3,9 +3,13 @@ import { NewsletterModal } from "@/components/NewsletterModal";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Helmet } from "react-helmet";
 import { useLanguage } from "@/contexts/LanguageContext";
+import { useSearchParams } from "react-router-dom";
 
 const PrivacyPolicy = () => {
-  const { language } = useLanguage();
+  const { language: contextLanguage } = useLanguage();
+  const [searchParams] = useSearchParams();
+  const forcedLang = searchParams.get('lang');
+  const language = forcedLang || contextLanguage;
   return (
     <div className="min-h-screen bg-background">
       <Helmet>

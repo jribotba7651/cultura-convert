@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route, useLocation, useNavigate } from "react-router-dom";
+import { BrowserRouter, Routes, Route, useLocation, useNavigate, Navigate } from "react-router-dom";
 import ErrorBoundary from "./components/ErrorBoundary";
 import { useEffect } from "react";
 import { LanguageProvider } from "./contexts/LanguageContext";
@@ -73,7 +73,9 @@ const AppContent = () => {
         <Route path="/proyectos" element={<Projects />} />
         <Route path="/projects" element={<Projects />} />
         <Route path="/tic-tac-toe-support" element={<TicTacToeSupport />} />
-        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="/privacy-policy" element={<PrivacyPolicy />} />
+          <Route path="/privacy-policy-en" element={<Navigate to="/privacy-policy?lang=en" replace />} />
+          <Route path="/privacy-policy-es" element={<Navigate to="/privacy-policy?lang=es" replace />} />
         <Route path="/recursos/:slug" element={<ResourceDownload />} />
         <Route path="/resources/:slug" element={<ResourceDownload />} />
         <Route path="/checkout" element={<Checkout />} />

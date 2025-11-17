@@ -12,6 +12,7 @@ import { Badge } from "@/components/ui/badge";
 import { Helmet } from "react-helmet";
 import { useToast } from "@/hooks/use-toast";
 import { Gamepad2, Heart, Mail, Sparkles, Users, Volume2, CircleDollarSign } from "lucide-react";
+import ticTacToeScreenshot from "@/assets/tic-tac-toe-screenshot.png";
 
 const TicTacToeSupport = () => {
   const { t, language } = useLanguage();
@@ -174,6 +175,15 @@ const TicTacToeSupport = () => {
               <p className="text-xl text-muted-foreground max-w-3xl mx-auto mb-8">
                 {t('tictactoeSubtitle')}
               </p>
+              
+              {/* App Screenshot */}
+              <div className="max-w-sm mx-auto mb-8">
+                <img 
+                  src={ticTacToeScreenshot} 
+                  alt="Tic-Tac-Toe App Screenshot - Luna Mode with colorful emojis"
+                  className="rounded-3xl shadow-2xl border-4 border-primary/20"
+                />
+              </div>
             </div>
 
             {/* Status Banner */}

@@ -31,6 +31,7 @@ import AdminResources from "./pages/AdminResources";
 import NotFound from "./pages/NotFound";
 import ResourceDownload from "./pages/ResourceDownload";
 import TicTacToeSupport from "./pages/TicTacToeSupport";
+import PrivacyPolicy from "./pages/PrivacyPolicy";
 import TestComponent from "./components/TestComponent";
 import SPARecovery from "./components/SPARecovery";
 
@@ -72,6 +73,7 @@ const AppContent = () => {
         <Route path="/proyectos" element={<Projects />} />
         <Route path="/projects" element={<Projects />} />
         <Route path="/tic-tac-toe-support" element={<TicTacToeSupport />} />
+        <Route path="/privacy-policy" element={<PrivacyPolicy />} />
         <Route path="/recursos/:slug" element={<ResourceDownload />} />
         <Route path="/resources/:slug" element={<ResourceDownload />} />
         <Route path="/checkout" element={<Checkout />} />

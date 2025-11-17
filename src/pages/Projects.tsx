@@ -4,7 +4,7 @@ import Navigation from "@/components/Navigation";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
-import { Github, Download, ExternalLink, Star, GitFork, Clock } from "lucide-react";
+import { Github, Download, ExternalLink, Star, GitFork, Clock, Gamepad2 } from "lucide-react";
 import { Helmet } from "react-helmet";
 
 interface GitHubRepo {
@@ -266,54 +266,68 @@ const Projects = () => {
                       ) : null}
 
                       {/* Action Buttons */}
-                      <div className="flex gap-3 pt-4">
-                        <Button 
-                          variant="default"
-                          className="flex-1 group-hover:shadow-lg transition-shadow"
-                          asChild
-                        >
-                          <a 
-                            href={`https://github.com/${project.repo}`}
-                            target="_blank"
-                            rel="noopener noreferrer"
-                          >
-                            <Github className="h-4 w-4 mr-2" />
-                            {t('viewOnGitHub')}
-                          </a>
-                        </Button>
-                        
-                        {project.type === 'chrome-extension' && project.installUrl && (
-                          <Button 
-                            variant="outline"
-                            className="flex-1 hover:bg-primary hover:text-primary-foreground"
-                            asChild
-                          >
-                            <a 
-                              href={project.installUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                            >
-                              <ExternalLink className="h-4 w-4 mr-2" />
-                              {t('install')}
-                            </a>
-                          </Button>
-                        )}
-                        
-                        {project.type === 'desktop-app' && project.downloadUrl && (
-                          <Button 
-                            variant="outline"
-                            className="flex-1 hover:bg-primary hover:text-primary-foreground"
-                            asChild
-                          >
-                            <a 
-                              href={project.downloadUrl}
-                              target="_blank"
-                              rel="noopener noreferrer"
-                            >
-                              <Download className="h-4 w-4 mr-2" />
-                              {t('download')}
-                            </a>
-                          </Button>
+                      <div className="pt-4">
+                        {project.id === 'tic-tac-toe' ? (
+                          <div className="flex flex-col items-center gap-2">
+                            <Badge variant="secondary" className="px-3 py-1">
+                              {language === 'es' ? 'Próximamente' : 'Coming Soon'}
+                            </Badge>
+                            <div className="flex items-center gap-2 text-primary font-semibold">
+                              <Gamepad2 className="h-4 w-4" />
+                              Apple App Store
+                            </div>
+                          </div>
+                        ) : (
+                          <div className="flex gap-3">
+                            {project.repo && (
+                              <Button 
+                                variant="default"
+                                className="flex-1 group-hover:shadow-lg transition-shadow"
+                                asChild
+                              >
+                                <a 
+                                  href={`https://github.com/${project.repo}`}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                >
+                                  <Github className="h-4 w-4 mr-2" />
+                                  {t('viewOnGitHub')}
+                                </a>
+                              </Button>
+                            )}
+                            {project.type === 'chrome-extension' && project.installUrl && (
+                              <Button 
+                                variant="outline"
+                                className="flex-1 hover:bg-primary hover:text-primary-foreground"
+                                asChild
+                              >
+                                <a 
+                                  href={project.installUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                >
+                                  <ExternalLink className="h-4 w-4 mr-2" />
+                                  {t('install')}
+                                </a>
+                              </Button>
+                            )}
+                            {project.type === 'desktop-app' && project.downloadUrl && (
+                              <Button 
+                                variant="outline"
+                                className="flex-1 hover:bg-primary hover:text-primary-foreground"
+                                asChild
+                              >
+                                <a 
+                                  href={project.downloadUrl}
+                                  target="_blank"
+                                  rel="noopener noreferrer"
+                                >
+                                  <Download className="h-4 w-4 mr-2" />
+                                  {t('download')}
+                                </a>
+                              </Button>
+                            )}
+                          </div>
                         )}
                       </div>
                     </CardContent>

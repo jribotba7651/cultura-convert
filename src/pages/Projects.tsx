@@ -37,6 +37,22 @@ interface Project {
 
 const projects: Project[] = [
   {
+    id: "tic-tac-toe",
+    repo: "",
+    type: "desktop-app",
+    title: {
+      es: "Tic-Tac-Toe Familiar",
+      en: "Family Tic-Tac-Toe"
+    },
+    description: {
+      es: "App de Tic-Tac-Toe diseñada para tiempo de calidad en familia. Colorida, con anuncios mínimos y sin música molesta.",
+      en: "Tic-Tac-Toe app designed for quality family time. Colorful, minimal ads, and no annoying music."
+    },
+    downloadUrl: "/tic-tac-toe-support",
+    techStack: ["React Native", "iOS", "Family Gaming"],
+    featured: true
+  },
+  {
     id: "sql-formatter",
     repo: "jribotba7651/sql-formatter-chrome-extension",
     type: "chrome-extension",

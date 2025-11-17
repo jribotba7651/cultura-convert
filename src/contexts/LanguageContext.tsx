@@ -122,7 +122,23 @@ const translations = {
     shipped: "Enviado",
     delivered: "Entregado",
     cancelled: "Cancelado",
-    failed: "Fallido"
+    failed: "Fallido",
+    
+    // Tic-Tac-Toe Support
+    tictactoeTitle: "Soporte Tic-Tac-Toe",
+    tictactoeSubtitle: "Tiempo de calidad padre-hijo con Tic-Tac-Toe colorido. Emojis divertidos, anuncios mínimos (1 cada 5 juegos), sin música que distraiga. Perfecto para crear recuerdos familiares duraderos.",
+    tictactoeComingSoon: "Próximamente en App Store",
+    tictactoeStatus: "Estado del Proyecto",
+    tictactoeStatusDesc: "Próximamente en la App Store de Apple. Suscríbete a nuestro newsletter para recibir notificaciones cuando lancemos la app.",
+    tictactoeFeatures: "Características",
+    tictattoeFAQ: "Preguntas Frecuentes",
+    tictactoeContactTitle: "Soporte Técnico",
+    tictactoeContactDesc: "¿Tienes alguna pregunta o problema? Contáctanos y te ayudaremos lo antes posible.",
+    tictactoeFooter: "Desarrollado con amor para momentos de unión familiar",
+    tictactoeMetaDesc: "App familiar de Tic-Tac-Toe con diseño colorido, anuncios mínimos y sin música molesta. Próximamente en App Store.",
+    contactName: "Nombre",
+    contactSubject: "Asunto",
+    contactMessage: "Mensaje"
   },
   en: {
     // Header
@@ -235,7 +251,23 @@ const translations = {
     shipped: "Shipped",
     delivered: "Delivered",
     cancelled: "Cancelled",
-    failed: "Failed"
+    failed: "Failed",
+    
+    // Tic-Tac-Toe Support
+    tictactoeTitle: "Tic-Tac-Toe App Support",
+    tictactoeSubtitle: "Quality dad-kid bonding with colorful Tic-Tac-Toe. Fun emojis, minimal ads (1 per 5 games), no distracting music. Perfect for creating lasting family memories.",
+    tictactoeComingSoon: "Coming Soon to App Store",
+    tictactoeStatus: "Project Status",
+    tictactoeStatusDesc: "Coming Soon to Apple App Store. Subscribe to our newsletter to get notified when we launch the app.",
+    tictactoeFeatures: "Features",
+    tictattoeFAQ: "Frequently Asked Questions",
+    tictactoeContactTitle: "Technical Support",
+    tictactoeContactDesc: "Have a question or issue? Contact us and we'll help you as soon as possible.",
+    tictactoeFooter: "Developed with love for family bonding moments",
+    tictactoeMetaDesc: "Family-friendly Tic-Tac-Toe app with colorful design, minimal ads, and no annoying music. Coming soon to App Store.",
+    contactName: "Name",
+    contactSubject: "Subject",
+    contactMessage: "Message"
   }
 };
 

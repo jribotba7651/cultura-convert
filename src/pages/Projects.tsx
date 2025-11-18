@@ -53,6 +53,22 @@ const projects: Project[] = [
     featured: true
   },
   {
+    id: "keep-awake",
+    repo: "jribotba7651/KeepAwake",
+    type: "desktop-app",
+    title: {
+      es: "KeepAwake",
+      en: "KeepAwake"
+    },
+    description: {
+      es: "Mantén tu computadora activa evitando que entre en modo de suspensión automáticamente",
+      en: "Keep your computer awake and prevent it from going to sleep automatically"
+    },
+    downloadUrl: "https://github.com/jribotba7651/KeepAwake/releases",
+    techStack: ["C#", "WPF", ".NET", "Windows"],
+    featured: true
+  },
+  {
     id: "sql-formatter",
     repo: "jribotba7651/sql-formatter-chrome-extension",
     type: "chrome-extension",

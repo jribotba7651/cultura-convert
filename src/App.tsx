@@ -78,6 +78,7 @@ const AppContent = () => {
           <Route path="/privacy-policy-es" element={<Navigate to="/privacy-policy?lang=es" replace />} />
         <Route path="/recursos/:slug" element={<ResourceDownload />} />
         <Route path="/resources/:slug" element={<ResourceDownload />} />
+        <Route path="/share/resource/:slug" element={<ResourceDownload />} />
         <Route path="/checkout" element={<Checkout />} />
         <Route path="/order-confirmation/:orderId" element={<OrderConfirmation />} />
         <Route path="/auth" element={<Auth />} />

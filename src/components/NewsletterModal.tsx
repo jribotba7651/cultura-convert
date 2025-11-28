@@ -50,63 +50,73 @@ export const NewsletterModal = ({ webhookEndpoint }: NewsletterModalProps) => {
     { id: 'all', label: language === 'es' ? 'Todos los temas' : 'All Topics' },
   ];
 
-  // Check if modal should be shown
-  const shouldShowModal = (): boolean => {
+  // Check if modal should be shown - runs once on mount
+  useEffect(() => {
     const dismissed = localStorage.getItem(STORAGE_KEY);
-    if (!dismissed) return true;
-    
-    const dismissedTime = parseInt(dismissed, 10);
-    const now = Date.now();
-    
-    if (now - dismissedTime > DISMISS_DURATION) {
-      localStorage.removeItem(STORAGE_KEY);
-      return true;
+    if (dismissed) {
+      const dismissedTime = parseInt(dismissed, 10);
+      const now = Date.now();
+      
+      // If it's been more than 7 days, clear the dismissal
+      if (now - dismissedTime > DISMISS_DURATION) {
+        localStorage.removeItem(STORAGE_KEY);
+      } else {
+        // Modal was dismissed recently, don't show it
+        return;
+      }
     }
-    
-    return false;
-  };
+
+    // Set up timeout to show modal after 30 seconds
+    const timeoutId = setTimeout(() => {
+      setIsOpen(true);
+    }, 30000);
+
+    return () => clearTimeout(timeoutId);
+  }, []); // Only run once on mount
 
   // Handle scroll tracking
   useEffect(() => {
+    // Check if modal was dismissed
+    const dismissed = localStorage.getItem(STORAGE_KEY);
+    if (dismissed) {
+      const dismissedTime = parseInt(dismissed, 10);
+      if (Date.now() - dismissedTime <= DISMISS_DURATION) {
+        return; // Don't track scroll if dismissed recently
+      }
+    }
+
     const handleScroll = () => {
       const scrollPercentage = (window.scrollY / (document.documentElement.scrollHeight - window.innerHeight)) * 100;
-      if (scrollPercentage >= 50 && !hasScrolledEnough) {
+      if (scrollPercentage >= 50 && !hasScrolledEnough && !isOpen) {
         setHasScrolledEnough(true);
+        setIsOpen(true);
       }
     };
 
     window.addEventListener('scroll', handleScroll);
     return () => window.removeEventListener('scroll', handleScroll);
-  }, [hasScrolledEnough]);
-
-  // Show modal after 30 seconds or 50% scroll
-  useEffect(() => {
-    if (!shouldShowModal()) return;
-
-    const timeoutId = setTimeout(() => {
-      setIsOpen(true);
-    }, 30000); // 30 seconds
-
-    return () => clearTimeout(timeoutId);
-  }, []);
-
-  useEffect(() => {
-    if (hasScrolledEnough && shouldShowModal()) {
-      setIsOpen(true);
-    }
-  }, [hasScrolledEnough]);
+  }, [hasScrolledEnough, isOpen]);
 
   // Exit-intent detection
   useEffect(() => {
+    // Check if modal was dismissed
+    const dismissed = localStorage.getItem(STORAGE_KEY);
+    if (dismissed) {
+      const dismissedTime = parseInt(dismissed, 10);
+      if (Date.now() - dismissedTime <= DISMISS_DURATION) {
+        return; // Don't track mouse leave if dismissed recently
+      }
+    }
+
     const handleMouseLeave = (e: MouseEvent) => {
-      if (e.clientY <= 0 && shouldShowModal()) {
+      if (e.clientY <= 0 && !isOpen) {
         setIsOpen(true);
       }
     };
 
     document.addEventListener('mouseleave', handleMouseLeave);
     return () => document.removeEventListener('mouseleave', handleMouseLeave);
-  }, []);
+  }, [isOpen]);
 
   const handleClose = () => {
     setIsOpen(false);

@@ -16,6 +16,7 @@ import lasAventurasLunaAvoCover from "@/assets/las-aventuras-luna-avo-cover.jpg"
 import sofiaMariePalomaCover from "@/assets/sofia-marie-paloma-cover.jpg";
 import cartasDeNewarkCover from "@/assets/cartas-de-newark-cover.jpg";
 import raicesEnTierraAjenaCover from "@/assets/raices-en-tierra-ajena-cover.jpg";
+import nietosEnLaDiasporaCover from "@/assets/nietos-en-la-diaspora-cover.jpg";
 
 // Datos de ejemplo para los libros de Juan C. Ribot Guzmán
 const juanBooks: Book[] = [
@@ -43,6 +44,16 @@ const juanBooks: Book[] = [
 
 // Datos de ejemplo para los libros de Rosnelma García Amalbert
 const rosnelmaBooks: Book[] = [
+  {
+    title: "Nietos en la Diáspora: Tres Generaciones, Una Historia",
+    description: {
+      es: "¿Qué significa ser puertorriqueño cuando tu familia ha estado migrando por más de un siglo? A través de diálogos familiares auténticos que mezclan español e inglés, este libro explora 500 años de historia puertorriqueña desde los taínos hasta Bad Bunny, las políticas económicas que forzaron la Gran Migración, las contribuciones monumentales de los puertorriqueños en Estados Unidos, y cómo la próxima generación puede ser global sin perder sus raíces. Con más de 100 fuentes académicas, combina rigor histórico con narrativa emotiva basada en testimonios reales y la experiencia vivida de cuatro generaciones de puertorriqueños. Perfecto para familias puertorriqueñas navegando la experiencia diaspórica, jóvenes latinos buscando entender su identidad bicultural, educadores enseñando historia puertorriqueña, y cualquier persona interesada en temas de migración, identidad y cultura.",
+      en: "What does it mean to be Puerto Rican when your family has been migrating for over a century? Through authentic family dialogues that blend Spanish and English, this book explores 500 years of Puerto Rican history from the Taínos to Bad Bunny, the economic policies that forced the Great Migration, the monumental contributions of Puerto Ricans in the United States, and how the next generation can be global without losing their roots. With over 100 academic sources, it combines historical rigor with emotional narrative based on real testimonies and the lived experience of four generations of Puerto Ricans. Perfect for Puerto Rican families navigating the diasporic experience, young Latinos seeking to understand their bicultural identity, educators teaching Puerto Rican history, and anyone interested in migration, identity, and culture."
+    },
+    status: "published" as const,
+    amazonUrl: "https://a.co/d/31LLEzW",
+    coverImage: nietosEnLaDiasporaCover,
+  },
   {
     title: "JÍBARA EN LA LUNA: Transforming Challenges into Opportunities",
     description: {

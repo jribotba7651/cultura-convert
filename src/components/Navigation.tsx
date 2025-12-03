@@ -17,13 +17,12 @@ const Navigation = () => {
 
   const navItems = [
     { path: "/", label: t('home') },
-    { path: "/professional-profile", label: t('language') === 'es' ? 'Perfil SAP' : 'SAP Profile' },
+    { path: "/nosotros", label: t('language') === 'es' ? 'Nosotros' : 'About Us' },
     { path: "/blog", label: t('blog') },
     { path: "/services", label: t('services') },
     { path: "/consulting", label: "Consulting" },
     { path: "/proyectos", label: t('projects') },
     { path: "/store", label: t('store') },
-    { path: "/privacy-policy", label: t('language') === 'es' ? 'Privacidad' : 'Privacy' },
   ];
 
   return (

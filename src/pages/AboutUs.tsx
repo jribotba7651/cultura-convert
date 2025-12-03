@@ -23,6 +23,7 @@ import {
   Factory
 } from "lucide-react";
 import juanProfessionalPhoto from "@/assets/juan-ribot-professional.jpg";
+import rosnelmaProfilePhoto from "@/assets/rosnelma-garcia-profile.jpg";
 
 const AboutUs = () => {
   const { language } = useLanguage();
@@ -313,9 +314,12 @@ const AboutUs = () => {
           <div className="flex flex-col lg:flex-row items-start gap-12 mb-16">
             {/* Photo & Basic Info */}
             <div className="flex-shrink-0 text-center lg:text-left">
-              <div className="w-48 h-48 md:w-56 md:h-56 rounded-full overflow-hidden border-4 border-secondary/30 shadow-xl mx-auto lg:mx-0 mb-6 bg-secondary/10 flex items-center justify-center">
-                {/* Placeholder - will be replaced with actual photo */}
-                <span className="text-5xl font-bold text-secondary/60">RG</span>
+              <div className="w-48 h-48 md:w-56 md:h-56 rounded-full overflow-hidden border-4 border-secondary/30 shadow-xl mx-auto lg:mx-0 mb-6">
+                <img 
+                  src={rosnelmaProfilePhoto} 
+                  alt="Rosnelma García-Amalbert" 
+                  className="w-full h-full object-cover"
+                />
               </div>
               <h2 className="text-2xl md:text-3xl font-bold text-foreground mb-2">
                 Rosnelma García-Amalbert

@@ -18,6 +18,7 @@ import {
   FileText,
   Settings
 } from "lucide-react";
+import juanProfessionalPhoto from "@/assets/juan-ribot-professional.jpg";
 
 const ProfessionalProfile = () => {
   const { language } = useLanguage();
@@ -97,24 +98,37 @@ const ProfessionalProfile = () => {
       <section className="relative py-24 px-4 bg-gradient-to-br from-primary/10 via-background to-secondary/10 overflow-hidden">
         <div className="absolute inset-0 bg-[radial-gradient(circle_at_30%_20%,hsl(var(--primary)/0.1)_0%,transparent_50%)]" />
         <div className="container mx-auto max-w-5xl relative z-10">
-          <div className="text-center space-y-6">
-            <Badge variant="secondary" className="mb-4 text-sm px-4 py-1">
-              {language === 'es' ? 'Perfil Profesional' : 'Professional Profile'}
-            </Badge>
-            <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground tracking-tight">
-              Juan C. Ribot-Guzman
-            </h1>
-            <p className="text-2xl md:text-3xl font-semibold text-primary">
-              SAP Master Data & Data Governance Leader
-            </p>
-            <p className="text-xl text-muted-foreground max-w-2xl mx-auto">
-              15+ years in Master Data, Supply Chain Operations, and ERP Transformations
-            </p>
-            <div className="flex flex-wrap justify-center gap-3 pt-4">
-              <Badge variant="outline" className="text-sm">SAP S/4HANA</Badge>
-              <Badge variant="outline" className="text-sm">Master Data Management</Badge>
-              <Badge variant="outline" className="text-sm">Data Governance</Badge>
-              <Badge variant="outline" className="text-sm">Supply Chain</Badge>
+          <div className="flex flex-col lg:flex-row items-center gap-12">
+            {/* Photo */}
+            <div className="flex-shrink-0">
+              <div className="w-48 h-48 md:w-64 md:h-64 rounded-full overflow-hidden border-4 border-primary/20 shadow-xl">
+                <img 
+                  src={juanProfessionalPhoto} 
+                  alt="Juan C. Ribot-Guzman" 
+                  className="w-full h-full object-cover"
+                />
+              </div>
+            </div>
+            {/* Text Content */}
+            <div className="text-center lg:text-left space-y-6">
+              <Badge variant="secondary" className="text-sm px-4 py-1">
+                {language === 'es' ? 'Perfil Profesional' : 'Professional Profile'}
+              </Badge>
+              <h1 className="text-4xl md:text-5xl lg:text-6xl font-bold text-foreground tracking-tight">
+                Juan C. Ribot-Guzman
+              </h1>
+              <p className="text-2xl md:text-3xl font-semibold text-primary">
+                SAP Master Data & Data Governance Leader
+              </p>
+              <p className="text-xl text-muted-foreground max-w-2xl">
+                15+ years in Master Data, Supply Chain Operations, and ERP Transformations
+              </p>
+              <div className="flex flex-wrap justify-center lg:justify-start gap-3 pt-4">
+                <Badge variant="outline" className="text-sm">SAP S/4HANA</Badge>
+                <Badge variant="outline" className="text-sm">Master Data Management</Badge>
+                <Badge variant="outline" className="text-sm">Data Governance</Badge>
+                <Badge variant="outline" className="text-sm">Supply Chain</Badge>
+              </div>
             </div>
           </div>
         </div>

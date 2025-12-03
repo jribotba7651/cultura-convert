@@ -17,6 +17,7 @@ const Navigation = () => {
 
   const navItems = [
     { path: "/", label: t('home') },
+    { path: "/professional-profile", label: t('language') === 'es' ? 'Perfil SAP' : 'SAP Profile' },
     { path: "/blog", label: t('blog') },
     { path: "/services", label: t('services') },
     { path: "/consulting", label: "Consulting" },

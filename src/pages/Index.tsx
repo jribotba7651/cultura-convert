@@ -17,9 +17,20 @@ import sofiaMariePalomaCover from "@/assets/sofia-marie-paloma-cover.jpg";
 import cartasDeNewarkCover from "@/assets/cartas-de-newark-cover.jpg";
 import raicesEnTierraAjenaCover from "@/assets/raices-en-tierra-ajena-cover.jpg";
 import nietosEnLaDiasporaCover from "@/assets/nietos-en-la-diaspora-cover.jpg";
+import lasQueSiempreEstuvieronCover from "@/assets/las-que-siempre-estuvieron-cover.jpg";
 
 // Datos de ejemplo para los libros de Juan C. Ribot Guzmán
 const juanBooks: Book[] = [
+  {
+    title: "Las Que Siempre Estuvieron: Conversación Entre Dioses",
+    description: {
+      es: "Cinco figuras religiosas llegan a la cima del Monte Roraima: Jesús, Buda, Mahoma, Krishna y Quetzalcóatl. Por primera vez, los fundadores de las tradiciones espirituales más influyentes se encuentran cara a cara. Pero la conversación cambia cuando ellas llegan: María Magdalena, Khadija, Mahapajapati, Radha e Ixchel. Las mujeres que fueron borradas de las escrituras vienen con preguntas incómodas. Una novela sobre el diálogo entre tradiciones que han dividido a la humanidad y las voces femeninas que la historia silenció.",
+      en: "Five religious figures arrive at the summit of Mount Roraima: Jesus, Buddha, Muhammad, Krishna, and Quetzalcoatl. For the first time, the founders of the world's most influential spiritual traditions meet face to face. But the conversation changes when they arrive: Mary Magdalene, Khadija, Mahapajapati, Radha, and Ixchel. The women who were erased from scriptures come with uncomfortable questions. A novel about dialogue between traditions that have divided humanity and the feminine voices that history silenced."
+    },
+    status: "published" as const,
+    amazonUrl: "https://a.co/d/hJpEIi0",
+    coverImage: lasQueSiempreEstuvieronCover,
+  },
   {
     title: "Raíces En Tierra Ajena",
     description: {

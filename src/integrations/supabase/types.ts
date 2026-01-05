@@ -663,6 +663,10 @@ export type Database = {
         }
         Returns: boolean
       }
+      increment_token_access_count: {
+        Args: { p_order_id: string; p_token: string }
+        Returns: undefined
+      }
       log_order_access: {
         Args: {
           p_access_method: string

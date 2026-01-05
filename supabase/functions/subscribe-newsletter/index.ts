@@ -11,7 +11,6 @@ interface NewsletterSubscriptionRequest {
   email: string;
   interests: string[];
   language: string;
-  webhookEndpoint?: string;
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -30,7 +29,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    const { name, email, interests, language, webhookEndpoint }: NewsletterSubscriptionRequest = await req.json();
+    const { name, email, interests, language }: NewsletterSubscriptionRequest = await req.json();
 
     console.log('Newsletter subscription request:', { email, name, interests, language });
 
@@ -107,34 +106,6 @@ const handler = async (req: Request): Promise<Response> => {
       }
 
       console.log('New subscription created:', email);
-    }
-
-    // If webhook endpoint is provided, send data to external service
-    if (webhookEndpoint) {
-      try {
-        const webhookResponse = await fetch(webhookEndpoint, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-          },
-          body: JSON.stringify({
-            email: email.trim().toLowerCase(),
-            name: name.trim(),
-            interests,
-            language,
-            timestamp: new Date().toISOString(),
-          }),
-        });
-
-        if (!webhookResponse.ok) {
-          console.error('Webhook call failed:', await webhookResponse.text());
-        } else {
-          console.log('Webhook call successful');
-        }
-      } catch (webhookError) {
-        console.error('Error calling webhook:', webhookError);
-        // Don't fail the subscription if webhook fails
-      }
     }
 
     return new Response(

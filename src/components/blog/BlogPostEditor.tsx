@@ -31,6 +31,7 @@ export function BlogPostEditor({ postId, onClose }: BlogPostEditorProps) {
     excerpt_es: '',
     content_en: '',
     content_es: '',
+    content_json_en: null as Json | null,
     content_json_es: null as Json | null,
     category_en: '',
     category_es: '',
@@ -67,6 +68,7 @@ export function BlogPostEditor({ postId, onClose }: BlogPostEditorProps) {
           excerpt_es: data.excerpt_es || '',
           content_en: data.content_en || '',
           content_es: data.content_es || '',
+          content_json_en: (data as any).content_json_en || null,
           content_json_es: (data as any).content_json_es || null,
           category_en: data.category_en || '',
           category_es: data.category_es || '',
@@ -180,6 +182,7 @@ export function BlogPostEditor({ postId, onClose }: BlogPostEditorProps) {
         excerpt_es: formData.excerpt_es,
         content_en: formData.content_en,
         content_es: formData.content_es,
+        content_json_en: formData.content_json_en,
         content_json_es: formData.content_json_es,
         category_en: formData.category_en,
         category_es: formData.category_es,
@@ -282,13 +285,17 @@ export function BlogPostEditor({ postId, onClose }: BlogPostEditorProps) {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="content-en">Content (English)</Label>
-              <Textarea
-                id="content-en"
-                value={formData.content_en}
-                onChange={(e) => setFormData({ ...formData, content_en: e.target.value })}
+              <Label>Content (English)</Label>
+              <TipTapEditor
+                content={formData.content_en}
+                contentJson={formData.content_json_en}
+                onChange={(html, json) => setFormData({ 
+                  ...formData, 
+                  content_en: html,
+                  content_json_en: json 
+                })}
                 placeholder="Full post content"
-                rows={10}
+                postId={postId}
               />
             </div>
 

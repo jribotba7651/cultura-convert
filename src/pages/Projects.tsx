@@ -127,10 +127,27 @@ const Projects = () => {
     const fetchGitHubData = async () => {
       try {
         const promises = projects.map(async (project) => {
+          if (!project.repo) return null;
+          
           const response = await fetch(`https://api.github.com/repos/${project.repo}`);
           if (response.ok) {
-            const data = await response.json();
-            return { [project.id]: data };
+            const rawData = await response.json();
+            
+            // Validate and sanitize response data
+            if (rawData && typeof rawData.name === 'string') {
+              const sanitizedData: GitHubRepo = {
+                name: String(rawData.name || '').substring(0, 100),
+                description: String(rawData.description || '').substring(0, 500),
+                html_url: String(rawData.html_url || '').substring(0, 200),
+                stargazers_count: Math.max(0, Number(rawData.stargazers_count) || 0),
+                forks_count: Math.max(0, Number(rawData.forks_count) || 0),
+                updated_at: String(rawData.updated_at || '').substring(0, 30),
+                topics: Array.isArray(rawData.topics) 
+                  ? rawData.topics.slice(0, 10).map((t: unknown) => String(t).substring(0, 50))
+                  : []
+              };
+              return { [project.id]: sanitizedData };
+            }
           }
           return null;
         });

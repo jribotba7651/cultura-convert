@@ -55,10 +55,9 @@ const OrderConfirmation = () => {
         setShowAccountPrompt(true);
       }
       
-      // Clean up token after successful access (optional - for security)
-      if (accessToken) {
-        localStorage.removeItem(`order_token_${id}`);
-      }
+      // Keep token in localStorage for the full 48-hour lifetime
+      // This allows users to revisit their order confirmation page
+      // Server-side rate limiting and token expiration handle security
       
     } catch (error: any) {
       console.error('Error fetching order:', error);

@@ -1,7 +1,6 @@
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Link from '@tiptap/extension-link';
-import Image from '@tiptap/extension-image';
 import { Button } from '@/components/ui/button';
 import { 
   Bold, 
@@ -21,6 +20,7 @@ import { cn } from '@/lib/utils';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import type { Json } from '@/integrations/supabase/types';
+import { ResizableImage } from './ResizableImageExtension';
 
 interface TipTapEditorProps {
   content: string;
@@ -48,7 +48,8 @@ export function TipTapEditor({ content, contentJson, onChange, placeholder, post
           class: 'text-primary underline',
         },
       }),
-      Image.configure({
+      ResizableImage.configure({
+        inline: false,
         HTMLAttributes: {
           class: 'max-w-full h-auto rounded-lg',
         },
@@ -134,8 +135,8 @@ export function TipTapEditor({ content, contentJson, onChange, placeholder, post
         .from('blog-images')
         .getPublicUrl(filePath);
 
-      // Insert image at cursor position
-      editor.chain().focus().setImage({ src: data.publicUrl }).run();
+      // Insert resizable image at cursor position
+      editor.chain().focus().setResizableImage({ src: data.publicUrl }).run();
 
       toast({
         title: 'Imagen subida',

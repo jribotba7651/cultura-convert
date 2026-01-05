@@ -137,11 +137,24 @@ export function BlogPostEditor({ postId, onClose }: BlogPostEditorProps) {
     }
   };
 
+  const getMissingFields = () => {
+    const missing: string[] = [];
+    if (!formData.title_en.trim()) missing.push('Title (English)');
+    if (!formData.title_es.trim()) missing.push('Título (Español)');
+    if (!formData.slug.trim()) missing.push('URL Slug');
+    return missing;
+  };
+
+  const hasEnglishTitleMissing = !formData.title_en.trim();
+  const hasSpanishTitleMissing = !formData.title_es.trim();
+
   const handleSave = async () => {
-    if (!formData.title_en || !formData.title_es || !formData.slug) {
+    const missingFields = getMissingFields();
+    
+    if (missingFields.length > 0) {
       toast({
-        title: 'Error',
-        description: 'Please fill in all required fields (titles and slug)',
+        title: 'Campos requeridos / Required fields',
+        description: `Por favor completa: ${missingFields.join(', ')}`,
         variant: 'destructive',
       });
       return;
@@ -227,8 +240,18 @@ export function BlogPostEditor({ postId, onClose }: BlogPostEditorProps) {
       <CardContent className="space-y-6">
         <Tabs defaultValue="en">
           <TabsList className="grid w-full grid-cols-2">
-            <TabsTrigger value="en">English</TabsTrigger>
-            <TabsTrigger value="es">Español</TabsTrigger>
+            <TabsTrigger value="en" className="relative">
+              English
+              {hasEnglishTitleMissing && (
+                <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-destructive" />
+              )}
+            </TabsTrigger>
+            <TabsTrigger value="es" className="relative">
+              Español
+              {hasSpanishTitleMissing && (
+                <span className="absolute -top-1 -right-1 h-2 w-2 rounded-full bg-destructive" />
+              )}
+            </TabsTrigger>
           </TabsList>
 
           <TabsContent value="en" className="space-y-4">

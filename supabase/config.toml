@@ -13,10 +13,13 @@ verify_jwt = true
 verify_jwt = false
 
 [functions.sync-printify-products]
-verify_jwt = false
+verify_jwt = true
 
 [functions.cleanup-product-data]
-verify_jwt = false
+verify_jwt = true
+
+[functions.manage-product]
+verify_jwt = true
 
 [functions.create-stripe-payment-intent]
 verify_jwt = false

@@ -8,6 +8,7 @@ import { isValidURL } from "@/utils/sanitize";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Book } from "@/types/Book";
 import { ShoppingCart, ExternalLink } from "lucide-react";
+import { useBookAnalytics } from "@/hooks/useBookAnalytics";
 
 interface AuthorProfileProps {
   name: string;
@@ -24,6 +25,7 @@ const AuthorProfile = ({ name, bio, books, image }: AuthorProfileProps) => {
   const { toast } = useToast();
   const { language, t } = useLanguage();
   const navigate = useNavigate();
+  const { trackBuyDirectClick, trackAmazonClick } = useBookAnalytics();
 
   const handleKnowMore = () => {
     setShowMoreInfo(!showMoreInfo);
@@ -52,13 +54,14 @@ const AuthorProfile = ({ name, bio, books, image }: AuthorProfileProps) => {
   };
 
   const handleBuyDirect = (book: Book) => {
-    const basePath = language === 'es' ? '/libro' : '/book';
-    navigate(`${basePath}/${book.slug}`);
+    trackBuyDirectClick({ slug: book.slug, language: language as 'en' | 'es', component: 'author' });
+    navigate(`/libro/${book.slug}`);
   };
 
   const handleAmazonClick = (book: Book) => {
     const url = book.amazonUrl || book.amazonHardcoverUrl || book.amazonSoftcoverUrl;
     if (url && isValidURL(url)) {
+      trackAmazonClick({ slug: book.slug, language: language as 'en' | 'es', component: 'author' });
       window.open(url, '_blank', 'noopener,noreferrer');
     }
   };

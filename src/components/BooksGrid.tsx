@@ -6,6 +6,7 @@ import { Book } from "@/types/Book";
 import { ShoppingCart, BookOpen, ExternalLink } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { isValidURL } from "@/utils/sanitize";
+import { useBookAnalytics } from "@/hooks/useBookAnalytics";
 
 interface BooksGridProps {
   books: Book[];
@@ -15,15 +16,17 @@ interface BooksGridProps {
 export const BooksGrid = ({ books, title }: BooksGridProps) => {
   const { language } = useLanguage();
   const navigate = useNavigate();
+  const { trackBuyDirectClick, trackAmazonClick } = useBookAnalytics();
 
   const handleBuyDirect = (book: Book) => {
-    const basePath = language === 'es' ? '/libro' : '/book';
-    navigate(`${basePath}/${book.slug}`);
+    trackBuyDirectClick({ slug: book.slug, language: language as 'en' | 'es', component: 'grid' });
+    navigate(`/libro/${book.slug}`);
   };
 
   const handleAmazonClick = (book: Book) => {
     const url = book.amazonUrl || book.amazonHardcoverUrl || book.amazonSoftcoverUrl;
     if (url && isValidURL(url)) {
+      trackAmazonClick({ slug: book.slug, language: language as 'en' | 'es', component: 'grid' });
       window.open(url, '_blank', 'noopener,noreferrer');
     }
   };

@@ -75,6 +75,7 @@ export type Database = {
           category_es: string
           content_en: string
           content_es: string
+          content_json_en: Json | null
           content_json_es: Json | null
           cover_image: string | null
           created_at: string | null
@@ -97,6 +98,7 @@ export type Database = {
           category_es: string
           content_en: string
           content_es: string
+          content_json_en?: Json | null
           content_json_es?: Json | null
           cover_image?: string | null
           created_at?: string | null
@@ -119,6 +121,7 @@ export type Database = {
           category_es?: string
           content_en?: string
           content_es?: string
+          content_json_en?: Json | null
           content_json_es?: Json | null
           cover_image?: string | null
           created_at?: string | null

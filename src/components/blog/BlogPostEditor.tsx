@@ -8,7 +8,9 @@ import { Switch } from '@/components/ui/switch';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useToast } from '@/hooks/use-toast';
-import { Loader2, X, Upload } from 'lucide-react';
+import { Loader2, X } from 'lucide-react';
+import { TipTapEditor } from './TipTapEditor';
+import type { Json } from '@/integrations/supabase/types';
 
 interface BlogPostEditorProps {
   postId: string | null;
@@ -29,6 +31,7 @@ export function BlogPostEditor({ postId, onClose }: BlogPostEditorProps) {
     excerpt_es: '',
     content_en: '',
     content_es: '',
+    content_json_es: null as Json | null,
     category_en: '',
     category_es: '',
     slug: '',
@@ -64,6 +67,7 @@ export function BlogPostEditor({ postId, onClose }: BlogPostEditorProps) {
           excerpt_es: data.excerpt_es || '',
           content_en: data.content_en || '',
           content_es: data.content_es || '',
+          content_json_es: (data as any).content_json_es || null,
           category_en: data.category_en || '',
           category_es: data.category_es || '',
           slug: data.slug || '',
@@ -176,6 +180,7 @@ export function BlogPostEditor({ postId, onClose }: BlogPostEditorProps) {
         excerpt_es: formData.excerpt_es,
         content_en: formData.content_en,
         content_es: formData.content_es,
+        content_json_es: formData.content_json_es,
         category_en: formData.category_en,
         category_es: formData.category_es,
         slug: formData.slug,
@@ -321,13 +326,16 @@ export function BlogPostEditor({ postId, onClose }: BlogPostEditorProps) {
             </div>
 
             <div className="space-y-2">
-              <Label htmlFor="content-es">Contenido (Español)</Label>
-              <Textarea
-                id="content-es"
-                value={formData.content_es}
-                onChange={(e) => setFormData({ ...formData, content_es: e.target.value })}
+              <Label>Contenido (Español)</Label>
+              <TipTapEditor
+                content={formData.content_es}
+                contentJson={formData.content_json_es}
+                onChange={(html, json) => setFormData({ 
+                  ...formData, 
+                  content_es: html,
+                  content_json_es: json 
+                })}
                 placeholder="Contenido completo del post"
-                rows={10}
               />
             </div>
 

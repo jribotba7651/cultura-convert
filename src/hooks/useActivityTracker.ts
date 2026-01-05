@@ -2,13 +2,15 @@
  * Hook for tracking user activity and maintaining session security
  */
 
-import { useEffect, useCallback } from 'react';
+import { useEffect, useCallback, useMemo } from 'react';
 import { useAuth } from '@/contexts/AuthContext';
-import { useSessionSecurity } from '@/utils/sessionSecurity';
+import { sessionSecurityHelpers } from '@/utils/sessionSecurity';
 
 export const useActivityTracker = () => {
   const { user, isSessionValid } = useAuth();
-  const { trackActivity, checkSessionValidity } = useSessionSecurity();
+  
+  // Get helpers once, they don't change
+  const { trackActivity, checkSessionValidity } = useMemo(() => sessionSecurityHelpers, []);
 
   // Track various user activities
   const trackUserActivity = useCallback(() => {

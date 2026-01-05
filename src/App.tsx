@@ -68,7 +68,7 @@ const AppContent = () => {
       <Routes>
         <Route path="/" element={<Index />} />
         <Route path="/libro/:slug" element={<BookProduct />} />
-        <Route path="/book/:slug" element={<BookProduct />} />
+        <Route path="/book/:slug" element={<BookProduct />} /> {/* Redirects to /libro/:slug in component */}
         <Route path="/nosotros" element={<AboutUs />} />
         <Route path="/about-us" element={<AboutUs />} />
         <Route path="/professional-profile" element={<ProfessionalProfile />} />

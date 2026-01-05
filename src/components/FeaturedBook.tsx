@@ -5,6 +5,7 @@ import { Book } from "@/types/Book";
 import { ShoppingCart, Star, TrendingUp, ExternalLink } from "lucide-react";
 import { useNavigate } from "react-router-dom";
 import { isValidURL } from "@/utils/sanitize";
+import { useBookAnalytics } from "@/hooks/useBookAnalytics";
 
 interface FeaturedBookProps {
   book: Book;
@@ -14,15 +15,17 @@ interface FeaturedBookProps {
 export const FeaturedBook = ({ book, badge }: FeaturedBookProps) => {
   const { language } = useLanguage();
   const navigate = useNavigate();
+  const { trackBuyDirectClick, trackAmazonClick } = useBookAnalytics();
 
   const handleBuyDirect = () => {
-    const basePath = language === 'es' ? '/libro' : '/book';
-    navigate(`${basePath}/${book.slug}`);
+    trackBuyDirectClick({ slug: book.slug, language: language as 'en' | 'es', component: 'featured' });
+    navigate(`/libro/${book.slug}`);
   };
 
   const handleAmazonClick = () => {
     const url = book.amazonUrl || book.amazonHardcoverUrl || book.amazonSoftcoverUrl;
     if (url && isValidURL(url)) {
+      trackAmazonClick({ slug: book.slug, language: language as 'en' | 'es', component: 'featured' });
       window.open(url, '_blank', 'noopener,noreferrer');
     }
   };

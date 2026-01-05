@@ -14,6 +14,30 @@ export type Database = {
   }
   public: {
     Tables: {
+      analytics_events: {
+        Row: {
+          created_at: string
+          event_data: Json
+          event_name: string
+          id: string
+          session_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          event_data?: Json
+          event_name: string
+          id?: string
+          session_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          event_data?: Json
+          event_name?: string
+          id?: string
+          session_id?: string | null
+        }
+        Relationships: []
+      }
       analytics_page_views: {
         Row: {
           created_at: string
@@ -107,6 +131,33 @@ export type Database = {
           title_en?: string
           title_es?: string
           updated_at?: string | null
+        }
+        Relationships: []
+      }
+      book_waitlist: {
+        Row: {
+          book_slug: string
+          created_at: string
+          email: string
+          id: string
+          language: string
+          source_component: string
+        }
+        Insert: {
+          book_slug: string
+          created_at?: string
+          email: string
+          id?: string
+          language: string
+          source_component: string
+        }
+        Update: {
+          book_slug?: string
+          created_at?: string
+          email?: string
+          id?: string
+          language?: string
+          source_component?: string
         }
         Relationships: []
       }
@@ -259,6 +310,47 @@ export type Database = {
           name?: string
         }
         Relationships: []
+      }
+      email_queue: {
+        Row: {
+          created_at: string
+          email_type: string
+          error_message: string | null
+          id: string
+          scheduled_for: string
+          sent_at: string | null
+          status: string
+          waitlist_id: string | null
+        }
+        Insert: {
+          created_at?: string
+          email_type: string
+          error_message?: string | null
+          id?: string
+          scheduled_for: string
+          sent_at?: string | null
+          status?: string
+          waitlist_id?: string | null
+        }
+        Update: {
+          created_at?: string
+          email_type?: string
+          error_message?: string | null
+          id?: string
+          scheduled_for?: string
+          sent_at?: string | null
+          status?: string
+          waitlist_id?: string | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "email_queue_waitlist_id_fkey"
+            columns: ["waitlist_id"]
+            isOneToOne: false
+            referencedRelation: "book_waitlist"
+            referencedColumns: ["id"]
+          },
+        ]
       }
       newsletter_subscriptions: {
         Row: {
@@ -618,6 +710,36 @@ export type Database = {
           shipping_address?: Json | null
           updated_at?: string
           user_id?: string
+        }
+        Relationships: []
+      }
+      sample_downloads: {
+        Row: {
+          book_slug: string
+          created_at: string
+          download_token: string
+          downloaded_at: string | null
+          email: string
+          id: string
+          language: string
+        }
+        Insert: {
+          book_slug: string
+          created_at?: string
+          download_token?: string
+          downloaded_at?: string | null
+          email: string
+          id?: string
+          language: string
+        }
+        Update: {
+          book_slug?: string
+          created_at?: string
+          download_token?: string
+          downloaded_at?: string | null
+          email?: string
+          id?: string
+          language?: string
         }
         Relationships: []
       }

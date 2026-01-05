@@ -2,10 +2,12 @@ import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { useState } from "react";
+import { useNavigate } from "react-router-dom";
 import { useToast } from "@/hooks/use-toast";
-import { sanitizeURLParam, isValidURL } from "@/utils/sanitize";
+import { isValidURL } from "@/utils/sanitize";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Book } from "@/types/Book";
+import { ShoppingCart, ExternalLink } from "lucide-react";
 
 interface AuthorProfileProps {
   name: string;
@@ -21,6 +23,7 @@ const AuthorProfile = ({ name, bio, books, image }: AuthorProfileProps) => {
   const [showMoreInfo, setShowMoreInfo] = useState(false);
   const { toast } = useToast();
   const { language, t } = useLanguage();
+  const navigate = useNavigate();
 
   const handleKnowMore = () => {
     setShowMoreInfo(!showMoreInfo);
@@ -48,32 +51,19 @@ const AuthorProfile = ({ name, bio, books, image }: AuthorProfileProps) => {
     }
   };
 
-  const handleBuyOnAmazon = (book: Book) => {
-    if (book.amazonUrl && isValidURL(book.amazonUrl)) {
-      toast({
-        title: t('buyingRedirect'),
-        description: `${t('buyingRedirectDesc')} "${book.title}"`,
-      });
-      window.open(book.amazonUrl, '_blank', 'noopener,noreferrer');
-    } else {
-      // Fallback to Amazon search
-      const searchQuery = sanitizeURLParam(book.title);
-      const amazonUrl = `https://www.amazon.com/s?k=${searchQuery}`;
-      
-      toast({
-        title: t('buyingRedirect'),
-        description: `${t('buyingRedirectDesc')} "${book.title}"`,
-      });
-      window.open(amazonUrl, '_blank', 'noopener,noreferrer');
+  const handleBuyDirect = (book: Book) => {
+    const basePath = language === 'es' ? '/libro' : '/book';
+    navigate(`${basePath}/${book.slug}`);
+  };
+
+  const handleAmazonClick = (book: Book) => {
+    const url = book.amazonUrl || book.amazonHardcoverUrl || book.amazonSoftcoverUrl;
+    if (url && isValidURL(url)) {
+      window.open(url, '_blank', 'noopener,noreferrer');
     }
   };
 
-  const handlePreview = (bookTitle: string) => {
-    toast({
-      title: t('previewOpen'),
-      description: `${t('previewOpenDesc')} "${bookTitle}"`,
-    });
-  };
+  const getAmazonUrl = (book: Book) => book.amazonUrl || book.amazonHardcoverUrl || book.amazonSoftcoverUrl;
 
   return (
     <div className="w-full max-w-4xl mx-auto">
@@ -114,7 +104,9 @@ const AuthorProfile = ({ name, bio, books, image }: AuthorProfileProps) => {
       </div>
 
       <div className="space-y-6">
-        <h3 className="text-2xl font-semibold text-foreground">Obras</h3>
+        <h3 className="text-2xl font-semibold text-foreground">
+          {language === 'es' ? 'Obras' : 'Published Works'}
+        </h3>
         
         {books.map((book, index) => (
           <Card key={index} className="border border-border">
@@ -142,14 +134,28 @@ const AuthorProfile = ({ name, bio, books, image }: AuthorProfileProps) => {
                     {book.description[language]}
                   </CardDescription>
                   {book.status === "published" && (
-                    <div className="flex gap-2">
+                    <div className="flex flex-wrap gap-2">
+                      {/* Primary: Buy Direct */}
                       <Button
                         size="sm"
-                        onClick={() => handleBuyOnAmazon(book)}
-                        className="bg-slate-800 hover:bg-slate-700 text-white hover:animate-[wiggle_0.5s_ease-in-out] transition-all duration-200"
+                        onClick={() => handleBuyDirect(book)}
+                        className="bg-primary hover:bg-primary/90 text-primary-foreground"
                       >
-                        {t('buyOnAmazon')}
+                        <ShoppingCart className="mr-2 h-4 w-4" />
+                        {language === 'es' ? 'Comprar directo' : 'Buy Direct'}
                       </Button>
+                      
+                      {/* Secondary: Amazon */}
+                      {getAmazonUrl(book) && (
+                        <Button
+                          size="sm"
+                          variant="outline"
+                          onClick={() => handleAmazonClick(book)}
+                        >
+                          <ExternalLink className="mr-2 h-4 w-4" />
+                          Amazon
+                        </Button>
+                      )}
                     </div>
                   )}
                 </div>

@@ -34,6 +34,7 @@ import TicTacToeSupport from "./pages/TicTacToeSupport";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
 import ProfessionalProfile from "./pages/ProfessionalProfile";
 import AboutUs from "./pages/AboutUs";
+import BookProduct from "./pages/BookProduct";
 import TestComponent from "./components/TestComponent";
 import SPARecovery from "./components/SPARecovery";
 
@@ -66,6 +67,8 @@ const AppContent = () => {
       <CanonicalPathGuard />
       <Routes>
         <Route path="/" element={<Index />} />
+        <Route path="/libro/:slug" element={<BookProduct />} />
+        <Route path="/book/:slug" element={<BookProduct />} />
         <Route path="/nosotros" element={<AboutUs />} />
         <Route path="/about-us" element={<AboutUs />} />
         <Route path="/professional-profile" element={<ProfessionalProfile />} />

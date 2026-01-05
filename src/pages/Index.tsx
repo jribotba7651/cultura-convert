@@ -23,6 +23,7 @@ import lasQueSiempreEstuvieronCover from "@/assets/las-que-siempre-estuvieron-co
 const juanBooks: Book[] = [
   {
     title: "Las Que Siempre Estuvieron: Conversación Entre Dioses",
+    slug: "las-que-siempre-estuvieron",
     description: {
       es: "Cinco figuras religiosas llegan a la cima del Monte Roraima: Jesús, Buda, Mahoma, Krishna y Quetzalcóatl. Por primera vez, los fundadores de las tradiciones espirituales más influyentes se encuentran cara a cara. Pero la conversación cambia cuando ellas llegan: María Magdalena, Khadija, Mahapajapati, Radha e Ixchel. Las mujeres que fueron borradas de las escrituras vienen con preguntas incómodas. Una novela sobre el diálogo entre tradiciones que han dividido a la humanidad y las voces femeninas que la historia silenció.",
       en: "Five religious figures arrive at the summit of Mount Roraima: Jesus, Buddha, Muhammad, Krishna, and Quetzalcoatl. For the first time, the founders of the world's most influential spiritual traditions meet face to face. But the conversation changes when they arrive: Mary Magdalene, Khadija, Mahapajapati, Radha, and Ixchel. The women who were erased from scriptures come with uncomfortable questions. A novel about dialogue between traditions that have divided humanity and the feminine voices that history silenced."
@@ -34,6 +35,7 @@ const juanBooks: Book[] = [
   },
   {
     title: "Raíces En Tierra Ajena",
+    slug: "raices-en-tierra-ajena",
     description: {
       es: "Una historia poderosa sobre familia, supervivencia y esperanza en la América dividida de hoy. Los Ramírez sacrificaron todo por el sueño americano. Ahora viven con miedo diario en Kenner, Louisiana. Al otro lado de la calle viven los Davis. Familia blanca, republicana, con sus propios prejuicios y certezas. Dos mundos separados por más que una cerca de jardín. Pero cuando las amistades inesperadas florecen entre los hijos, todo cambia. Una novela sobre identidad, exilio y la fuerza transformadora del amor humano. Perfecta para lectores de Jeanine Cummins, Julia Alvarez y Reyna Grande.",
       en: "A powerful story about family, survival, and hope in today's divided America. The Ramírez family sacrificed everything for the American dream. Now they live in daily fear in Kenner, Louisiana. Across the street live the Davis family. White, Republican, with their own prejudices and certainties. Two worlds separated by more than a garden fence. But when unexpected friendships bloom between the children, everything changes. A novel about identity, exile, and the transformative power of human love. Perfect for readers of Jeanine Cummins, Julia Alvarez, and Reyna Grande."
@@ -44,6 +46,7 @@ const juanBooks: Book[] = [
   },
   {
     title: "Cartas de Newark",
+    slug: "cartas-de-newark",
     description: {
       es: "Una colección de cartas que capturan la experiencia puertorriqueña en Nueva Jersey, explorando temas de identidad, nostalgia y la diáspora.",
       en: "A collection of letters capturing the Puerto Rican experience in New Jersey, exploring themes of identity, nostalgia, and diaspora."
@@ -58,6 +61,7 @@ const juanBooks: Book[] = [
 const rosnelmaBooks: Book[] = [
   {
     title: "Nietos en la Diáspora: Tres Generaciones, Una Historia",
+    slug: "nietos-en-la-diaspora",
     description: {
       es: "¿Qué significa ser puertorriqueño cuando tu familia ha estado migrando por más de un siglo? A través de diálogos familiares auténticos que mezclan español e inglés, este libro explora 500 años de historia puertorriqueña desde los taínos hasta Bad Bunny, las políticas económicas que forzaron la Gran Migración, las contribuciones monumentales de los puertorriqueños en Estados Unidos, y cómo la próxima generación puede ser global sin perder sus raíces. Con más de 100 fuentes académicas, combina rigor histórico con narrativa emotiva basada en testimonios reales y la experiencia vivida de cuatro generaciones de puertorriqueños. Perfecto para familias puertorriqueñas navegando la experiencia diaspórica, jóvenes latinos buscando entender su identidad bicultural, educadores enseñando historia puertorriqueña, y cualquier persona interesada en temas de migración, identidad y cultura.",
       en: "What does it mean to be Puerto Rican when your family has been migrating for over a century? Through authentic family dialogues that blend Spanish and English, this book explores 500 years of Puerto Rican history from the Taínos to Bad Bunny, the economic policies that forced the Great Migration, the monumental contributions of Puerto Ricans in the United States, and how the next generation can be global without losing their roots. With over 100 academic sources, it combines historical rigor with emotional narrative based on real testimonies and the lived experience of four generations of Puerto Ricans. Perfect for Puerto Rican families navigating the diasporic experience, young Latinos seeking to understand their bicultural identity, educators teaching Puerto Rican history, and anyone interested in migration, identity, and culture."
@@ -68,6 +72,7 @@ const rosnelmaBooks: Book[] = [
   },
   {
     title: "JÍBARA EN LA LUNA: Transforming Challenges into Opportunities",
+    slug: "jibara-en-la-luna-english",
     description: {
       es: "¿Qué pasaría si una jíbara de Puerto Rico pudiera alcanzar la luna sin perder su esencia? Rosnelma García comparte su extraordinario viaje de 22 años navegando Corporate America—desde una planta farmacéutica en Puerto Rico hasta oficinas ejecutivas en California. Una guía práctica y honesta para el liderazgo consciente con estrategias comprobadas, técnicas para navegar el bullying corporativo, y herramientas para integrar la maternidad con la ambición profesional. Perfecta para profesionales Latinas, madres trabajadoras y líderes que buscan autenticidad.",
       en: "What would happen if a jíbara from Puerto Rico could reach the moon without losing her essence? Rosnelma García shares her extraordinary 22-year journey navigating Corporate America—from a pharmaceutical plant in Puerto Rico to executive offices in California. A practical, honest guide to conscious leadership with proven strategies, techniques for navigating corporate bullying, and tools for integrating motherhood with professional ambition. Perfect for Latina professionals, working mothers, and leaders seeking authenticity."
@@ -78,6 +83,7 @@ const rosnelmaBooks: Book[] = [
   },
   {
     title: "JÍBARA EN LA LUNA: Transformando Desafíos en Oportunidades (Edición Español)",
+    slug: "jibara-en-la-luna-espanol",
     description: {
       es: "¿Qué pasaría si una jíbara de Puerto Rico pudiera llegar a la luna sin perder su esencia? Una guía práctica y honesta para el liderazgo consciente con estrategias comprobadas para convertir desafíos en oportunidades, técnicas para navegar el bullying corporativo, y herramientas para usar la perspectiva bicultural como ventaja competitiva.",
       en: "What would happen if a jíbara from Puerto Rico could reach the moon without losing her essence? A practical and honest guide to conscious leadership with proven strategies to turn challenges into opportunities, techniques to navigate corporate bullying, and tools to use bicultural perspective as a competitive advantage. (Spanish Edition)"
@@ -88,22 +94,24 @@ const rosnelmaBooks: Book[] = [
   },
   {
     title: "Las Aventuras de Luna y Avo",
+    slug: "las-aventuras-de-luna-y-avo",
     description: {
       es: "Un libro infantil lleno de aventuras que enseña a los niños sobre la valentía, la amistad y el poder de la imaginación.",
       en: "A children's book full of adventures teaching kids about courage, friendship, and the power of imagination."
     },
     status: "published" as const,
-    amazonUrl: "https://www.amazon.com/Las-aventuras-Luna-Avo-Spanish-ebook/dp/B0DYYV2NKH/ref=sr_1_4?dib=eyJ2IjoiMSJ9.ZuSe3DmdBrrx2NzXq2GjkF7apVCj913zvdaNPNuFRoZxqHNqYv4b6rQHjfIeM6cWMLjgH0rYnBa8c6Xim3hKSs56oXNi6J2FDDpUqgGwHfA.zENM8fRa48HJpgzlsuNHa-8cNVEzan_SURD_m9-5myA&dib_tag=se&qid=1757705499&refinements=p_27%3ARosnelma+Garcia&s=digital-text&sr=1-4&text=Rosnelma+Garcia",
+    amazonUrl: "https://www.amazon.com/Las-aventuras-Luna-Avo-Spanish-ebook/dp/B0DYYV2NKH",
     coverImage: lasAventurasLunaAvoCover,
   },
   {
     title: "Sofía Marie, 'Sofí Mary' o Paloma",
+    slug: "sofia-marie-paloma",
     description: {
       es: "Sofía Marie, también conocida como 'Sofí Mary,' es mucho más que una estudiante universitaria de primer año. Es el resultado de una infancia marcada por una madre brillante pero obsesivamente controladora, que combinaba tecnología de punta con rituales antiguos para vigilar cada uno de sus pasos. Ambientada en Puerto Rico y cargada de profundidad emocional, suspenso y tensiones propias del paso a la adultez, esta novela explora la delgada línea entre la protección y el control, el legado y la rebelión, la verdad y la identidad.",
       en: "Sofía Marie, also known as 'Sofí Mary,' is much more than a college freshman. She is the result of a childhood marked by a brilliant but obsessively controlling mother, who combined cutting-edge technology with ancient rituals to monitor her every step. Set in Puerto Rico and loaded with emotional depth, suspense, and coming-of-age tensions, this novel explores the thin line between protection and control, legacy and rebellion, truth and identity."
     },
     status: "published" as const,
-    amazonUrl: "https://www.amazon.com/dp/B0FB82RBP6?ref=cm_sw_r_ffobk_cp_ud_dp_79GCRX5MZ21X75R7H553&ref_=cm_sw_r_ffobk_cp_ud_dp_79GCRX5MZ21X75R7H553&social_share=cm_sw_r_ffobk_cp_ud_dp_79GCRX5MZ21X75R7H553&bestFormat=true",
+    amazonUrl: "https://www.amazon.com/dp/B0FB82RBP6",
     coverImage: sofiaMariePalomaCover,
   },
 ];

@@ -2,8 +2,8 @@ import { Button } from "@/components/ui/button";
 import { Badge } from "@/components/ui/badge";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Book } from "@/types/Book";
-import { ChevronLeft, ChevronRight, ShoppingCart, Star } from "lucide-react";
-import { useState } from "react";
+import { ShoppingCart, ExternalLink } from "lucide-react";
+import { useNavigate } from "react-router-dom";
 import { isValidURL } from "@/utils/sanitize";
 import {
   Carousel,
@@ -20,16 +20,22 @@ interface BooksHeroProps {
 
 export const BooksHero = ({ books, featured = [0, 1, 2] }: BooksHeroProps) => {
   const { language } = useLanguage();
+  const navigate = useNavigate();
   const featuredBooks = featured.map(index => books[index]).filter(Boolean);
 
-  const handleBuyClick = (url: string) => {
+  const handleBuyDirect = (book: Book) => {
+    const basePath = language === 'es' ? '/libro' : '/book';
+    navigate(`${basePath}/${book.slug}`);
+  };
+
+  const handleAmazonClick = (book: Book) => {
+    const url = book.amazonUrl || book.amazonHardcoverUrl || book.amazonSoftcoverUrl;
     if (url && isValidURL(url)) {
       window.open(url, '_blank', 'noopener,noreferrer');
     }
   };
 
-  const hasMultipleFormats = (book: Book) => book.amazonHardcoverUrl && book.amazonSoftcoverUrl;
-  const getDefaultUrl = (book: Book) => book.amazonUrl || book.amazonHardcoverUrl || book.amazonSoftcoverUrl;
+  const getAmazonUrl = (book: Book) => book.amazonUrl || book.amazonHardcoverUrl || book.amazonSoftcoverUrl;
 
   return (
     <section className="relative py-20 px-4 overflow-hidden bg-gradient-to-br from-primary/5 via-secondary/5 to-accent/5">
@@ -81,41 +87,30 @@ export const BooksHero = ({ books, featured = [0, 1, 2] }: BooksHeroProps) => {
                         </p>
                       </div>
 
-                      {book.status === "published" && (hasMultipleFormats(book) || getDefaultUrl(book)) && (
+                      {book.status === "published" && (
                         <div className="space-y-3">
-                          {hasMultipleFormats(book) ? (
-                            <div className="flex flex-col sm:flex-row gap-3">
-                              <Button 
-                                size="lg"
-                                onClick={() => handleBuyClick(book.amazonHardcoverUrl!)}
-                                className="flex-1 text-lg px-6 py-6 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
-                              >
-                                <ShoppingCart className="mr-2 h-5 w-5" />
-                                {language === 'es' ? 'Hardcover' : 'Hardcover'}
-                              </Button>
-                              <Button 
-                                size="lg"
-                                onClick={() => handleBuyClick(book.amazonSoftcoverUrl!)}
-                                className="flex-1 text-lg px-6 py-6 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
-                              >
-                                <ShoppingCart className="mr-2 h-5 w-5" />
-                                {language === 'es' ? 'Softcover' : 'Softcover'}
-                              </Button>
-                            </div>
-                          ) : (
+                          {/* Primary: Buy Direct */}
+                          <Button 
+                            size="lg"
+                            onClick={() => handleBuyDirect(book)}
+                            className="w-full text-lg px-8 py-6 bg-gradient-to-r from-primary to-primary/80 hover:from-primary/90 hover:to-primary/70 text-primary-foreground font-bold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
+                          >
+                            <ShoppingCart className="mr-2 h-5 w-5" />
+                            {language === 'es' ? 'Comprar directo' : 'Buy Direct'}
+                          </Button>
+                          
+                          {/* Secondary: Amazon */}
+                          {getAmazonUrl(book) && (
                             <Button 
-                              size="lg"
-                              onClick={() => handleBuyClick(getDefaultUrl(book)!)}
-                              className="w-full md:w-auto text-lg px-8 py-6 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-semibold shadow-lg hover:shadow-xl transform hover:scale-105 transition-all duration-200"
+                              variant="outline"
+                              size="sm"
+                              onClick={() => handleAmazonClick(book)}
+                              className="w-full text-sm"
                             >
-                              <ShoppingCart className="mr-2 h-5 w-5" />
-                              {language === 'es' ? 'Comprar en Amazon' : 'Buy on Amazon'}
+                              <ExternalLink className="mr-2 h-4 w-4" />
+                              Amazon
                             </Button>
                           )}
-                          <div className="flex items-center gap-2 text-sm text-muted-foreground">
-                            <Star className="h-4 w-4 fill-amber-400 text-amber-400" />
-                            <span>{language === 'es' ? 'Disponible en Amazon' : 'Available on Amazon'}</span>
-                          </div>
                         </div>
                       )}
                     </div>

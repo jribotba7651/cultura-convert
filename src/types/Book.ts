@@ -1,5 +1,6 @@
 export interface Book {
   title: string;
+  slug: string;
   description: {
     es: string;
     en: string;

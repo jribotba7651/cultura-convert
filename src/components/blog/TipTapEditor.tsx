@@ -1,6 +1,7 @@
 import { useEditor, EditorContent } from '@tiptap/react';
 import StarterKit from '@tiptap/starter-kit';
 import Link from '@tiptap/extension-link';
+import Image from '@tiptap/extension-image';
 import { Button } from '@/components/ui/button';
 import { 
   Bold, 
@@ -11,10 +12,14 @@ import {
   Heading3, 
   Quote, 
   Link as LinkIcon,
-  Unlink
+  Unlink,
+  ImagePlus,
+  Loader2
 } from 'lucide-react';
-import { useCallback, useEffect } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
+import { supabase } from '@/integrations/supabase/client';
+import { useToast } from '@/hooks/use-toast';
 import type { Json } from '@/integrations/supabase/types';
 
 interface TipTapEditorProps {
@@ -22,9 +27,14 @@ interface TipTapEditorProps {
   contentJson?: Json | null;
   onChange: (html: string, json: Json) => void;
   placeholder?: string;
+  postId?: string | null;
 }
 
-export function TipTapEditor({ content, contentJson, onChange, placeholder }: TipTapEditorProps) {
+export function TipTapEditor({ content, contentJson, onChange, placeholder, postId }: TipTapEditorProps) {
+  const [uploading, setUploading] = useState(false);
+  const fileInputRef = useRef<HTMLInputElement>(null);
+  const { toast } = useToast();
+
   const editor = useEditor({
     extensions: [
       StarterKit.configure({
@@ -36,6 +46,11 @@ export function TipTapEditor({ content, contentJson, onChange, placeholder }: Ti
         openOnClick: false,
         HTMLAttributes: {
           class: 'text-primary underline',
+        },
+      }),
+      Image.configure({
+        HTMLAttributes: {
+          class: 'max-w-full h-auto rounded-lg',
         },
       }),
     ],
@@ -76,12 +91,90 @@ export function TipTapEditor({ content, contentJson, onChange, placeholder }: Ti
     editor.chain().focus().extendMarkRange('link').setLink({ href: url }).run();
   }, [editor]);
 
+  const handleImageUpload = useCallback(async (file: File) => {
+    if (!editor) return;
+
+    // Validate file type
+    const allowedTypes = ['image/jpeg', 'image/png', 'image/webp', 'image/gif'];
+    if (!allowedTypes.includes(file.type)) {
+      toast({
+        title: 'Error',
+        description: 'Solo se permiten imágenes JPEG, PNG, WebP y GIF',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    // Validate file size (max 5MB)
+    const maxSize = 5 * 1024 * 1024;
+    if (file.size > maxSize) {
+      toast({
+        title: 'Error',
+        description: 'La imagen debe ser menor a 5MB',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setUploading(true);
+
+    try {
+      const timestamp = Date.now();
+      const sanitizedFileName = file.name.replace(/[^a-zA-Z0-9.-]/g, '_');
+      const folder = postId || 'drafts';
+      const filePath = `${folder}/${timestamp}-${sanitizedFileName}`;
+
+      const { error: uploadError } = await supabase.storage
+        .from('blog-images')
+        .upload(filePath, file);
+
+      if (uploadError) throw uploadError;
+
+      const { data } = supabase.storage
+        .from('blog-images')
+        .getPublicUrl(filePath);
+
+      // Insert image at cursor position
+      editor.chain().focus().setImage({ src: data.publicUrl }).run();
+
+      toast({
+        title: 'Imagen subida',
+        description: 'La imagen se insertó correctamente',
+      });
+    } catch (error) {
+      console.error('Error uploading image:', error);
+      toast({
+        title: 'Error',
+        description: 'No se pudo subir la imagen',
+        variant: 'destructive',
+      });
+    } finally {
+      setUploading(false);
+    }
+  }, [editor, postId, toast]);
+
+  const handleFileInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      handleImageUpload(file);
+    }
+    // Reset input so the same file can be selected again
+    e.target.value = '';
+  }, [handleImageUpload]);
+
   if (!editor) {
     return null;
   }
 
   return (
     <div className="border rounded-md overflow-hidden bg-background">
+      <input
+        ref={fileInputRef}
+        type="file"
+        accept="image/jpeg,image/png,image/webp,image/gif"
+        onChange={handleFileInputChange}
+        className="hidden"
+      />
       <div className="flex flex-wrap gap-1 p-2 border-b bg-muted/50">
         <Button
           type="button"
@@ -165,6 +258,19 @@ export function TipTapEditor({ content, contentJson, onChange, placeholder }: Ti
             <Unlink className="h-4 w-4" />
           </Button>
         )}
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => fileInputRef.current?.click()}
+          disabled={uploading}
+        >
+          {uploading ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <ImagePlus className="h-4 w-4" />
+          )}
+        </Button>
       </div>
       <EditorContent editor={editor} />
     </div>

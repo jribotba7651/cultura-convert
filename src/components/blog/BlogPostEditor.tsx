@@ -336,6 +336,7 @@ export function BlogPostEditor({ postId, onClose }: BlogPostEditorProps) {
                   content_json_es: json 
                 })}
                 placeholder="Contenido completo del post"
+                postId={postId}
               />
             </div>
 

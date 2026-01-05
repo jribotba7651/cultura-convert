@@ -119,7 +119,7 @@ const Index = () => {
       <NewsletterModal />
 
       {/* Hero Section with Featured Books Carousel */}
-      <BooksHero books={allBooks} featured={[0, 3, 2]} />
+      <BooksHero books={allBooks} featured={[5, 0, 3]} />
 
       {/* Featured Bestseller */}
       <FeaturedBook 

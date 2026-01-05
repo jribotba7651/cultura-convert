@@ -17,8 +17,66 @@ interface WaitlistSignupRequest {
   bookTitle: string;
 }
 
-const getWelcomeEmailHtml = (language: 'en' | 'es', bookTitle: string, bookSlug: string, sampleToken: string) => {
-  const baseUrl = Deno.env.get('SITE_URL') || 'https://ifctpzrmqcpqtgwepvoq.supabase.co';
+const getEmailFooter = (language: 'en' | 'es', email: string) => {
+  const supabaseUrl = Deno.env.get('SUPABASE_URL') || 'https://ifctpzrmqcpqtgwepvoq.supabase.co';
+  const unsubscribeUrl = `${supabaseUrl}/functions/v1/unsubscribe-email?email=${encodeURIComponent(email)}`;
+  const siteUrl = 'https://escritorespuertorricodiaspora.com';
+  const privacyUrl = `${siteUrl}/privacy-policy`;
+  const contactEmail = 'contact@escritorespuertorricodiaspora.com';
+
+  if (language === 'es') {
+    return `
+      <hr style="border: none; border-top: 1px solid #eee; margin: 32px 0;">
+      
+      <table style="width: 100%; border-collapse: collapse;">
+        <tr>
+          <td style="padding: 0;">
+            <p style="color: #666; font-size: 14px; margin: 0 0 8px 0;">
+              Con cariño,<br>
+              Juan C. Ribot Guzmán & Rosnelma García Amalbert
+            </p>
+            <p style="color: #999; font-size: 12px; margin: 16px 0 8px 0;">
+              <strong>Escritores Puerto Rico Diáspora</strong><br>
+              <a href="mailto:${contactEmail}" style="color: #999; text-decoration: none;">${contactEmail}</a>
+            </p>
+            <p style="color: #999; font-size: 11px; margin: 16px 0 0 0;">
+              <a href="${privacyUrl}" style="color: #999; text-decoration: underline;">Política de privacidad</a>
+              &nbsp;•&nbsp;
+              <a href="${unsubscribeUrl}" style="color: #999; text-decoration: underline;">Cancelar suscripción</a>
+            </p>
+          </td>
+        </tr>
+      </table>
+    `;
+  }
+
+  return `
+    <hr style="border: none; border-top: 1px solid #eee; margin: 32px 0;">
+    
+    <table style="width: 100%; border-collapse: collapse;">
+      <tr>
+        <td style="padding: 0;">
+          <p style="color: #666; font-size: 14px; margin: 0 0 8px 0;">
+            With love,<br>
+            Juan C. Ribot Guzmán & Rosnelma García Amalbert
+          </p>
+          <p style="color: #999; font-size: 12px; margin: 16px 0 8px 0;">
+            <strong>Escritores Puerto Rico Diáspora</strong><br>
+            <a href="mailto:${contactEmail}" style="color: #999; text-decoration: none;">${contactEmail}</a>
+          </p>
+          <p style="color: #999; font-size: 11px; margin: 16px 0 0 0;">
+            <a href="${privacyUrl}" style="color: #999; text-decoration: underline;">Privacy Policy</a>
+            &nbsp;•&nbsp;
+            <a href="${unsubscribeUrl}" style="color: #999; text-decoration: underline;">Unsubscribe</a>
+          </p>
+        </td>
+      </tr>
+    </table>
+  `;
+};
+
+const getWelcomeEmailHtml = (language: 'en' | 'es', bookTitle: string, bookSlug: string, sampleToken: string, email: string) => {
+  const baseUrl = Deno.env.get('SITE_URL') || 'https://escritorespuertorricodiaspora.com';
   const bookUrl = `${baseUrl}/libro/${bookSlug}`;
   const sampleUrl = `${baseUrl}/libro/${bookSlug}?sample=${sampleToken}`;
   
@@ -46,11 +104,7 @@ const getWelcomeEmailHtml = (language: 'en' | 'es', bookTitle: string, bookSlug:
           <a href="${bookUrl}" style="color: #2563eb;">Ver página del libro →</a>
         </p>
         
-        <hr style="border: none; border-top: 1px solid #eee; margin: 32px 0;">
-        
-        <p style="color: #666; font-size: 14px;">
-          Juan C. Ribot Guzmán & Rosnelma García Amalbert
-        </p>
+        ${getEmailFooter('es', email)}
       </body>
       </html>
     `;
@@ -79,11 +133,7 @@ const getWelcomeEmailHtml = (language: 'en' | 'es', bookTitle: string, bookSlug:
         <a href="${bookUrl}" style="color: #2563eb;">View book page →</a>
       </p>
       
-      <hr style="border: none; border-top: 1px solid #eee; margin: 32px 0;">
-      
-      <p style="color: #666; font-size: 14px;">
-        Juan C. Ribot Guzmán & Rosnelma García Amalbert
-      </p>
+      ${getEmailFooter('en', email)}
     </body>
     </html>
   `;
@@ -200,7 +250,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Send welcome email immediately
     try {
-      const emailHtml = getWelcomeEmailHtml(language, bookTitle, bookSlug, sampleToken);
+      const emailHtml = getWelcomeEmailHtml(language, bookTitle, bookSlug, sampleToken, email);
       
       const emailResponse = await resend.emails.send({
         from: 'Libros <onboarding@resend.dev>',

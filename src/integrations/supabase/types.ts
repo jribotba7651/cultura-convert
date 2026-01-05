@@ -142,6 +142,7 @@ export type Database = {
           id: string
           language: string
           source_component: string
+          unsubscribed_at: string | null
         }
         Insert: {
           book_slug: string
@@ -150,6 +151,7 @@ export type Database = {
           id?: string
           language: string
           source_component: string
+          unsubscribed_at?: string | null
         }
         Update: {
           book_slug?: string
@@ -158,6 +160,7 @@ export type Database = {
           id?: string
           language?: string
           source_component?: string
+          unsubscribed_at?: string | null
         }
         Relationships: []
       }

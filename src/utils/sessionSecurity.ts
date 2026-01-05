@@ -126,24 +126,23 @@ class SessionSecurityManager {
 export const sessionSecurity = new SessionSecurityManager();
 
 /**
- * Hook for components to easily track user activity
+ * Helper functions for session security operations
+ * Note: This is NOT a React hook - use these functions directly
  */
-export const useSessionSecurity = () => {
-  const trackActivity = (userId: string) => {
+export const sessionSecurityHelpers = {
+  trackActivity: (userId: string) => {
     sessionSecurity.updateActivity(userId);
-  };
+  },
 
-  const checkSessionValidity = (userId: string): boolean => {
+  checkSessionValidity: (userId: string): boolean => {
     return sessionSecurity.isSessionValid(userId);
-  };
+  },
 
-  const endSession = async (userId: string): Promise<void> => {
+  endSession: async (userId: string): Promise<void> => {
     await sessionSecurity.endSession(userId);
-  };
-
-  return {
-    trackActivity,
-    checkSessionValidity,
-    endSession
-  };
+  }
 };
+
+// Keep backward compatibility but mark as deprecated
+/** @deprecated Use sessionSecurityHelpers instead */
+export const useSessionSecurity = () => sessionSecurityHelpers;

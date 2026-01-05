@@ -43,6 +43,7 @@
     "@stripe/stripe-js": "^7.9.0",
     "@supabase/supabase-js": "^2.57.4",
     "@tanstack/react-query": "^5.83.0",
+    "@tiptap/extension-image": "^2.27.1",
     "@tiptap/extension-link": "^2.27.1",
     "@tiptap/react": "^2.27.1",
     "@tiptap/starter-kit": "^2.27.1",

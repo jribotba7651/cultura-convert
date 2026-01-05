@@ -53,3 +53,15 @@ verify_jwt = false
 
 [functions.get-sales-analytics]
 verify_jwt = true
+
+[functions.unsubscribe-email]
+verify_jwt = false
+
+[functions.book-waitlist-signup]
+verify_jwt = false
+
+[functions.send-waitlist-followup]
+verify_jwt = false
+
+[functions.track-analytics-event]
+verify_jwt = false

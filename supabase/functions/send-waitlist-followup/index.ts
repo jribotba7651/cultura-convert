@@ -75,12 +75,71 @@ const bookMetadata: Record<string, {
   },
 };
 
+const getEmailFooter = (language: 'en' | 'es', email: string) => {
+  const supabaseUrl = Deno.env.get('SUPABASE_URL') || 'https://ifctpzrmqcpqtgwepvoq.supabase.co';
+  const unsubscribeUrl = `${supabaseUrl}/functions/v1/unsubscribe-email?email=${encodeURIComponent(email)}`;
+  const siteUrl = 'https://escritorespuertorricodiaspora.com';
+  const privacyUrl = `${siteUrl}/privacy-policy`;
+  const contactEmail = 'contact@escritorespuertorricodiaspora.com';
+
+  if (language === 'es') {
+    return `
+      <hr style="border: none; border-top: 1px solid #eee; margin: 32px 0;">
+      
+      <table style="width: 100%; border-collapse: collapse;">
+        <tr>
+          <td style="padding: 0;">
+            <p style="color: #666; font-size: 14px; margin: 0 0 8px 0;">
+              Con cariño,<br>
+              Juan C. Ribot Guzmán & Rosnelma García Amalbert
+            </p>
+            <p style="color: #999; font-size: 12px; margin: 16px 0 8px 0;">
+              <strong>Escritores Puerto Rico Diáspora</strong><br>
+              <a href="mailto:${contactEmail}" style="color: #999; text-decoration: none;">${contactEmail}</a>
+            </p>
+            <p style="color: #999; font-size: 11px; margin: 16px 0 0 0;">
+              <a href="${privacyUrl}" style="color: #999; text-decoration: underline;">Política de privacidad</a>
+              &nbsp;•&nbsp;
+              <a href="${unsubscribeUrl}" style="color: #999; text-decoration: underline;">Cancelar suscripción</a>
+            </p>
+          </td>
+        </tr>
+      </table>
+    `;
+  }
+
+  return `
+    <hr style="border: none; border-top: 1px solid #eee; margin: 32px 0;">
+    
+    <table style="width: 100%; border-collapse: collapse;">
+      <tr>
+        <td style="padding: 0;">
+          <p style="color: #666; font-size: 14px; margin: 0 0 8px 0;">
+            With love,<br>
+            Juan C. Ribot Guzmán & Rosnelma García Amalbert
+          </p>
+          <p style="color: #999; font-size: 12px; margin: 16px 0 8px 0;">
+            <strong>Escritores Puerto Rico Diáspora</strong><br>
+            <a href="mailto:${contactEmail}" style="color: #999; text-decoration: none;">${contactEmail}</a>
+          </p>
+          <p style="color: #999; font-size: 11px; margin: 16px 0 0 0;">
+            <a href="${privacyUrl}" style="color: #999; text-decoration: underline;">Privacy Policy</a>
+            &nbsp;•&nbsp;
+            <a href="${unsubscribeUrl}" style="color: #999; text-decoration: underline;">Unsubscribe</a>
+          </p>
+        </td>
+      </tr>
+    </table>
+  `;
+};
+
 const getFollowUpEmailHtml = (
   language: 'en' | 'es', 
   bookSlug: string,
+  email: string,
   relatedBookSlug?: string
 ) => {
-  const baseUrl = Deno.env.get('SITE_URL') || 'https://ifctpzrmqcpqtgwepvoq.supabase.co';
+  const baseUrl = 'https://escritorespuertorricodiaspora.com';
   const meta = bookMetadata[bookSlug] || {
     insightEs: 'Escribir este libro fue un viaje de descubrimiento personal.',
     insightEn: 'Writing this book was a journey of personal discovery.',
@@ -123,12 +182,7 @@ const getFollowUpEmailHtml = (
         </p>
         ` : ''}
         
-        <hr style="border: none; border-top: 1px solid #eee; margin: 32px 0;">
-        
-        <p style="color: #666; font-size: 14px;">
-          Con cariño,<br>
-          Juan C. Ribot Guzmán & Rosnelma García Amalbert
-        </p>
+        ${getEmailFooter('es', email)}
       </body>
       </html>
     `;
@@ -164,12 +218,7 @@ const getFollowUpEmailHtml = (
       </p>
       ` : ''}
       
-      <hr style="border: none; border-top: 1px solid #eee; margin: 32px 0;">
-      
-      <p style="color: #666; font-size: 14px;">
-        With love,<br>
-        Juan C. Ribot Guzmán & Rosnelma García Amalbert
-      </p>
+      ${getEmailFooter('en', email)}
     </body>
     </html>
   `;
@@ -190,7 +239,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Get pending follow-up emails that are due
+    // Get pending follow-up emails that are due, excluding unsubscribed users
     const { data: pendingEmails, error: fetchError } = await supabase
       .from('email_queue')
       .select(`
@@ -199,7 +248,8 @@ const handler = async (req: Request): Promise<Response> => {
         book_waitlist (
           email,
           language,
-          book_slug
+          book_slug,
+          unsubscribed_at
         )
       `)
       .eq('email_type', 'followup')
@@ -216,10 +266,29 @@ const handler = async (req: Request): Promise<Response> => {
 
     let sent = 0;
     let failed = 0;
+    let skipped = 0;
 
     for (const emailRecord of pendingEmails || []) {
       const waitlist = emailRecord.book_waitlist as any;
       if (!waitlist) continue;
+
+      // Skip if user has unsubscribed
+      if (waitlist.unsubscribed_at) {
+        console.log(`Skipping unsubscribed user: ${waitlist.email}`);
+        
+        // Mark as skipped in email_queue
+        await supabase
+          .from('email_queue')
+          .update({ 
+            status: 'skipped', 
+            error_message: 'User unsubscribed',
+            sent_at: new Date().toISOString()
+          })
+          .eq('id', emailRecord.id);
+        
+        skipped++;
+        continue;
+      }
 
       const meta = bookMetadata[waitlist.book_slug];
       const relatedBook = meta?.relatedBook;
@@ -228,6 +297,7 @@ const handler = async (req: Request): Promise<Response> => {
         const emailHtml = getFollowUpEmailHtml(
           waitlist.language,
           waitlist.book_slug,
+          waitlist.email,
           relatedBook
         );
 
@@ -235,39 +305,51 @@ const handler = async (req: Request): Promise<Response> => {
           ? `Una historia detrás de ${meta?.titleEs || 'tu libro'}`
           : `A story behind ${meta?.titleEn || 'your book'}`;
 
-        await resend.emails.send({
+        const emailResponse = await resend.emails.send({
           from: 'Libros <onboarding@resend.dev>',
           to: [waitlist.email],
           subject,
           html: emailHtml,
         });
 
+        console.log(`Follow-up email sent to ${waitlist.email}:`, emailResponse);
+
         await supabase
           .from('email_queue')
-          .update({ status: 'sent', sent_at: new Date().toISOString() })
+          .update({ 
+            status: 'sent', 
+            sent_at: new Date().toISOString(),
+            error_message: null
+          })
           .eq('id', emailRecord.id);
 
         sent++;
-        console.log(`Follow-up email sent to ${waitlist.email}`);
 
       } catch (emailError: any) {
         console.error(`Error sending to ${waitlist.email}:`, emailError);
         
         await supabase
           .from('email_queue')
-          .update({ status: 'failed', error_message: emailError.message })
+          .update({ 
+            status: 'failed', 
+            error_message: emailError.message || 'Unknown error',
+            sent_at: new Date().toISOString()
+          })
           .eq('id', emailRecord.id);
 
         failed++;
       }
     }
 
+    console.log(`Follow-up processing complete: sent=${sent}, failed=${failed}, skipped=${skipped}`);
+
     return new Response(
       JSON.stringify({ 
         success: true,
         processed: pendingEmails?.length || 0,
         sent,
-        failed
+        failed,
+        skipped
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );

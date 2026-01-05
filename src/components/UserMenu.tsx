@@ -37,6 +37,33 @@ const UserMenu = () => {
     }
   };
 
+  React.useEffect(() => {
+    let cancelled = false;
+
+    const checkAdmin = async () => {
+      if (!user?.id) {
+        setIsAdmin(false);
+        return;
+      }
+
+      try {
+        const { data, error } = await supabase.functions.invoke('check-admin-access');
+        if (cancelled) return;
+        if (error) throw error;
+        setIsAdmin(Boolean(data?.isAdmin));
+      } catch (error) {
+        if (cancelled) return;
+        console.error('Error checking admin status:', error);
+        setIsAdmin(false);
+      }
+    };
+
+    checkAdmin();
+    return () => {
+      cancelled = true;
+    };
+  }, [user?.id]);
+
   if (!user) {
     return (
       <Link to="/auth">
@@ -49,22 +76,6 @@ const UserMenu = () => {
   }
 
   const initials = user.email ? user.email.substring(0, 2).toUpperCase() : 'U';
-
-  React.useEffect(() => {
-    const checkAdmin = async () => {
-      if (!user) return;
-      
-      try {
-        const { data } = await supabase.functions.invoke('check-admin-access');
-        setIsAdmin(data?.isAdmin || false);
-      } catch (error) {
-        console.error('Error checking admin status:', error);
-        setIsAdmin(false);
-      }
-    };
-
-    checkAdmin();
-  }, [user]);
 
   return (
     <DropdownMenu>

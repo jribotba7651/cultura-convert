@@ -14,11 +14,14 @@ interface BooksGridProps {
 export const BooksGrid = ({ books, title }: BooksGridProps) => {
   const { language } = useLanguage();
 
-  const handleBuyClick = (book: Book) => {
-    if (book.amazonUrl && isValidURL(book.amazonUrl)) {
-      window.open(book.amazonUrl, '_blank', 'noopener,noreferrer');
+  const handleBuyClick = (url: string) => {
+    if (url && isValidURL(url)) {
+      window.open(url, '_blank', 'noopener,noreferrer');
     }
   };
+
+  const hasMultipleFormats = (book: Book) => book.amazonHardcoverUrl && book.amazonSoftcoverUrl;
+  const getDefaultUrl = (book: Book) => book.amazonUrl || book.amazonHardcoverUrl || book.amazonSoftcoverUrl;
 
   return (
     <section className="py-20 px-4 bg-background">
@@ -72,15 +75,36 @@ export const BooksGrid = ({ books, title }: BooksGridProps) => {
                   </p>
 
                   {/* CTA Button */}
-                  {book.status === "published" && book.amazonUrl ? (
-                    <Button 
-                      onClick={() => handleBuyClick(book)}
-                      className="w-full bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-semibold shadow-md hover:shadow-lg transform hover:scale-[1.02] transition-all duration-200"
-                      size="lg"
-                    >
-                      <ShoppingCart className="mr-2 h-4 w-4" />
-                      {language === 'es' ? 'Comprar Ahora' : 'Buy Now'}
-                    </Button>
+                  {book.status === "published" && (hasMultipleFormats(book) || getDefaultUrl(book)) ? (
+                    hasMultipleFormats(book) ? (
+                      <div className="flex gap-2">
+                        <Button 
+                          onClick={() => handleBuyClick(book.amazonHardcoverUrl!)}
+                          className="flex-1 bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-semibold shadow-md hover:shadow-lg transform hover:scale-[1.02] transition-all duration-200"
+                          size="lg"
+                        >
+                          <ShoppingCart className="mr-1 h-4 w-4" />
+                          {language === 'es' ? 'Tapa Dura' : 'Hardcover'}
+                        </Button>
+                        <Button 
+                          onClick={() => handleBuyClick(book.amazonSoftcoverUrl!)}
+                          className="flex-1 bg-gradient-to-r from-emerald-500 to-teal-600 hover:from-emerald-600 hover:to-teal-700 text-white font-semibold shadow-md hover:shadow-lg transform hover:scale-[1.02] transition-all duration-200"
+                          size="lg"
+                        >
+                          <ShoppingCart className="mr-1 h-4 w-4" />
+                          {language === 'es' ? 'Rústica' : 'Softcover'}
+                        </Button>
+                      </div>
+                    ) : (
+                      <Button 
+                        onClick={() => handleBuyClick(getDefaultUrl(book)!)}
+                        className="w-full bg-gradient-to-r from-amber-500 to-orange-600 hover:from-amber-600 hover:to-orange-700 text-white font-semibold shadow-md hover:shadow-lg transform hover:scale-[1.02] transition-all duration-200"
+                        size="lg"
+                      >
+                        <ShoppingCart className="mr-2 h-4 w-4" />
+                        {language === 'es' ? 'Comprar Ahora' : 'Buy Now'}
+                      </Button>
+                    )
                   ) : (
                     <Button 
                       variant="outline"

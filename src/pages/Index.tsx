@@ -28,7 +28,8 @@ const juanBooks: Book[] = [
       en: "Five religious figures arrive at the summit of Mount Roraima: Jesus, Buddha, Muhammad, Krishna, and Quetzalcoatl. For the first time, the founders of the world's most influential spiritual traditions meet face to face. But the conversation changes when they arrive: Mary Magdalene, Khadija, Mahapajapati, Radha, and Ixchel. The women who were erased from scriptures come with uncomfortable questions. A novel about dialogue between traditions that have divided humanity and the feminine voices that history silenced."
     },
     status: "published" as const,
-    amazonUrl: "https://a.co/d/hJpEIi0",
+    amazonHardcoverUrl: "https://a.co/d/hJpEIi0",
+    amazonSoftcoverUrl: "https://a.co/d/dGGqrQO",
     coverImage: lasQueSiempreEstuvieronCover,
   },
   {

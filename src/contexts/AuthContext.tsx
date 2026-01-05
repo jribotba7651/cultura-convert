@@ -143,12 +143,27 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   };
 
   const signOut = async () => {
-    // Clean up session security before signing out
+    // Clean up session security before signing out (local tracking only)
     if (user?.id) {
       await sessionSecurity.endSession(user.id);
     }
-    
+
     const { error } = await supabase.auth.signOut();
+
+    // If the session already expired, Supabase can return "Auth session missing".
+    // Treat that case as a successful sign-out.
+    const msg = (error as any)?.message as string | undefined;
+    if (msg && /auth session missing/i.test(msg)) {
+      setSession(null);
+      setUser(null);
+      return { error: null };
+    }
+
+    if (!error) {
+      setSession(null);
+      setUser(null);
+    }
+
     return { error };
   };
 

@@ -2,7 +2,7 @@
  * Session security utilities for enhanced authentication security
  */
 
-import { supabase } from '@/integrations/supabase/client';
+
 
 interface SessionActivity {
   lastActivity: number;
@@ -78,12 +78,9 @@ class SessionSecurityManager {
       this.inactivityTimer = null;
     }
 
-    // Sign out from Supabase
-    try {
-      await supabase.auth.signOut();
-    } catch (error) {
-      console.error('Error during session cleanup:', error);
-    }
+    // IMPORTANT: Do NOT call supabase.auth.signOut() here.
+    // Auth sign-out must be handled by the AuthContext to avoid double signOut and
+    // "Auth session missing" errors when the session already expired.
   }
 
   /**

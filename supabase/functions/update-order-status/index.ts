@@ -33,8 +33,16 @@ serve(async (req) => {
       throw new Error('Unauthorized');
     }
 
-    // Simple admin check - only allow jribot@gmail.com
-    if (user.email !== 'jribot@gmail.com') {
+    // Check if user has admin role using the has_role function
+    const { data: isAdmin, error: roleError } = await supabaseClient
+      .rpc('has_role', { _user_id: user.id, _role: 'admin' });
+
+    if (roleError) {
+      console.error('Error checking admin role:', roleError);
+      throw new Error('Failed to verify admin access');
+    }
+
+    if (!isAdmin) {
       throw new Error('Unauthorized - Admin access required');
     }
 

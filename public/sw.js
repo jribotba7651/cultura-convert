@@ -1,5 +1,5 @@
 // Service Worker para gestión de caché y detección de actualizaciones
-const CACHE_VERSION = 'v3';
+const CACHE_VERSION = 'v4';
 const CACHE_NAME = `escritores-pr-${CACHE_VERSION}`;
 
 // Instalar el service worker

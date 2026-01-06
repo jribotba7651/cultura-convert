@@ -68,3 +68,6 @@ verify_jwt = false
 
 [functions.migrate-blogspot]
 verify_jwt = false
+
+[functions.cancel-order]
+verify_jwt = true

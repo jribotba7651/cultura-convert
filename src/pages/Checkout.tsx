@@ -17,6 +17,41 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { sanitizeText, validateInput } from '@/utils/sanitize';
 import { validateAddress, formatZipCode } from '@/utils/addressValidation';
+
+// Import book cover images for local resolution
+import raicesCover from '@/assets/raices-en-tierra-ajena-cover.jpg';
+import sofiaCover from '@/assets/sofia-marie-paloma-cover.jpg';
+import jibaraCover from '@/assets/jibara-en-la-luna-cover.jpg';
+import cartasCover from '@/assets/cartas-de-newark-cover.jpg';
+import jibaraEnglishCover from '@/assets/jibara-en-la-luna-english-cover.jpg';
+import nietosEnLaDiasporaCover from '@/assets/nietos-en-la-diaspora-cover.jpg';
+import lasQueEstuvieronCover from '@/assets/las-que-siempre-estuvieron-cover.jpg';
+import lunayAvoCover from '@/assets/las-aventuras-luna-avo-cover.jpg';
+
+// Helper to resolve image paths
+const resolveImagePath = (path: string): string => {
+  if (!path) return '/placeholder.svg';
+  
+  // If it's already a full URL (e.g., from Printify), return as-is
+  if (path.startsWith('http://') || path.startsWith('https://')) {
+    return path;
+  }
+  
+  // Map /src/assets paths to imported images
+  const imageMap: Record<string, string> = {
+    '/src/assets/raices-en-tierra-ajena-cover.jpg': raicesCover,
+    '/src/assets/sofia-marie-paloma-cover.jpg': sofiaCover,
+    '/src/assets/jibara-en-la-luna-cover.jpg': jibaraCover,
+    '/src/assets/cartas-de-newark-cover.jpg': cartasCover,
+    '/src/assets/jibara-en-la-luna-english-cover.jpg': jibaraEnglishCover,
+    '/src/assets/nietos-en-la-diaspora-cover.jpg': nietosEnLaDiasporaCover,
+    '/src/assets/las-que-siempre-estuvieron-cover.jpg': lasQueEstuvieronCover,
+    '/src/assets/las-aventuras-luna-avo-cover.jpg': lunayAvoCover,
+  };
+  
+  return imageMap[path] || '/placeholder.svg';
+};
+
 // NOTE: We now fetch the publishable key from a secure Edge Function to avoid env mismatches
 let initialStripePromise: Promise<Stripe | null> | null = null;
 
@@ -1121,9 +1156,9 @@ const CheckoutForm = () => {
               {items.map((item) => (
                 <div key={item.id} className="flex gap-3">
                   <img
-                    src={item.product.images[0] || 'https://images.unsplash.com/photo-1497935586351-b67a49e012bf?auto=format&fit=crop&w=100&h=100'}
+                    src={resolveImagePath(item.product.images[0] || item.product.printify_data?.images?.[0]?.src || '')}
                     alt={item.product.title[language]}
-                    className="w-16 h-16 object-cover rounded"
+                    className="w-16 h-16 object-contain bg-muted rounded"
                   />
                   
                   <div className="flex-1">

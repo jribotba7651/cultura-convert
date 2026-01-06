@@ -6,6 +6,7 @@ import Navigation from "@/components/Navigation";
 import { supabase } from '@/integrations/supabase/client';
 import { useEffect, useState } from 'react';
 import { Loader2, Calendar, Tag } from 'lucide-react';
+import { cleanMarkdown } from '@/utils/htmlCleaner';
 
 interface BlogPost {
   id: string;
@@ -58,7 +59,7 @@ const Blog = () => {
   };
 
   const getTitle = (post: BlogPost) => language === 'es' ? post.title_es : post.title_en;
-  const getExcerpt = (post: BlogPost) => language === 'es' ? post.excerpt_es : post.excerpt_en;
+  const getExcerpt = (post: BlogPost) => cleanMarkdown(language === 'es' ? post.excerpt_es : post.excerpt_en);
   const getCategory = (post: BlogPost) => language === 'es' ? post.category_es : post.category_en;
 
   const [featuredPost, ...previousPosts] = posts;

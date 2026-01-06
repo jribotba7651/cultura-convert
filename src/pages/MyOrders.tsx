@@ -12,6 +12,48 @@ import { formatDistanceToNow, format } from 'date-fns';
 import { es, enUS } from 'date-fns/locale';
 import Navigation from '@/components/Navigation';
 
+// Import book cover images
+import raicesCover from '@/assets/raices-en-tierra-ajena-cover.jpg';
+import sofiaCover from '@/assets/sofia-marie-paloma-cover.jpg';
+import jibaraCover from '@/assets/jibara-en-la-luna-cover.jpg';
+import cartasCover from '@/assets/cartas-de-newark-cover.jpg';
+import jibaraEnglishCover from '@/assets/jibara-en-la-luna-english-cover.jpg';
+import nietosEnLaDiasporaCover from '@/assets/nietos-en-la-diaspora-cover.jpg';
+import lasQueEstuvieronCover from '@/assets/las-que-siempre-estuvieron-cover.jpg';
+import lunayAvoCover from '@/assets/las-aventuras-luna-avo-cover.jpg';
+
+// Helper to resolve image paths from database to imported images
+const resolveImagePath = (path: string | undefined): string => {
+  if (!path) return '/placeholder.svg';
+  
+  // If it's already a full URL (Printify, etc.), return as-is
+  if (path.startsWith('http://') || path.startsWith('https://')) {
+    return path;
+  }
+  
+  // Map image paths to imported images - handle both /src/assets and /assets formats
+  const imageMap: Record<string, string> = {
+    '/src/assets/raices-en-tierra-ajena-cover.jpg': raicesCover,
+    '/assets/raices-en-tierra-ajena-cover.jpg': raicesCover,
+    '/src/assets/sofia-marie-paloma-cover.jpg': sofiaCover,
+    '/assets/sofia-marie-paloma-cover.jpg': sofiaCover,
+    '/src/assets/jibara-en-la-luna-cover.jpg': jibaraCover,
+    '/assets/jibara-en-la-luna-cover.jpg': jibaraCover,
+    '/src/assets/cartas-de-newark-cover.jpg': cartasCover,
+    '/assets/cartas-de-newark-cover.jpg': cartasCover,
+    '/src/assets/jibara-en-la-luna-english-cover.jpg': jibaraEnglishCover,
+    '/assets/jibara-en-la-luna-english-cover.jpg': jibaraEnglishCover,
+    '/src/assets/nietos-en-la-diaspora-cover.jpg': nietosEnLaDiasporaCover,
+    '/assets/nietos-en-la-diaspora-cover.jpg': nietosEnLaDiasporaCover,
+    '/src/assets/las-que-siempre-estuvieron-cover.jpg': lasQueEstuvieronCover,
+    '/assets/las-que-siempre-estuvieron-cover.jpg': lasQueEstuvieronCover,
+    '/src/assets/las-aventuras-luna-avo-cover.jpg': lunayAvoCover,
+    '/assets/las-aventuras-luna-avo-cover.jpg': lunayAvoCover,
+  };
+  
+  return imageMap[path] || '/placeholder.svg';
+};
+
 interface OrderItem {
   id: string;
   quantity: number;
@@ -225,13 +267,11 @@ const MyOrders = () => {
                       <h4 className="font-medium">{t('orderProducts')}:</h4>
                       {order.order_items.map((item) => (
                         <div key={item.id} className="flex items-center gap-3 p-3 bg-muted/50 rounded-lg">
-                          {item.product.images?.[0] && (
-                            <img
-                              src={item.product.images[0]}
-                              alt={item.product.title?.[language] || 'Product'}
-                              className="w-12 h-12 object-cover rounded"
-                            />
-                          )}
+                          <img
+                            src={resolveImagePath(item.product.images?.[0])}
+                            alt={item.product.title?.[language] || 'Product'}
+                            className="w-12 h-12 object-cover rounded"
+                          />
                           <div className="flex-1">
                             <p className="font-medium">
                               {item.product.title?.[language] || 'Product'}

@@ -54,6 +54,7 @@ export default function AdminOrders() {
     action: "cancel",
   });
   const [cancelReason, setCancelReason] = useState<string>("");
+  const [cancelLoading, setCancelLoading] = useState(false);
 
   const canCancelOrder = (order: Order) => {
     return !["shipped", "delivered", "cancelled"].includes(order.status);
@@ -73,17 +74,61 @@ export default function AdminOrders() {
     setCancelReason("");
   };
 
-  const handleConfirmCancel = () => {
-    const message = cancelModal.action === "cancel_refund"
-      ? "UI listo. Falta conectar backend."
-      : "UI listo. Falta conectar backend.";
+  const handleConfirmCancel = async () => {
+    if (!cancelModal.order) return;
+
+    setCancelLoading(true);
     
-    toast({
-      title: cancelModal.action === "cancel_refund" ? "Cancelar y reembolsar" : "Cancelar orden",
-      description: message,
-    });
-    
-    closeCancelModal();
+    try {
+      const { data, error } = await supabase.functions.invoke("cancel-order", {
+        body: {
+          order_id: cancelModal.order.id,
+          refund: cancelModal.action === "cancel_refund",
+          reason: cancelReason || undefined,
+        },
+      });
+
+      if (error) {
+        throw new Error(error.message || "Error al cancelar la orden");
+      }
+
+      if (!data.ok) {
+        throw new Error(data.error || "Error al cancelar la orden");
+      }
+
+      // Success toast
+      const successMessage = cancelModal.action === "cancel_refund"
+        ? "Orden cancelada y reembolso iniciado"
+        : "Orden cancelada";
+      
+      toast({
+        title: "Éxito",
+        description: successMessage,
+      });
+
+      // Warning toast for Printify items
+      if (data.printify_cancel_skipped) {
+        toast({
+          title: "Atención",
+          description: "Orden cancelada en el sistema. Cancelación de Printify no aplicada automáticamente.",
+          variant: "destructive",
+        });
+      }
+
+      // Refresh orders list
+      await fetchOrders();
+      closeCancelModal();
+
+    } catch (error: any) {
+      console.error("Error cancelling order:", error);
+      toast({
+        title: "Error",
+        description: error.message || "No se pudo cancelar la orden",
+        variant: "destructive",
+      });
+    } finally {
+      setCancelLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -341,10 +386,11 @@ export default function AdminOrders() {
           )}
           
           <DialogFooter>
-            <Button variant="outline" onClick={closeCancelModal}>
-              Cancelar
+            <Button variant="outline" onClick={closeCancelModal} disabled={cancelLoading}>
+              Volver
             </Button>
-            <Button variant="destructive" onClick={handleConfirmCancel}>
+            <Button variant="destructive" onClick={handleConfirmCancel} disabled={cancelLoading}>
+              {cancelLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
               {cancelModal.action === "cancel_refund" ? "Cancelar y reembolsar" : "Cancelar orden"}
             </Button>
           </DialogFooter>

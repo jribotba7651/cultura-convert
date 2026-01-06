@@ -87,6 +87,21 @@ serve(async (req) => {
             break
           }
 
+          // Check if order contains Printify items by checking order_items products
+          let hasPrintifyItems = false;
+          const orderItemProductIds = order.order_items.map((item: any) => item.product_id);
+          
+          if (orderItemProductIds.length > 0) {
+            const { data: products } = await supabase
+              .from('products')
+              .select('id, printify_product_id')
+              .in('id', orderItemProductIds);
+            
+            hasPrintifyItems = products?.some((p: any) => p.printify_product_id !== null) || false;
+          }
+          
+          console.log('Order has Printify items:', hasPrintifyItems, 'Manual fulfillment:', order.has_manual_fulfillment);
+
           // Actualizar estado de la orden
           const { error: updateError } = await supabase
             .from('orders')
@@ -100,6 +115,29 @@ serve(async (req) => {
             console.error('Error updating order status:', updateError)
           } else {
             console.log('Order status updated to paid:', order.id)
+          }
+
+          // Only trigger Printify order creation if order has Printify items
+          if (hasPrintifyItems) {
+            console.log('Triggering Printify order creation for order:', order.id);
+            try {
+              const { data: printifyData, error: printifyError } = await supabase.functions.invoke('create-printify-order', {
+                body: { payment_intent_id: paymentIntent.id },
+                headers: {
+                  Authorization: `Bearer ${Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')}`
+                }
+              });
+              
+              if (printifyError) {
+                console.error('Error creating Printify order:', printifyError);
+              } else {
+                console.log('Printify order created successfully:', printifyData);
+              }
+            } catch (printifyErr) {
+              console.error('Failed to invoke create-printify-order:', printifyErr);
+            }
+          } else {
+            console.log('Skipping Printify order creation - order contains only manual fulfillment items');
           }
 
         // Enviar email de confirmación

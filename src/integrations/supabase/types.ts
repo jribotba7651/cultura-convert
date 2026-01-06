@@ -558,6 +558,7 @@ export type Database = {
           customer_email: string
           customer_name: string
           customer_phone: string | null
+          has_manual_fulfillment: boolean
           id: string
           notes: string | null
           printify_order_id: string | null
@@ -580,6 +581,7 @@ export type Database = {
           customer_email: string
           customer_name: string
           customer_phone?: string | null
+          has_manual_fulfillment?: boolean
           id?: string
           notes?: string | null
           printify_order_id?: string | null
@@ -602,6 +604,7 @@ export type Database = {
           customer_email?: string
           customer_name?: string
           customer_phone?: string | null
+          has_manual_fulfillment?: boolean
           id?: string
           notes?: string | null
           printify_order_id?: string | null

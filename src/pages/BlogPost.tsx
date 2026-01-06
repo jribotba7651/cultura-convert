@@ -8,6 +8,29 @@ import { ArrowLeft, Loader2 } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import { supabase } from '@/integrations/supabase/client';
 import { useEffect, useState } from 'react';
+import { cleanMarkdown } from '@/utils/htmlCleaner';
+
+// Convert markdown-style links to HTML and handle basic markdown
+const processContent = (content: string): string => {
+  if (!content) return '';
+  
+  // Check if content is already HTML (from TipTap editor)
+  if (content.includes('<p>') || content.includes('<div>') || content.includes('<figure')) {
+    return content;
+  }
+  
+  // Convert markdown links [text](url) to HTML
+  let processed = content.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">$1</a>');
+  
+  // Convert double newlines to paragraphs
+  const paragraphs = processed.split(/\n\n+/);
+  processed = paragraphs
+    .filter(p => p.trim())
+    .map(p => `<p class="mb-4">${p.replace(/\n/g, '<br/>')}</p>`)
+    .join('');
+  
+  return processed;
+};
 
 interface BlogPostData {
   id: string;
@@ -110,7 +133,7 @@ const BlogPost = () => {
             </h1>
             
             <p className="text-xl text-muted-foreground mb-6">
-              {language === 'es' ? post.excerpt_es : post.excerpt_en}
+              {cleanMarkdown(language === 'es' ? post.excerpt_es : post.excerpt_en)}
             </p>
             
             {post.tags && post.tags.length > 0 && (
@@ -135,13 +158,15 @@ const BlogPost = () => {
           {/* Ad at article start */}
           <AdSenseAd adSlot="3456789012" adFormat="rectangle" className="my-6" />
 
-          <div className="text-foreground leading-relaxed space-y-6">
-            {(language === 'es' ? post.content_es : post.content_en).split('\n\n').map((paragraph, index) => (
-              <p key={index} className="text-lg">
-                {paragraph}
-              </p>
-            ))}
-          </div>
+          <div 
+            className="text-foreground leading-relaxed prose prose-lg max-w-none
+                       prose-a:text-primary prose-a:no-underline hover:prose-a:underline
+                       prose-img:rounded-lg prose-img:max-w-full prose-img:h-auto
+                       prose-p:mb-4 prose-headings:text-foreground"
+            dangerouslySetInnerHTML={{ 
+              __html: processContent(language === 'es' ? post.content_es : post.content_en) 
+            }}
+          />
 
           {/* Ad at article end */}
           <AdSenseAd adSlot="4567890123" adFormat="horizontal" className="my-6" />

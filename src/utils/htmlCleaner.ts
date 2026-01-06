@@ -60,6 +60,57 @@ export const cleanHTML = (html: string): string => {
 };
 
 /**
+ * Cleans markdown syntax from text (for excerpts/previews)
+ */
+export const cleanMarkdown = (text: string): string => {
+  if (!text || typeof text !== 'string') return '';
+  
+  let cleaned = text;
+  
+  // Remove various markdown link patterns
+  // Pattern: [](url) - empty links with content in parentheses
+  cleaned = cleaned.replace(/\[\s*\]\s*\([^)]*\)/g, '');
+  
+  // Pattern: [text](url) - links with text, keep the text
+  cleaned = cleaned.replace(/\[([^\]]+)\]\([^)]*\)/g, '$1');
+  
+  // Remove any leftover brackets from malformed links
+  cleaned = cleaned.replace(/\[\s*\]/g, '');
+  
+  // Remove bold/italic markers
+  cleaned = cleaned.replace(/\*\*([^*]+)\*\*/g, '$1');
+  cleaned = cleaned.replace(/\*([^*]+)\*/g, '$1');
+  cleaned = cleaned.replace(/__([^_]+)__/g, '$1');
+  cleaned = cleaned.replace(/_([^_]+)_/g, '$1');
+  
+  // Remove headers
+  cleaned = cleaned.replace(/^#+\s*/gm, '');
+  
+  // Remove raw URLs that might be left over (including truncated ones ending with ...)
+  cleaned = cleaned.replace(/https?:\/\/[^\s)]*\.{3}?/g, '');
+  cleaned = cleaned.replace(/https?:\/\/[^\s)]+/g, '');
+  
+  // Remove leftover parentheses with only whitespace or empty
+  cleaned = cleaned.replace(/\(\s*\)/g, '');
+  
+  // Remove single orphan opening/closing parentheses at start of text
+  cleaned = cleaned.replace(/^\s*\(\s*$/gm, '');
+  cleaned = cleaned.replace(/^\s*\)\s*$/gm, '');
+  cleaned = cleaned.replace(/^\s*\(\s+/g, '');
+  
+  // Clean HTML tags if any
+  cleaned = cleanHTML(cleaned);
+  
+  // Clean up multiple spaces and trim
+  cleaned = cleaned.replace(/\s+/g, ' ').trim();
+  
+  // Remove leading/trailing orphan parentheses
+  cleaned = cleaned.replace(/^\s*\(?\s*$/, '').replace(/^\(\s*/, '').replace(/\s*\)$/, '');
+  
+  return cleaned.trim();
+};
+
+/**
  * Truncates text to specified length with ellipsis
  */
 export const truncateText = (text: string, maxLength: number = 100): string => {

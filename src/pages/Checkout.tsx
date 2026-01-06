@@ -38,16 +38,24 @@ const resolveImagePath = (path: string): string => {
     return path;
   }
   
-  // Map /src/assets paths to imported images
+  // Map image paths to imported images - handle both /src/assets and /assets formats
   const imageMap: Record<string, string> = {
     '/src/assets/raices-en-tierra-ajena-cover.jpg': raicesCover,
+    '/assets/raices-en-tierra-ajena-cover.jpg': raicesCover,
     '/src/assets/sofia-marie-paloma-cover.jpg': sofiaCover,
+    '/assets/sofia-marie-paloma-cover.jpg': sofiaCover,
     '/src/assets/jibara-en-la-luna-cover.jpg': jibaraCover,
+    '/assets/jibara-en-la-luna-cover.jpg': jibaraCover,
     '/src/assets/cartas-de-newark-cover.jpg': cartasCover,
+    '/assets/cartas-de-newark-cover.jpg': cartasCover,
     '/src/assets/jibara-en-la-luna-english-cover.jpg': jibaraEnglishCover,
+    '/assets/jibara-en-la-luna-english-cover.jpg': jibaraEnglishCover,
     '/src/assets/nietos-en-la-diaspora-cover.jpg': nietosEnLaDiasporaCover,
+    '/assets/nietos-en-la-diaspora-cover.jpg': nietosEnLaDiasporaCover,
     '/src/assets/las-que-siempre-estuvieron-cover.jpg': lasQueEstuvieronCover,
+    '/assets/las-que-siempre-estuvieron-cover.jpg': lasQueEstuvieronCover,
     '/src/assets/las-aventuras-luna-avo-cover.jpg': lunayAvoCover,
+    '/assets/las-aventuras-luna-avo-cover.jpg': lunayAvoCover,
   };
   
   return imageMap[path] || '/placeholder.svg';

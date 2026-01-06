@@ -5,12 +5,22 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Badge } from "@/components/ui/badge";
 import { Accordion, AccordionContent, AccordionItem, AccordionTrigger } from "@/components/ui/accordion";
-import { ArrowLeft, Bell, Gift, ExternalLink, BookOpen, Users, Lightbulb, Quote, Download, ChevronRight } from "lucide-react";
+import { ArrowLeft, Bell, Gift, ExternalLink, BookOpen, Users, Lightbulb, Quote, Download, ChevronRight, ShoppingCart, Loader2 } from "lucide-react";
 import { useState, useEffect } from "react";
 import { useToast } from "@/hooks/use-toast";
 import { supabase } from "@/integrations/supabase/client";
 import { useBookAnalytics } from "@/hooks/useBookAnalytics";
 import { Helmet } from "react-helmet";
+import { useCart } from "@/contexts/CartContext";
+import { Product } from "@/types/Store";
+
+// Mapping of book slugs to product IDs for direct purchase
+// Only these 3 books have "Buy Direct" enabled
+const DIRECT_PURCHASE_BOOKS: Record<string, string> = {
+  "cartas-de-newark": "f704387c-08c6-4177-a8a3-ff35018eacd9",
+  "raices-en-tierra-ajena": "2eb33c81-0056-4907-aea7-584b22fdfe2d",
+  "jibara-en-la-luna-espanol": "bcff5050-24b2-4006-afc3-6686b025b6c1",
+};
 
 // Import all book covers
 import jibaraEnLaLunaCover from "@/assets/jibara-en-la-luna-cover.jpg";
@@ -392,12 +402,18 @@ const BookProduct = () => {
   const { language } = useLanguage();
   const { toast } = useToast();
   const { trackBuyDirectClick, trackAmazonClick, trackWaitlistSubmit, trackSampleDownload } = useBookAnalytics();
+  const { addToCart } = useCart();
   
   const [waitlistEmail, setWaitlistEmail] = useState("");
   const [sampleEmail, setSampleEmail] = useState("");
   const [isWaitlistSubmitting, setIsWaitlistSubmitting] = useState(false);
   const [isSampleSubmitting, setIsSampleSubmitting] = useState(false);
   const [sampleToken, setSampleToken] = useState<string | null>(null);
+  const [isBuyingDirect, setIsBuyingDirect] = useState(false);
+
+  // Check if this book has direct purchase enabled
+  const directPurchaseProductId = slug ? DIRECT_PURCHASE_BOOKS[slug] : null;
+  const hasDirectPurchase = Boolean(directPurchaseProductId);
 
   const book = slug ? booksData[slug] : null;
   const isEnglishRoute = window.location.pathname.startsWith('/book/');
@@ -416,6 +432,63 @@ const BookProduct = () => {
   if (isEnglishRoute && slug) {
     return <Navigate to={`/libro/${slug}`} replace />;
   }
+
+  // Handle direct purchase for enabled books
+  const handleBuyDirect = async () => {
+    if (!directPurchaseProductId || !slug) return;
+    
+    setIsBuyingDirect(true);
+    try {
+      // Track analytics
+      trackBuyDirectClick({ slug, language: language as 'en' | 'es', component: 'product' });
+      
+      // Fetch product from Supabase
+      const { data: productData, error } = await supabase
+        .from('products')
+        .select('*')
+        .eq('id', directPurchaseProductId)
+        .single();
+      
+      if (error || !productData) {
+        throw new Error('Product not found');
+      }
+      
+      // Transform Supabase product to match Product type
+      const product: Product = {
+        id: productData.id,
+        title: productData.title as { es: string; en: string },
+        description: productData.description as { es: string; en: string },
+        price_cents: productData.price_cents,
+        compare_at_price_cents: productData.compare_at_price_cents || undefined,
+        images: productData.images || [],
+        category_id: productData.category_id || '',
+        tags: productData.tags || [],
+        variants: productData.variants as any[] || undefined,
+        is_active: productData.is_active || true,
+        printify_product_id: productData.printify_product_id || undefined,
+        printify_data: productData.printify_data,
+        created_at: productData.created_at,
+        updated_at: productData.updated_at,
+      };
+      
+      // Add to cart (quantity 1, default variant)
+      addToCart(product, 1, product.variants?.[0]?.id);
+      
+      // Navigate to checkout
+      navigate('/checkout');
+    } catch (error) {
+      console.error('Buy direct failed:', error);
+      toast({
+        title: language === 'es' ? 'Error' : 'Error',
+        description: language === 'es' 
+          ? 'No pudimos procesar tu compra. Intenta de nuevo.' 
+          : 'Could not process your purchase. Please try again.',
+        variant: "destructive"
+      });
+    } finally {
+      setIsBuyingDirect(false);
+    }
+  };
 
   const handleWaitlistSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
@@ -600,45 +673,85 @@ const BookProduct = () => {
               </ul>
             </div>
 
-            {/* Primary CTA - Waitlist */}
+            {/* Primary CTA - Buy Direct or Waitlist */}
             <div className="bg-gradient-to-br from-primary/5 via-secondary/5 to-accent/5 rounded-2xl p-6 lg:p-8 border border-border/50">
-              <div className="flex items-center gap-3 mb-4">
-                <div className="p-2 bg-primary/10 rounded-full">
-                  <Gift className="h-6 w-6 text-primary" />
-                </div>
-                <h3 className="text-xl font-semibold text-foreground">
-                  {language === 'es' ? 'Comprar Directo' : 'Buy Direct'}
-                </h3>
-                <Badge variant="secondary">
-                  {language === 'es' ? 'Próximamente' : 'Coming Soon'}
-                </Badge>
-              </div>
-              
-              <p className="text-muted-foreground mb-6">
-                {language === 'es' 
-                  ? 'La compra directa estará disponible pronto. Déjanos tu email y recibe una muestra de regalo.'
-                  : 'Direct checkout coming soon. Get notified and receive a bonus sample.'}
-              </p>
+              {hasDirectPurchase ? (
+                <>
+                  {/* Direct Purchase Available */}
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="p-2 bg-primary/10 rounded-full">
+                      <ShoppingCart className="h-6 w-6 text-primary" />
+                    </div>
+                    <h3 className="text-xl font-semibold text-foreground">
+                      {language === 'es' ? 'Comprar Directo' : 'Buy Direct'}
+                    </h3>
+                    <Badge variant="default" className="bg-green-600">
+                      {language === 'es' ? 'Disponible' : 'Available'}
+                    </Badge>
+                  </div>
+                  
+                  <p className="text-muted-foreground mb-6">
+                    {language === 'es' 
+                      ? 'Compra directamente y recibe tu libro firmado por el autor.'
+                      : 'Buy directly and receive your book signed by the author.'}
+                  </p>
 
-              <form onSubmit={handleWaitlistSubmit} className="flex flex-col sm:flex-row gap-3">
-                <Input
-                  type="email"
-                  placeholder={language === 'es' ? 'Tu email' : 'Your email'}
-                  value={waitlistEmail}
-                  onChange={(e) => setWaitlistEmail(e.target.value)}
-                  required
-                  className="flex-1"
-                />
-                <Button 
-                  type="submit" 
-                  disabled={isWaitlistSubmitting}
-                  size="lg"
-                  className="bg-primary hover:bg-primary/90"
-                >
-                  <Bell className="mr-2 h-4 w-4" />
-                  {language === 'es' ? 'Avisarme' : 'Get notified'}
-                </Button>
-              </form>
+                  <Button 
+                    onClick={handleBuyDirect}
+                    disabled={isBuyingDirect}
+                    size="lg"
+                    className="w-full sm:w-auto bg-primary hover:bg-primary/90"
+                  >
+                    {isBuyingDirect ? (
+                      <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                    ) : (
+                      <ShoppingCart className="mr-2 h-4 w-4" />
+                    )}
+                    {language === 'es' ? 'Comprar Ahora' : 'Buy Now'}
+                  </Button>
+                </>
+              ) : (
+                <>
+                  {/* Waitlist for books without direct purchase */}
+                  <div className="flex items-center gap-3 mb-4">
+                    <div className="p-2 bg-primary/10 rounded-full">
+                      <Gift className="h-6 w-6 text-primary" />
+                    </div>
+                    <h3 className="text-xl font-semibold text-foreground">
+                      {language === 'es' ? 'Comprar Directo' : 'Buy Direct'}
+                    </h3>
+                    <Badge variant="secondary">
+                      {language === 'es' ? 'Próximamente' : 'Coming Soon'}
+                    </Badge>
+                  </div>
+                  
+                  <p className="text-muted-foreground mb-6">
+                    {language === 'es' 
+                      ? 'La compra directa estará disponible pronto. Déjanos tu email y recibe una muestra de regalo.'
+                      : 'Direct checkout coming soon. Get notified and receive a bonus sample.'}
+                  </p>
+
+                  <form onSubmit={handleWaitlistSubmit} className="flex flex-col sm:flex-row gap-3">
+                    <Input
+                      type="email"
+                      placeholder={language === 'es' ? 'Tu email' : 'Your email'}
+                      value={waitlistEmail}
+                      onChange={(e) => setWaitlistEmail(e.target.value)}
+                      required
+                      className="flex-1"
+                    />
+                    <Button 
+                      type="submit" 
+                      disabled={isWaitlistSubmitting}
+                      size="lg"
+                      className="bg-primary hover:bg-primary/90"
+                    >
+                      <Bell className="mr-2 h-4 w-4" />
+                      {language === 'es' ? 'Avisarme' : 'Get notified'}
+                    </Button>
+                  </form>
+                </>
+              )}
             </div>
 
             {/* Secondary CTA - Amazon */}

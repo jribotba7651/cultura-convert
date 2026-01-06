@@ -222,6 +222,8 @@ const handler = async (req: Request): Promise<Response> => {
     console.log('Calculating order total...');
     let totalAmount = 0;
     const orderItems = [];
+    let hasManualFulfillment = false;
+    let hasPrintifyItems = false;
 
     for (const item of items) {
       console.log('Processing item:', item.id);
@@ -234,6 +236,13 @@ const handler = async (req: Request): Promise<Response> => {
       if (error || !product) {
         console.error('Product fetch error:', error);
         throw new Error(`Product not found: ${item.id}`);
+      }
+
+      // Track fulfillment type
+      if (product.printify_product_id) {
+        hasPrintifyItems = true;
+      } else {
+        hasManualFulfillment = true;
       }
 
       let unitPrice = product.price_cents;
@@ -257,6 +266,8 @@ const handler = async (req: Request): Promise<Response> => {
         variant_id: item.variant_id,
       });
     }
+
+    console.log('Order fulfillment types - Manual:', hasManualFulfillment, 'Printify:', hasPrintifyItems);
 
     // Add shipping (flat rate for now - $5.99)
     const shippingAmount = 599;
@@ -341,6 +352,7 @@ const handler = async (req: Request): Promise<Response> => {
         stripe_payment_intent_id: paymentIntent.id,
         status: 'pending',
         currency: 'USD',
+        has_manual_fulfillment: hasManualFulfillment,
       })
       .select('id')
       .single();

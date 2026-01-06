@@ -10,6 +10,12 @@ import { useLanguage } from '@/contexts/LanguageContext';
 import { useAuth } from '@/contexts/AuthContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Order } from '@/types/Store';
+import { Book } from 'lucide-react';
+
+// Extended order type to include has_manual_fulfillment
+interface ExtendedOrder extends Order {
+  has_manual_fulfillment?: boolean;
+}
 
 const OrderConfirmation = () => {
   const { orderId } = useParams<{ orderId: string }>();
@@ -17,7 +23,7 @@ const OrderConfirmation = () => {
   const { language } = useLanguage();
   const { user } = useAuth();
   
-  const [order, setOrder] = useState<Order | null>(null);
+  const [order, setOrder] = useState<ExtendedOrder | null>(null);
   const [loading, setLoading] = useState(true);
   const [showAccountPrompt, setShowAccountPrompt] = useState(false);
 
@@ -48,7 +54,7 @@ const OrderConfirmation = () => {
         throw new Error(data.error);
       }
 
-      setOrder(data.order as unknown as Order);
+      setOrder(data.order as unknown as ExtendedOrder);
       
       // Show account creation prompt for anonymous orders
       if (!user && data.order.user_id === null) {
@@ -217,6 +223,27 @@ const OrderConfirmation = () => {
                   <p>{new Date(order.created_at).toLocaleDateString()}</p>
                 </div>
 
+                {/* Manual fulfillment notice for books */}
+                {order.has_manual_fulfillment && !order.tracking_number && (
+                  <div className="bg-primary/10 border border-primary/20 rounded-lg p-4">
+                    <div className="flex items-start gap-3">
+                      <Book className="h-5 w-5 text-primary mt-0.5" />
+                      <div>
+                        <p className="font-medium text-foreground">
+                          {language === 'es' 
+                            ? 'Libros con envío manual' 
+                            : 'Books with manual shipping'}
+                        </p>
+                        <p className="text-sm text-muted-foreground mt-1">
+                          {language === 'es' 
+                            ? 'Tus libros serán enviados manualmente por el autor. Recibirás un correo con el número de seguimiento en 1-3 días hábiles.' 
+                            : 'Your books will be shipped manually by the author. You will receive a tracking email within 1-3 business days.'}
+                        </p>
+                      </div>
+                    </div>
+                  </div>
+                )}
+
                 {order.tracking_number && (
                   <div>
                     <p className="text-sm text-muted-foreground">
@@ -225,7 +252,7 @@ const OrderConfirmation = () => {
                     <p className="font-mono text-sm">{order.tracking_number}</p>
                     {order.tracking_url && (
                       <Button 
-                        variant="link" 
+                        variant="link"
                         className="p-0 h-auto"
                         onClick={() => window.open(order.tracking_url, '_blank')}
                       >

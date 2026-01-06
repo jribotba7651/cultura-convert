@@ -7,9 +7,39 @@ import { Card } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Package, ArrowLeft, Loader2 } from "lucide-react";
+import { Package, ArrowLeft, Loader2, MoreVertical, XCircle, RefreshCcw } from "lucide-react";
 import { toast } from "@/hooks/use-toast";
 import OrderDetailsCard from "@/components/admin/OrderDetailsCard";
+import {
+  DropdownMenu,
+  DropdownMenuContent,
+  DropdownMenuItem,
+  DropdownMenuTrigger,
+} from "@/components/ui/dropdown-menu";
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from "@/components/ui/dialog";
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from "@/components/ui/select";
+import { Label } from "@/components/ui/label";
+
+type CancelAction = "cancel" | "cancel_refund";
+
+interface CancelModalState {
+  isOpen: boolean;
+  order: Order | null;
+  action: CancelAction;
+}
 
 export default function AdminOrders() {
   const navigate = useNavigate();
@@ -18,6 +48,43 @@ export default function AdminOrders() {
   const [loading, setLoading] = useState(true);
   const [selectedOrder, setSelectedOrder] = useState<Order | null>(null);
   const [filter, setFilter] = useState<string>("all");
+  const [cancelModal, setCancelModal] = useState<CancelModalState>({
+    isOpen: false,
+    order: null,
+    action: "cancel",
+  });
+  const [cancelReason, setCancelReason] = useState<string>("");
+
+  const canCancelOrder = (order: Order) => {
+    return !["shipped", "delivered", "cancelled"].includes(order.status);
+  };
+
+  const canRefundOrder = (order: Order) => {
+    return order.status === "paid" && !!order.stripe_payment_intent_id;
+  };
+
+  const openCancelModal = (order: Order, action: CancelAction) => {
+    setCancelModal({ isOpen: true, order, action });
+    setCancelReason("");
+  };
+
+  const closeCancelModal = () => {
+    setCancelModal({ isOpen: false, order: null, action: "cancel" });
+    setCancelReason("");
+  };
+
+  const handleConfirmCancel = () => {
+    const message = cancelModal.action === "cancel_refund"
+      ? "UI listo. Falta conectar backend."
+      : "UI listo. Falta conectar backend.";
+    
+    toast({
+      title: cancelModal.action === "cancel_refund" ? "Cancelar y reembolsar" : "Cancelar orden",
+      description: message,
+    });
+    
+    closeCancelModal();
+  };
 
   useEffect(() => {
     if (isAdmin) {
@@ -134,11 +201,13 @@ export default function AdminOrders() {
               {filteredOrders.map((order) => (
                 <Card
                   key={order.id}
-                  className="p-6 hover:shadow-lg transition-shadow cursor-pointer"
-                  onClick={() => setSelectedOrder(order)}
+                  className="p-6 hover:shadow-lg transition-shadow"
                 >
                   <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                    <div className="space-y-2 flex-1">
+                    <div 
+                      className="space-y-2 flex-1 cursor-pointer"
+                      onClick={() => setSelectedOrder(order)}
+                    >
                       <div className="flex items-center gap-3 flex-wrap">
                         <h3 className="font-semibold text-lg">
                           Orden #{order.id.slice(0, 8)}
@@ -165,13 +234,62 @@ export default function AdminOrders() {
                         </p>
                       </div>
                     </div>
-                    <div className="text-right">
-                      <p className="text-2xl font-bold text-primary">
-                        ${(order.total_amount_cents / 100).toFixed(2)}
-                      </p>
-                      <Button variant="outline" size="sm" className="mt-2">
-                        Ver detalles
-                      </Button>
+                    <div className="flex items-center gap-4">
+                      <div className="text-right">
+                        <p className="text-2xl font-bold text-primary">
+                          ${(order.total_amount_cents / 100).toFixed(2)}
+                        </p>
+                        <Button 
+                          variant="outline" 
+                          size="sm" 
+                          className="mt-2"
+                          onClick={() => setSelectedOrder(order)}
+                        >
+                          Ver detalles
+                        </Button>
+                      </div>
+                      
+                      {/* Actions Menu */}
+                      <DropdownMenu>
+                        <DropdownMenuTrigger asChild>
+                          <Button variant="ghost" size="icon" className="h-8 w-8">
+                            <MoreVertical className="h-4 w-4" />
+                            <span className="sr-only">Acciones</span>
+                          </Button>
+                        </DropdownMenuTrigger>
+                        <DropdownMenuContent align="end">
+                          {canCancelOrder(order) ? (
+                            <>
+                              <DropdownMenuItem
+                                onClick={(e) => {
+                                  e.stopPropagation();
+                                  openCancelModal(order, "cancel");
+                                }}
+                                className="text-destructive focus:text-destructive"
+                              >
+                                <XCircle className="mr-2 h-4 w-4" />
+                                Cancelar orden
+                              </DropdownMenuItem>
+                              {canRefundOrder(order) && (
+                                <DropdownMenuItem
+                                  onClick={(e) => {
+                                    e.stopPropagation();
+                                    openCancelModal(order, "cancel_refund");
+                                  }}
+                                  className="text-destructive focus:text-destructive"
+                                >
+                                  <RefreshCcw className="mr-2 h-4 w-4" />
+                                  Cancelar y reembolsar
+                                </DropdownMenuItem>
+                              )}
+                            </>
+                          ) : (
+                            <DropdownMenuItem disabled className="text-muted-foreground">
+                              No se puede cancelar después de enviar
+                            </DropdownMenuItem>
+                          )}
+                        </DropdownMenuContent>
+                      </DropdownMenu>
                     </div>
                   </div>
                 </Card>
@@ -180,6 +298,58 @@ export default function AdminOrders() {
           )}
         </TabsContent>
       </Tabs>
+
+      {/* Cancel Confirmation Modal */}
+      <Dialog open={cancelModal.isOpen} onOpenChange={(open) => !open && closeCancelModal()}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>Confirmar cancelación</DialogTitle>
+            <DialogDescription>
+              Esta acción cancelará la orden seleccionada.
+            </DialogDescription>
+          </DialogHeader>
+          
+          {cancelModal.order && (
+            <div className="space-y-4">
+              <div className="bg-muted p-4 rounded-lg space-y-2">
+                <p>
+                  <strong>Número de orden:</strong> #{cancelModal.order.id.slice(0, 8)}
+                </p>
+                <p>
+                  <strong>Email del cliente:</strong> {cancelModal.order.customer_email}
+                </p>
+                <p>
+                  <strong>Total:</strong> ${(cancelModal.order.total_amount_cents / 100).toFixed(2)}
+                </p>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="cancel-reason">Razón de cancelación (opcional)</Label>
+                <Select value={cancelReason} onValueChange={setCancelReason}>
+                  <SelectTrigger id="cancel-reason">
+                    <SelectValue placeholder="Seleccionar razón..." />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="customer_request">Solicitud del cliente</SelectItem>
+                    <SelectItem value="payment_issue">Problema de pago</SelectItem>
+                    <SelectItem value="inventory">Inventario</SelectItem>
+                    <SelectItem value="other">Otro</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
+            </div>
+          )}
+          
+          <DialogFooter>
+            <Button variant="outline" onClick={closeCancelModal}>
+              Cancelar
+            </Button>
+            <Button variant="destructive" onClick={handleConfirmCancel}>
+              {cancelModal.action === "cancel_refund" ? "Cancelar y reembolsar" : "Cancelar orden"}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

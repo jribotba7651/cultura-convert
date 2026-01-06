@@ -26,6 +26,7 @@ import MyOrders from "./pages/MyOrders";
 import AdminOrders from "./pages/AdminOrders";
 import AdminAnalytics from "./pages/AdminAnalytics";
 import AdminBlog from "./pages/AdminBlog";
+import AdminBlogMigration from "./pages/AdminBlogMigration";
 import AdminNewsletter from "./pages/AdminNewsletter";
 import AdminResources from "./pages/AdminResources";
 import NotFound from "./pages/NotFound";
@@ -94,6 +95,7 @@ const AppContent = () => {
         <Route path="/admin/orders" element={<AdminOrders />} />
         <Route path="/admin/analytics" element={<AdminAnalytics />} />
             <Route path="/admin/blog" element={<AdminBlog />} />
+            <Route path="/admin/blog/migration" element={<AdminBlogMigration />} />
             <Route path="/admin/newsletter" element={<AdminNewsletter />} />
             <Route path="/admin/resources" element={<AdminResources />} />
         <Route path="/test" element={<TestComponent />} />

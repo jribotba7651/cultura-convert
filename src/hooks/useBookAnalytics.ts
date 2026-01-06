@@ -15,7 +15,7 @@ const getSessionId = (): string => {
 interface TrackEventOptions {
   slug: string;
   language: 'en' | 'es';
-  component: 'hero' | 'featured' | 'grid' | 'author' | 'product';
+  component: 'hero' | 'featured' | 'grid' | 'author' | 'product' | 'direct-checkout-section';
 }
 
 export const useBookAnalytics = () => {

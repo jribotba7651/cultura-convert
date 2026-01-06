@@ -5,6 +5,7 @@ import { AdSenseAd } from "@/components/AdSenseAd";
 import { BooksHero } from "@/components/BooksHero";
 import { BooksGrid } from "@/components/BooksGrid";
 import { FeaturedBook } from "@/components/FeaturedBook";
+import { DirectCheckoutSection } from "@/components/DirectCheckoutSection";
 import { NewsletterModal } from "@/components/NewsletterModal";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Book } from "@/types/Book";
@@ -135,6 +136,9 @@ const Index = () => {
         book={rosnelmaBooks[0]} 
         badge={language === 'es' ? '🆕 NUEVO - Primer Libro en Inglés' : '🆕 NEW - First Book in English'}
       />
+
+      {/* Direct Checkout Section - Prominent placement */}
+      <DirectCheckoutSection books={allBooks} />
 
       {/* All Books Grid */}
       <BooksGrid 

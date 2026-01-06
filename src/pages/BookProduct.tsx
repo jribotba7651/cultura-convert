@@ -697,7 +697,8 @@ const BookProduct = () => {
                   </p>
 
                   <Button 
-                    onClick={handleBuyDirect}
+                    type="button"
+                    onClick={(e) => { e.preventDefault(); handleBuyDirect(); }}
                     disabled={isBuyingDirect}
                     size="lg"
                     className="w-full sm:w-auto bg-primary hover:bg-primary/90"
@@ -1023,24 +1024,46 @@ const BookProduct = () => {
             {language === 'es' ? '¿Listo para comenzar?' : 'Ready to start?'}
           </h2>
           <p className="text-primary-foreground/80 mb-8">
-            {language === 'es' 
-              ? 'Únete a la lista y sé el primero en saber cuando esté disponible la compra directa.'
-              : 'Join the list and be the first to know when direct purchase is available.'}
+            {hasDirectPurchase
+              ? (language === 'es' 
+                  ? 'Compra ahora y recibe tu libro directamente.'
+                  : 'Buy now and receive your book directly.')
+              : (language === 'es' 
+                  ? 'Únete a la lista y sé el primero en saber cuando esté disponible la compra directa.'
+                  : 'Join the list and be the first to know when direct purchase is available.')}
           </p>
           <div className="flex flex-col sm:flex-row gap-4 justify-center">
-            <Button 
-              size="lg" 
-              variant="secondary"
-              onClick={() => {
-                trackBuyDirectClick({ slug: slug || '', language: language as 'en' | 'es', component: 'product' });
-                document.querySelector('form')?.scrollIntoView({ behavior: 'smooth' });
-              }}
-            >
-              <Bell className="mr-2 h-4 w-4" />
-              {language === 'es' ? 'Unirme a la lista' : 'Join the list'}
-            </Button>
+            {hasDirectPurchase ? (
+              <Button 
+                type="button"
+                size="lg" 
+                variant="secondary"
+                disabled={isBuyingDirect}
+                onClick={(e) => { e.preventDefault(); handleBuyDirect(); }}
+              >
+                {isBuyingDirect ? (
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                ) : (
+                  <ShoppingCart className="mr-2 h-4 w-4" />
+                )}
+                {language === 'es' ? 'Comprar Ahora' : 'Buy Now'}
+              </Button>
+            ) : (
+              <Button 
+                type="button"
+                size="lg" 
+                variant="secondary"
+                onClick={() => {
+                  document.querySelector('form')?.scrollIntoView({ behavior: 'smooth' });
+                }}
+              >
+                <Bell className="mr-2 h-4 w-4" />
+                {language === 'es' ? 'Unirme a la lista' : 'Join the list'}
+              </Button>
+            )}
             {getAmazonUrl() && (
               <Button 
+                type="button"
                 size="lg" 
                 variant="outline"
                 className="bg-transparent border-primary-foreground/30 text-primary-foreground hover:bg-primary-foreground/10"

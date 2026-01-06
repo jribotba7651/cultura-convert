@@ -65,3 +65,6 @@ verify_jwt = false
 
 [functions.track-analytics-event]
 verify_jwt = false
+
+[functions.migrate-blogspot]
+verify_jwt = false

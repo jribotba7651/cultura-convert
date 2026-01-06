@@ -17,6 +17,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import { sanitizeText, validateInput } from '@/utils/sanitize';
 import { validateAddress, formatZipCode } from '@/utils/addressValidation';
+import { validateCheckoutForm, type ValidationError } from '@/utils/validation';
 
 // Import book cover images for local resolution
 import raicesCover from '@/assets/raices-en-tierra-ajena-cover.jpg';
@@ -229,6 +230,7 @@ const CheckoutForm = () => {
   const [applePayProcessing, setApplePayProcessing] = useState(false);
   const [addressErrors, setAddressErrors] = useState<{[key: string]: string[]}>({});
   const [addressWarnings, setAddressWarnings] = useState<{[key: string]: string[]}>({});
+  const [fieldErrors, setFieldErrors] = useState<Record<string, string>>({});
   const [formData, setFormData] = useState<CheckoutFormData>({
     email: '',
     name: '',
@@ -442,6 +444,15 @@ const CheckoutForm = () => {
   const handleInputChange = (field: string, value: string | boolean) => {
     const keys = field.split('.');
 
+    // Clear field error when user starts typing
+    if (fieldErrors[field]) {
+      setFieldErrors(prev => {
+        const updated = { ...prev };
+        delete updated[field];
+        return updated;
+      });
+    }
+
     // Build next form state synchronously
     let nextForm = { ...formData } as typeof formData;
     if (keys.length === 1) {
@@ -512,15 +523,39 @@ const CheckoutForm = () => {
       return;
     }
 
+    // Run form validation
+    const validationErrors = validateCheckoutForm(formData, language);
+    
+    if (validationErrors.length > 0) {
+      // Convert errors array to field map
+      const errorsMap: Record<string, string> = {};
+      validationErrors.forEach(err => {
+        errorsMap[err.field] = err.message;
+      });
+      setFieldErrors(errorsMap);
+      
+      // Scroll to first error field
+      const firstErrorField = validationErrors[0].field;
+      const fieldId = firstErrorField.replace('.', '-').replace('shippingAddress', 'shipping').replace('billingAddress', 'billing');
+      const element = document.getElementById(fieldId);
+      if (element) {
+        element.scrollIntoView({ behavior: 'smooth', block: 'center' });
+        element.focus();
+      }
+      
+      toast({
+        title: language === 'es' ? 'Formulario incompleto' : 'Incomplete form',
+        description: language === 'es' 
+          ? `Por favor corrige ${validationErrors.length} error${validationErrors.length > 1 ? 'es' : ''} en el formulario.`
+          : `Please fix ${validationErrors.length} error${validationErrors.length > 1 ? 's' : ''} in the form.`,
+        variant: 'destructive',
+      });
+      return;
+    }
+
     // Validate addresses before proceeding
     const shippingValidation = { isValid: true, errors: [] };
     const billingValidation = { isValid: true, errors: [] };
-    
-    // const shippingValidation = validateAddress(formData.shippingAddress, language);
-    // const billingValidation = validateAddress(
-    //   formData.sameAsShipping ? formData.shippingAddress : formData.billingAddress, 
-    //   language
-    // );
 
     if (!shippingValidation.isValid || !billingValidation.isValid) {
       setAddressErrors({
@@ -732,27 +767,35 @@ const CheckoutForm = () => {
                   
                   <div>
                     <Label htmlFor="email">
-                      {language === 'es' ? 'Correo electrónico' : 'Email'}
+                      {language === 'es' ? 'Correo electrónico' : 'Email'} *
                     </Label>
                     <Input
                       id="email"
                       type="email"
                       value={formData.email}
                       onChange={(e) => handleInputChange('email', e.target.value)}
+                      className={fieldErrors['email'] ? 'border-destructive' : ''}
                       required
                     />
+                    {fieldErrors['email'] && (
+                      <p className="text-sm text-destructive mt-1">{fieldErrors['email']}</p>
+                    )}
                   </div>
                   
                   <div>
                     <Label htmlFor="name">
-                      {language === 'es' ? 'Nombre completo' : 'Full name'}
+                      {language === 'es' ? 'Nombre completo' : 'Full name'} *
                     </Label>
                     <Input
                       id="name"
                       value={formData.name}
                       onChange={(e) => handleInputChange('name', e.target.value)}
+                      className={fieldErrors['name'] ? 'border-destructive' : ''}
                       required
                     />
+                    {fieldErrors['name'] && (
+                      <p className="text-sm text-destructive mt-1">{fieldErrors['name']}</p>
+                    )}
                   </div>
                   
                   <div>
@@ -764,7 +807,11 @@ const CheckoutForm = () => {
                       type="tel"
                       value={formData.phone}
                       onChange={(e) => handleInputChange('phone', e.target.value)}
+                      className={fieldErrors['phone'] ? 'border-destructive' : ''}
                     />
+                    {fieldErrors['phone'] && (
+                      <p className="text-sm text-destructive mt-1">{fieldErrors['phone']}</p>
+                    )}
                   </div>
                 </div>
 
@@ -820,14 +867,18 @@ const CheckoutForm = () => {
                   
                   <div>
                     <Label htmlFor="shipping-line1">
-                      {language === 'es' ? 'Dirección' : 'Address'}
+                      {language === 'es' ? 'Dirección' : 'Address'} *
                     </Label>
                     <Input
                       id="shipping-line1"
                       value={formData.shippingAddress.line1}
                       onChange={(e) => handleInputChange('shippingAddress.line1', e.target.value)}
+                      className={fieldErrors['shippingAddress.line1'] ? 'border-destructive' : ''}
                       required
                     />
+                    {fieldErrors['shippingAddress.line1'] && (
+                      <p className="text-sm text-destructive mt-1">{fieldErrors['shippingAddress.line1']}</p>
+                    )}
                   </div>
                   
                   <div>
@@ -844,26 +895,30 @@ const CheckoutForm = () => {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="shipping-city">
-                        {language === 'es' ? 'Ciudad' : 'City'}
+                        {language === 'es' ? 'Ciudad' : 'City'} *
                       </Label>
                       <Input
                         id="shipping-city"
                         value={formData.shippingAddress.city}
                         onChange={(e) => handleInputChange('shippingAddress.city', e.target.value)}
+                        className={fieldErrors['shippingAddress.city'] ? 'border-destructive' : ''}
                         required
                       />
+                      {fieldErrors['shippingAddress.city'] && (
+                        <p className="text-sm text-destructive mt-1">{fieldErrors['shippingAddress.city']}</p>
+                      )}
                     </div>
                     
                     <div>
                       <Label htmlFor="shipping-state">
-                        {language === 'es' ? 'Estado/Provincia' : 'State/Province'}
+                        {language === 'es' ? 'Estado/Provincia' : 'State/Province'} *
                       </Label>
                       {getStatesForCountry(formData.shippingAddress.country).length > 0 ? (
                         <Select
                           value={formData.shippingAddress.state}
                           onValueChange={(value) => handleInputChange('shippingAddress.state', value)}
                         >
-                          <SelectTrigger>
+                          <SelectTrigger className={fieldErrors['shippingAddress.state'] ? 'border-destructive' : ''}>
                             <SelectValue placeholder={language === 'es' ? 'Seleccionar estado' : 'Select state'} />
                           </SelectTrigger>
                           <SelectContent className="bg-background border z-50">
@@ -880,8 +935,12 @@ const CheckoutForm = () => {
                           value={formData.shippingAddress.state}
                           onChange={(e) => handleInputChange('shippingAddress.state', e.target.value)}
                           placeholder={language === 'es' ? 'Estado/Provincia' : 'State/Province'}
+                          className={fieldErrors['shippingAddress.state'] ? 'border-destructive' : ''}
                           required
                         />
+                      )}
+                      {fieldErrors['shippingAddress.state'] && (
+                        <p className="text-sm text-destructive mt-1">{fieldErrors['shippingAddress.state']}</p>
                       )}
                     </div>
                   </div>
@@ -889,7 +948,7 @@ const CheckoutForm = () => {
                   <div className="grid grid-cols-2 gap-4">
                     <div>
                       <Label htmlFor="shipping-postal">
-                        {language === 'es' ? 'Código postal' : 'Postal code'}
+                        {language === 'es' ? 'Código postal' : 'Postal code'} *
                       </Label>
                       <Input
                         id="shipping-postal"
@@ -898,11 +957,17 @@ const CheckoutForm = () => {
                           const formatted = formatZipCode(e.target.value, formData.shippingAddress.country);
                           handleInputChange('shippingAddress.postal_code', formatted);
                         }}
-                        className={addressErrors.shippingAddress?.some(error => 
-                          error.toLowerCase().includes('postal') || error.toLowerCase().includes('zip')
-                        ) ? 'border-destructive' : ''}
+                        className={
+                          fieldErrors['shippingAddress.postal_code'] || 
+                          addressErrors.shippingAddress?.some(error => 
+                            error.toLowerCase().includes('postal') || error.toLowerCase().includes('zip')
+                          ) ? 'border-destructive' : ''
+                        }
                         required
                       />
+                      {fieldErrors['shippingAddress.postal_code'] && (
+                        <p className="text-sm text-destructive mt-1">{fieldErrors['shippingAddress.postal_code']}</p>
+                      )}
                       {addressErrors.shippingAddress?.filter(error => 
                         error.toLowerCase().includes('postal') || error.toLowerCase().includes('zip')
                       ).map((error, index) => (
@@ -963,14 +1028,18 @@ const CheckoutForm = () => {
                       
                       <div>
                         <Label htmlFor="billing-line1">
-                          {language === 'es' ? 'Dirección' : 'Address'}
+                          {language === 'es' ? 'Dirección' : 'Address'} *
                         </Label>
                         <Input
                           id="billing-line1"
                           value={formData.billingAddress.line1}
                           onChange={(e) => handleInputChange('billingAddress.line1', e.target.value)}
+                          className={fieldErrors['billingAddress.line1'] ? 'border-destructive' : ''}
                           required
                         />
+                        {fieldErrors['billingAddress.line1'] && (
+                          <p className="text-sm text-destructive mt-1">{fieldErrors['billingAddress.line1']}</p>
+                        )}
                       </div>
                       
                       <div>
@@ -987,26 +1056,30 @@ const CheckoutForm = () => {
                       <div className="grid grid-cols-2 gap-4">
                         <div>
                           <Label htmlFor="billing-city">
-                            {language === 'es' ? 'Ciudad' : 'City'}
+                            {language === 'es' ? 'Ciudad' : 'City'} *
                           </Label>
                           <Input
                             id="billing-city"
                             value={formData.billingAddress.city}
                             onChange={(e) => handleInputChange('billingAddress.city', e.target.value)}
+                            className={fieldErrors['billingAddress.city'] ? 'border-destructive' : ''}
                             required
                           />
+                          {fieldErrors['billingAddress.city'] && (
+                            <p className="text-sm text-destructive mt-1">{fieldErrors['billingAddress.city']}</p>
+                          )}
                         </div>
                         
                         <div>
                           <Label htmlFor="billing-state">
-                            {language === 'es' ? 'Estado/Provincia' : 'State/Province'}
+                            {language === 'es' ? 'Estado/Provincia' : 'State/Province'} *
                           </Label>
                           {getStatesForCountry(formData.billingAddress.country).length > 0 ? (
                             <Select
                               value={formData.billingAddress.state}
                               onValueChange={(value) => handleInputChange('billingAddress.state', value)}
                             >
-                              <SelectTrigger>
+                              <SelectTrigger className={fieldErrors['billingAddress.state'] ? 'border-destructive' : ''}>
                                 <SelectValue placeholder={language === 'es' ? 'Seleccionar estado' : 'Select state'} />
                               </SelectTrigger>
                               <SelectContent className="bg-background border z-50">
@@ -1023,8 +1096,12 @@ const CheckoutForm = () => {
                               value={formData.billingAddress.state}
                               onChange={(e) => handleInputChange('billingAddress.state', e.target.value)}
                               placeholder={language === 'es' ? 'Estado/Provincia' : 'State/Province'}
+                              className={fieldErrors['billingAddress.state'] ? 'border-destructive' : ''}
                               required
                             />
+                          )}
+                          {fieldErrors['billingAddress.state'] && (
+                            <p className="text-sm text-destructive mt-1">{fieldErrors['billingAddress.state']}</p>
                           )}
                         </div>
                       </div>
@@ -1032,7 +1109,7 @@ const CheckoutForm = () => {
                       <div className="grid grid-cols-2 gap-4">
                         <div>
                           <Label htmlFor="billing-postal">
-                            {language === 'es' ? 'Código postal' : 'Postal code'}
+                            {language === 'es' ? 'Código postal' : 'Postal code'} *
                           </Label>
                           <Input
                             id="billing-postal"
@@ -1041,11 +1118,17 @@ const CheckoutForm = () => {
                               const formatted = formatZipCode(e.target.value, formData.billingAddress.country);
                               handleInputChange('billingAddress.postal_code', formatted);
                             }}
-                            className={addressErrors.billingAddress?.some(error => 
-                              error.toLowerCase().includes('postal') || error.toLowerCase().includes('zip')
-                            ) ? 'border-destructive' : ''}
+                            className={
+                              fieldErrors['billingAddress.postal_code'] ||
+                              addressErrors.billingAddress?.some(error => 
+                                error.toLowerCase().includes('postal') || error.toLowerCase().includes('zip')
+                              ) ? 'border-destructive' : ''
+                            }
                             required
                           />
+                          {fieldErrors['billingAddress.postal_code'] && (
+                            <p className="text-sm text-destructive mt-1">{fieldErrors['billingAddress.postal_code']}</p>
+                          )}
                           {addressErrors.billingAddress?.filter(error => 
                             error.toLowerCase().includes('postal') || error.toLowerCase().includes('zip')
                           ).map((error, index) => (

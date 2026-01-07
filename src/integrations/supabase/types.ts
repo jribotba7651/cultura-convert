@@ -322,33 +322,48 @@ export type Database = {
       }
       email_queue: {
         Row: {
+          attempts: number | null
           created_at: string
           email_type: string
           error_message: string | null
           id: string
+          payload: Json | null
+          provider: string | null
+          recipient_email: string | null
           scheduled_for: string
           sent_at: string | null
           status: string
+          subject: string | null
           waitlist_id: string | null
         }
         Insert: {
+          attempts?: number | null
           created_at?: string
           email_type: string
           error_message?: string | null
           id?: string
+          payload?: Json | null
+          provider?: string | null
+          recipient_email?: string | null
           scheduled_for: string
           sent_at?: string | null
           status?: string
+          subject?: string | null
           waitlist_id?: string | null
         }
         Update: {
+          attempts?: number | null
           created_at?: string
           email_type?: string
           error_message?: string | null
           id?: string
+          payload?: Json | null
+          provider?: string | null
+          recipient_email?: string | null
           scheduled_for?: string
           sent_at?: string | null
           status?: string
+          subject?: string | null
           waitlist_id?: string | null
         }
         Relationships: [

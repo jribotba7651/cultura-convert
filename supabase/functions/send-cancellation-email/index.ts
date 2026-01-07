@@ -9,16 +9,24 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
-interface CancellationEmailData {
+interface CancellationEmailPayload {
   order_id: string;
   order_short_id: string;
-  customer_email: string;
   customer_name: string;
   total_amount_cents: number;
   currency: string;
   refund_applied: boolean;
   stripe_refund_id?: string;
   cancel_reason?: string;
+}
+
+interface EmailQueueRecord {
+  id: string;
+  email_type: string;
+  recipient_email: string;
+  subject: string;
+  payload: CancellationEmailPayload;
+  attempts: number;
 }
 
 const formatAmount = (cents: number, currency: string): string => {
@@ -53,7 +61,7 @@ const getEmailFooter = (): string => {
   `;
 };
 
-const getCancellationEmailHtml = (data: CancellationEmailData): string => {
+const getCancellationEmailHtml = (data: CancellationEmailPayload, recipientEmail: string): string => {
   const formattedTotal = formatAmount(data.total_amount_cents, data.currency);
   
   const refundSection = data.refund_applied
@@ -138,10 +146,10 @@ const handler = async (req: Request): Promise<Response> => {
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Get pending cancellation emails
+    // Get pending cancellation emails using new columns
     const { data: pendingEmails, error: fetchError } = await supabase
       .from("email_queue")
-      .select("id, email_type, error_message")
+      .select("id, email_type, recipient_email, subject, payload, attempts")
       .in("email_type", ["order_cancelled", "order_refunded"])
       .eq("status", "pending")
       .lte("scheduled_for", new Date().toISOString())
@@ -158,64 +166,64 @@ const handler = async (req: Request): Promise<Response> => {
     let failed = 0;
 
     for (const emailRecord of pendingEmails || []) {
+      const record = emailRecord as EmailQueueRecord;
+      
       try {
-        // Parse email metadata from error_message field (temporary storage)
-        const emailData: CancellationEmailData = JSON.parse(emailRecord.error_message || "{}");
-
-        if (!emailData.customer_email || !emailData.order_id) {
-          console.error(`[send-cancellation-email] Invalid email data for record ${emailRecord.id}`);
+        // Validate required fields
+        if (!record.recipient_email || !record.payload) {
+          console.error(`[send-cancellation-email] Invalid email data for record ${record.id}`);
           await supabase
             .from("email_queue")
             .update({
               status: "failed",
-              error_message: "Invalid email data",
+              error_message: "Missing recipient_email or payload",
+              attempts: (record.attempts || 0) + 1,
               sent_at: new Date().toISOString(),
             })
-            .eq("id", emailRecord.id);
+            .eq("id", record.id);
           failed++;
           continue;
         }
 
-        const emailHtml = getCancellationEmailHtml(emailData);
-        
-        const subject = emailData.refund_applied
-          ? `Order #${emailData.order_short_id} Cancelled & Refunded / Orden Cancelada y Reembolsada`
-          : `Order #${emailData.order_short_id} Cancelled / Orden Cancelada`;
+        const payload = record.payload as CancellationEmailPayload;
+        const emailHtml = getCancellationEmailHtml(payload, record.recipient_email);
 
-        console.log(`[send-cancellation-email] Sending to ${emailData.customer_email}`);
+        console.log(`[send-cancellation-email] Sending to ${record.recipient_email}`);
 
         const emailResponse = await resend.emails.send({
           from: "Orders <onboarding@resend.dev>",
-          to: [emailData.customer_email],
-          subject,
+          to: [record.recipient_email],
+          subject: record.subject,
           html: emailHtml,
         });
 
         console.log(`[send-cancellation-email] Email sent:`, emailResponse);
 
-        // Update status to sent and clear the metadata from error_message
+        // Update status to sent, keep payload for audit
         await supabase
           .from("email_queue")
           .update({
             status: "sent",
             sent_at: new Date().toISOString(),
+            attempts: (record.attempts || 0) + 1,
             error_message: null,
           })
-          .eq("id", emailRecord.id);
+          .eq("id", record.id);
 
         sent++;
 
       } catch (emailError: any) {
-        console.error(`[send-cancellation-email] Error sending email for record ${emailRecord.id}:`, emailError);
+        console.error(`[send-cancellation-email] Error sending email for record ${record.id}:`, emailError);
 
         await supabase
           .from("email_queue")
           .update({
             status: "failed",
             error_message: emailError.message || "Unknown error",
+            attempts: (record.attempts || 0) + 1,
             sent_at: new Date().toISOString(),
           })
-          .eq("id", emailRecord.id);
+          .eq("id", record.id);
 
         failed++;
       }

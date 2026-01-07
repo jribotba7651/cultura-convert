@@ -275,12 +275,17 @@ Deno.serve(async (req) => {
     // 6) Enqueue cancellation email
     try {
       const emailType = response.refund_applied ? "order_refunded" : "order_cancelled";
+      const orderShortId = order.id.substring(0, 8).toUpperCase();
       
-      // Store email data as JSON metadata
-      const emailMetadata = {
+      // Build subject line
+      const subject = response.refund_applied
+        ? `Order #${orderShortId} Cancelled & Refunded / Orden Cancelada y Reembolsada`
+        : `Order #${orderShortId} Cancelled / Orden Cancelada`;
+      
+      // Store structured payload
+      const payload = {
         order_id: order.id,
-        order_short_id: order.id.substring(0, 8).toUpperCase(),
-        customer_email: order.customer_email,
+        order_short_id: orderShortId,
         customer_name: order.customer_name,
         total_amount_cents: order.total_amount_cents,
         currency: order.currency || "USD",
@@ -293,22 +298,20 @@ Deno.serve(async (req) => {
         .from("email_queue")
         .insert({
           email_type: emailType,
-          scheduled_for: new Date().toISOString(), // Send immediately
+          recipient_email: order.customer_email,
+          subject: subject,
+          payload: payload,
+          scheduled_for: new Date().toISOString(),
           status: "pending",
-          // Store metadata in error_message temporarily (we'll use a proper column later)
-          // For now, we encode it - the email sending function will decode it
-          error_message: JSON.stringify(emailMetadata),
         });
 
       if (emailQueueError) {
         console.error(`[cancel-order] Failed to enqueue email:`, emailQueueError);
-        // Don't fail the request, just log the error
       } else {
         console.log(`[cancel-order] Enqueued ${emailType} email for ${order.customer_email}`);
       }
     } catch (emailError) {
       console.error(`[cancel-order] Error enqueueing email:`, emailError);
-      // Don't fail the main request
     }
 
     console.log(`[cancel-order] Completed successfully:`, response);

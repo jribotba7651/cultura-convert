@@ -1,10 +1,22 @@
-import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
+/**
+ * send-cancellation-email Edge Function
+ * 
+ * Processes pending cancellation emails from email_queue table.
+ * Protected by CRON_SECRET header - intended to be called by pg_cron.
+ * 
+ * Required secrets:
+ * - RESEND_API_KEY: Resend API key for sending emails
+ * - ORDERS_FROM_EMAIL: Verified sender email (e.g., "Store <orders@domain.com>")
+ * - CRON_SECRET: Secret to authenticate cron job requests
+ * 
+ * Deploy with: supabase functions deploy send-cancellation-email --no-verify-jwt
+ */
+
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
-import { Resend } from "npm:resend@2.0.0";
 
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
-  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
+  "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type, x-cron-secret",
 };
 
 const MAX_ATTEMPTS = 3;
@@ -131,22 +143,85 @@ const getCancellationEmailHtml = (data: CancellationEmailPayload, recipientEmail
   `;
 };
 
-const handler = async (req: Request): Promise<Response> => {
+/**
+ * Send email using Resend REST API (no SDK dependency)
+ */
+async function sendEmailViaResend(
+  apiKey: string,
+  from: string,
+  to: string,
+  subject: string,
+  html: string
+): Promise<{ success: boolean; id?: string; error?: string }> {
+  try {
+    const response = await fetch("https://api.resend.com/emails", {
+      method: "POST",
+      headers: {
+        "Authorization": `Bearer ${apiKey}`,
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({
+        from,
+        to: [to],
+        subject,
+        html,
+      }),
+    });
+
+    const data = await response.json();
+
+    if (!response.ok) {
+      return {
+        success: false,
+        error: data.message || data.error || `HTTP ${response.status}`,
+      };
+    }
+
+    return { success: true, id: data.id };
+  } catch (error: any) {
+    return { success: false, error: error.message || "Network error" };
+  }
+}
+
+Deno.serve(async (req: Request): Promise<Response> => {
+  // Handle CORS preflight
   if (req.method === "OPTIONS") {
     return new Response(null, { headers: corsHeaders });
   }
 
-  try {
-    // Initialize Resend with API key
-    const resendApiKey = Deno.env.get("RESEND_API_KEY");
-    if (!resendApiKey) {
-      throw new Error("Missing RESEND_API_KEY");
-    }
-    const resend = new Resend(resendApiKey);
+  // Security: Validate cron secret header
+  const cronSecret = Deno.env.get("CRON_SECRET");
+  const requestSecret = req.headers.get("x-cron-secret");
 
+  if (!cronSecret) {
+    console.error("[send-cancellation-email] CRON_SECRET not configured");
+    return new Response(
+      JSON.stringify({ error: "Server misconfiguration" }),
+      { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  }
+
+  if (!requestSecret || requestSecret !== cronSecret) {
+    console.warn("[send-cancellation-email] Unauthorized request - invalid or missing x-cron-secret");
+    return new Response(
+      JSON.stringify({ error: "Forbidden" }),
+      { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+    );
+  }
+
+  try {
+    // Load required environment variables
+    const resendApiKey = Deno.env.get("RESEND_API_KEY");
+    const ordersFromEmail = Deno.env.get("ORDERS_FROM_EMAIL");
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
+    if (!resendApiKey) {
+      throw new Error("Missing RESEND_API_KEY");
+    }
+    if (!ordersFromEmail) {
+      throw new Error("Missing ORDERS_FROM_EMAIL");
+    }
     if (!supabaseUrl || !supabaseServiceKey) {
       throw new Error("Missing Supabase configuration");
     }
@@ -167,7 +242,15 @@ const handler = async (req: Request): Promise<Response> => {
       throw fetchError;
     }
 
-    console.log(`[send-cancellation-email] Processing ${pendingEmails?.length || 0} cancellation emails`);
+    const pendingCount = pendingEmails?.length || 0;
+    console.log(`[send-cancellation-email] Found ${pendingCount} pending cancellation emails`);
+
+    if (pendingCount === 0) {
+      return new Response(
+        JSON.stringify({ success: true, processed: 0, sent: 0, failed: 0 }),
+        { status: 200, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
 
     let sent = 0;
     let failed = 0;
@@ -197,28 +280,33 @@ const handler = async (req: Request): Promise<Response> => {
 
         console.log(`[send-cancellation-email] Sending to ${record.recipient_email} (attempt ${newAttempts})`);
 
-        // Send email with verified domain FROM address
-        const emailResponse = await resend.emails.send({
-          from: "Jíbaro en la Luna <orders@jibaroenlaluna.com>",
-          to: [record.recipient_email],
-          subject: record.subject,
-          html: emailHtml,
-        });
+        // Send email via Resend REST API
+        const result = await sendEmailViaResend(
+          resendApiKey,
+          ordersFromEmail,
+          record.recipient_email,
+          record.subject,
+          emailHtml
+        );
 
-        console.log(`[send-cancellation-email] Email sent successfully:`, emailResponse);
+        if (result.success) {
+          console.log(`[send-cancellation-email] Email sent successfully: id=${result.id}`);
 
-        // Update status to sent, keep payload for audit
-        await supabase
-          .from("email_queue")
-          .update({
-            status: "sent",
-            sent_at: new Date().toISOString(),
-            attempts: newAttempts,
-            error_message: null,
-          })
-          .eq("id", record.id);
+          // Update status to sent, keep payload for audit
+          await supabase
+            .from("email_queue")
+            .update({
+              status: "sent",
+              sent_at: new Date().toISOString(),
+              attempts: newAttempts,
+              error_message: null,
+            })
+            .eq("id", record.id);
 
-        sent++;
+          sent++;
+        } else {
+          throw new Error(result.error || "Unknown Resend error");
+        }
 
       } catch (emailError: any) {
         console.error(`[send-cancellation-email] Error sending email for record ${record.id} (attempt ${newAttempts}):`, emailError);
@@ -238,16 +326,16 @@ const handler = async (req: Request): Promise<Response> => {
         if (newStatus === "failed") {
           failed++;
         }
-        // If still pending, it will be retried on next run
+        // If still pending, it will be retried on next cron run
       }
     }
 
-    console.log(`[send-cancellation-email] Complete: sent=${sent}, failed=${failed}`);
+    console.log(`[send-cancellation-email] Complete: processed=${pendingCount}, sent=${sent}, failed=${failed}`);
 
     return new Response(
       JSON.stringify({
         success: true,
-        processed: pendingEmails?.length || 0,
+        processed: pendingCount,
         sent,
         failed,
       }),
@@ -261,6 +349,4 @@ const handler = async (req: Request): Promise<Response> => {
       { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
     );
   }
-};
-
-serve(handler);
+});

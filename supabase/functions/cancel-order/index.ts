@@ -148,6 +148,7 @@ Deno.serve(async (req) => {
     }
 
     // 5) Process refund if requested
+    let refundId: string | undefined;
     if (refund) {
       console.log(`[cancel-order] Processing refund...`);
 
@@ -186,6 +187,7 @@ Deno.serve(async (req) => {
 
         response.refund_applied = true;
         response.stripe_refund_id = stripeRefund.id;
+        refundId = stripeRefund.id;
 
         // Optionally update order with refund info in notes
         await supabase
@@ -212,6 +214,45 @@ Deno.serve(async (req) => {
           { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
         );
       }
+    }
+
+    // 6) Enqueue cancellation email
+    try {
+      const emailType = response.refund_applied ? "order_refunded" : "order_cancelled";
+      
+      // Store email data as JSON metadata
+      const emailMetadata = {
+        order_id: order.id,
+        order_short_id: order.id.substring(0, 8).toUpperCase(),
+        customer_email: order.customer_email,
+        customer_name: order.customer_name,
+        total_amount_cents: order.total_amount_cents,
+        currency: order.currency || "USD",
+        refund_applied: response.refund_applied,
+        stripe_refund_id: refundId,
+        cancel_reason: reason,
+      };
+
+      const { error: emailQueueError } = await supabase
+        .from("email_queue")
+        .insert({
+          email_type: emailType,
+          scheduled_for: new Date().toISOString(), // Send immediately
+          status: "pending",
+          // Store metadata in error_message temporarily (we'll use a proper column later)
+          // For now, we encode it - the email sending function will decode it
+          error_message: JSON.stringify(emailMetadata),
+        });
+
+      if (emailQueueError) {
+        console.error(`[cancel-order] Failed to enqueue email:`, emailQueueError);
+        // Don't fail the request, just log the error
+      } else {
+        console.log(`[cancel-order] Enqueued ${emailType} email for ${order.customer_email}`);
+      }
+    } catch (emailError) {
+      console.error(`[cancel-order] Error enqueueing email:`, emailError);
+      // Don't fail the main request
     }
 
     console.log(`[cancel-order] Completed successfully:`, response);

@@ -75,7 +75,7 @@ export default function AdminOrders() {
   };
 
   const handleConfirmCancel = async () => {
-    if (!cancelModal.order) return;
+    if (!cancelModal.order || cancelLoading) return;
 
     setCancelLoading(true);
     
@@ -390,8 +390,14 @@ export default function AdminOrders() {
               Volver
             </Button>
             <Button variant="destructive" onClick={handleConfirmCancel} disabled={cancelLoading}>
-              {cancelLoading && <Loader2 className="mr-2 h-4 w-4 animate-spin" />}
-              {cancelModal.action === "cancel_refund" ? "Cancelar y reembolsar" : "Cancelar orden"}
+              {cancelLoading ? (
+                <>
+                  <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+                  Procesando...
+                </>
+              ) : (
+                cancelModal.action === "cancel_refund" ? "Cancelar y reembolsar" : "Cancelar orden"
+              )}
             </Button>
           </DialogFooter>
         </DialogContent>

@@ -28,8 +28,66 @@ Deno.serve(async (req) => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
+  const supabaseAnonKey = Deno.env.get("SUPABASE_ANON_KEY")!;
+  const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+
   try {
-    // Parse request body
+    // 1) Require Authorization header
+    const authHeader = req.headers.get("Authorization");
+    if (!authHeader) {
+      console.error("[cancel-order] Missing Authorization header");
+      return new Response(
+        JSON.stringify({ ok: false, error: "Authorization required" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    // 2) Create user-context client to verify the caller
+    const supabaseUser = createClient(supabaseUrl, supabaseAnonKey, {
+      global: { headers: { Authorization: authHeader } },
+    });
+
+    // Get the current user
+    const { data: { user }, error: userError } = await supabaseUser.auth.getUser();
+    
+    if (userError || !user) {
+      console.error("[cancel-order] Authentication failed:", userError);
+      return new Response(
+        JSON.stringify({ ok: false, error: "Authentication failed" }),
+        { status: 401, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    console.log(`[cancel-order] Authenticated user: ${user.email}`);
+
+    // 3) Check admin role using user_roles table
+    const { data: adminRole, error: roleError } = await supabaseUser
+      .from("user_roles")
+      .select("role")
+      .eq("user_id", user.id)
+      .eq("role", "admin")
+      .maybeSingle();
+
+    if (roleError) {
+      console.error("[cancel-order] Error checking admin role:", roleError);
+      return new Response(
+        JSON.stringify({ ok: false, error: "Error checking permissions" }),
+        { status: 500, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    if (!adminRole) {
+      console.warn(`[cancel-order] User ${user.email} is not an admin`);
+      return new Response(
+        JSON.stringify({ ok: false, error: "Admin access required" }),
+        { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
+      );
+    }
+
+    console.log(`[cancel-order] Admin access verified for ${user.email}`);
+
+    // 4) Parse request body (after auth checks)
     const { order_id, refund, reason }: CancelOrderRequest = await req.json();
     
     console.log(`[cancel-order] Processing cancellation for order: ${order_id}, refund: ${refund}, reason: ${reason || 'none'}`);
@@ -42,9 +100,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    // Initialize Supabase client with service role
-    const supabaseUrl = Deno.env.get("SUPABASE_URL")!;
-    const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY")!;
+    // 5) Use service role client for privileged operations
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
     // 1) Fetch order by id

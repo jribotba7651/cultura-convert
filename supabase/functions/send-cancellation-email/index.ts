@@ -2,12 +2,12 @@ import { serve } from "https://deno.land/std@0.190.0/http/server.ts";
 import { createClient } from "https://esm.sh/@supabase/supabase-js@2.39.3";
 import { Resend } from "npm:resend@2.0.0";
 
-const resend = new Resend(Deno.env.get("RESEND_API_KEY"));
-
 const corsHeaders = {
   "Access-Control-Allow-Origin": "*",
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
+
+const MAX_ATTEMPTS = 3;
 
 interface CancellationEmailPayload {
   order_id: string;
@@ -137,6 +137,13 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
+    // Initialize Resend with API key
+    const resendApiKey = Deno.env.get("RESEND_API_KEY");
+    if (!resendApiKey) {
+      throw new Error("Missing RESEND_API_KEY");
+    }
+    const resend = new Resend(resendApiKey);
+
     const supabaseUrl = Deno.env.get("SUPABASE_URL");
     const supabaseServiceKey = Deno.env.get("SUPABASE_SERVICE_ROLE_KEY");
 
@@ -146,7 +153,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
 
-    // Get pending cancellation emails using new columns
+    // Fetch pending cancellation emails
     const { data: pendingEmails, error: fetchError } = await supabase
       .from("email_queue")
       .select("id, email_type, recipient_email, subject, payload, attempts")
@@ -167,6 +174,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     for (const emailRecord of pendingEmails || []) {
       const record = emailRecord as EmailQueueRecord;
+      const newAttempts = (record.attempts || 0) + 1;
       
       try {
         // Validate required fields
@@ -177,8 +185,7 @@ const handler = async (req: Request): Promise<Response> => {
             .update({
               status: "failed",
               error_message: "Missing recipient_email or payload",
-              attempts: (record.attempts || 0) + 1,
-              sent_at: new Date().toISOString(),
+              attempts: newAttempts,
             })
             .eq("id", record.id);
           failed++;
@@ -188,16 +195,17 @@ const handler = async (req: Request): Promise<Response> => {
         const payload = record.payload as CancellationEmailPayload;
         const emailHtml = getCancellationEmailHtml(payload, record.recipient_email);
 
-        console.log(`[send-cancellation-email] Sending to ${record.recipient_email}`);
+        console.log(`[send-cancellation-email] Sending to ${record.recipient_email} (attempt ${newAttempts})`);
 
+        // Send email with verified domain FROM address
         const emailResponse = await resend.emails.send({
-          from: "Orders <onboarding@resend.dev>",
+          from: "Jíbaro en la Luna <orders@jibaroenlaluna.com>",
           to: [record.recipient_email],
           subject: record.subject,
           html: emailHtml,
         });
 
-        console.log(`[send-cancellation-email] Email sent:`, emailResponse);
+        console.log(`[send-cancellation-email] Email sent successfully:`, emailResponse);
 
         // Update status to sent, keep payload for audit
         await supabase
@@ -205,7 +213,7 @@ const handler = async (req: Request): Promise<Response> => {
           .update({
             status: "sent",
             sent_at: new Date().toISOString(),
-            attempts: (record.attempts || 0) + 1,
+            attempts: newAttempts,
             error_message: null,
           })
           .eq("id", record.id);
@@ -213,19 +221,24 @@ const handler = async (req: Request): Promise<Response> => {
         sent++;
 
       } catch (emailError: any) {
-        console.error(`[send-cancellation-email] Error sending email for record ${record.id}:`, emailError);
+        console.error(`[send-cancellation-email] Error sending email for record ${record.id} (attempt ${newAttempts}):`, emailError);
+
+        // Determine status based on attempt count
+        const newStatus = newAttempts >= MAX_ATTEMPTS ? "failed" : "pending";
 
         await supabase
           .from("email_queue")
           .update({
-            status: "failed",
+            status: newStatus,
             error_message: emailError.message || "Unknown error",
-            attempts: (record.attempts || 0) + 1,
-            sent_at: new Date().toISOString(),
+            attempts: newAttempts,
           })
           .eq("id", record.id);
 
-        failed++;
+        if (newStatus === "failed") {
+          failed++;
+        }
+        // If still pending, it will be retried on next run
       }
     }
 

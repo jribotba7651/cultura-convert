@@ -156,7 +156,7 @@ const BlogPost = () => {
           )}
 
           {/* Ad at article start */}
-          <AdSenseAd adSlot="3456789012" adFormat="rectangle" className="my-6" />
+          <AdSenseAd adSlot="4747218112" adFormat="rectangle" className="my-6" />
 
           <div 
             className="text-foreground leading-relaxed prose prose-lg max-w-none
@@ -169,7 +169,7 @@ const BlogPost = () => {
           />
 
           {/* Ad at article end */}
-          <AdSenseAd adSlot="4567890123" adFormat="horizontal" className="my-6" />
+          <AdSenseAd adSlot="4747218112" adFormat="horizontal" className="my-6" />
         </article>
 
         <div className="mt-12 pt-8 border-t border-border">

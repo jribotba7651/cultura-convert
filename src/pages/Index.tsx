@@ -148,7 +148,7 @@ const Index = () => {
 
       {/* Ad before authors */}
       <div className="max-w-4xl mx-auto px-4 py-8">
-        <AdSenseAd adSlot="1234567890" adFormat="auto" className="my-4" />
+        <AdSenseAd adSlot="7977028447" adFormat="auto" className="my-4" />
       </div>
 
       {/* Authors Section - Now below books */}
@@ -168,7 +168,7 @@ const Index = () => {
             
             {/* Ad between authors */}
             <div className="py-4">
-              <AdSenseAd adSlot="2345678901" adFormat="horizontal" className="my-4" />
+              <AdSenseAd adSlot="5608873640" adFormat="horizontal" className="my-4" />
             </div>
             
             <AuthorProfile

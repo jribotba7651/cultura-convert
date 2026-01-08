@@ -163,7 +163,7 @@ const Store = () => {
 
         {/* Ad before products */}
         <div className="mb-8">
-          <AdSenseAd adSlot="5678901234" adFormat="horizontal" className="my-4" />
+          <AdSenseAd adSlot="7977028447" adFormat="horizontal" className="my-4" />
         </div>
 
         {/* Search and Filters */}

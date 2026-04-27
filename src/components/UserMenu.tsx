@@ -20,6 +20,7 @@ const UserMenu = () => {
   const { t } = useLanguage();
   const { toast } = useToast();
   const [isAdmin, setIsAdmin] = React.useState(false);
+  const [checkingAdmin, setCheckingAdmin] = React.useState(false);
 
   const handleSignOut = async () => {
     const { error } = await signOut();
@@ -43,18 +44,34 @@ const UserMenu = () => {
     const checkAdmin = async () => {
       if (!user?.id) {
         setIsAdmin(false);
+        setCheckingAdmin(false);
         return;
       }
 
+      setCheckingAdmin(true);
       try {
         const { data, error } = await supabase.functions.invoke('check-admin-access');
         if (cancelled) return;
-        if (error) throw error;
+        if (error) {
+          console.warn('[UserMenu] check-admin-access error:', {
+            message: error.message,
+            name: error.name,
+            context: (error as any)?.context,
+            status: (error as any)?.status,
+            userId: user.id,
+            email: user.email,
+            origin: window.location.origin,
+          });
+          throw error;
+        }
+        console.info('[UserMenu] Admin check result:', { isAdmin: data?.isAdmin, email: data?.email });
         setIsAdmin(Boolean(data?.isAdmin));
       } catch (error) {
         if (cancelled) return;
-        console.error('Error checking admin status:', error);
+        console.error('[UserMenu] Error checking admin status:', error);
         setIsAdmin(false);
+      } finally {
+        if (!cancelled) setCheckingAdmin(false);
       }
     };
 

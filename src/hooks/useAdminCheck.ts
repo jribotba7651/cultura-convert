@@ -14,21 +14,28 @@ export const useAdminCheck = () => {
   useEffect(() => {
     const checkAdminAccess = async () => {
       if (!user) {
+        console.warn('[useAdminCheck] No user session — redirecting to /auth');
         navigate('/auth');
         return;
       }
 
       try {
+        console.info('[useAdminCheck] Verifying admin for', user.email, 'on', window.location.origin);
         const { data, error } = await supabase.functions.invoke('check-admin-access', {
           method: 'POST',
         });
 
         if (error) {
-          console.error('Error checking admin access:', error);
+          console.error('[useAdminCheck] Edge function error:', {
+            message: error.message,
+            name: error.name,
+            context: (error as any)?.context,
+            status: (error as any)?.status,
+          });
           setIsAdmin(false);
           toast({
-            title: 'Acceso denegado',
-            description: 'No tienes permisos para acceder a esta página',
+            title: 'Error de verificación',
+            description: `No se pudo verificar tu acceso: ${error.message}. Revisa la consola.`,
             variant: 'destructive',
           });
           navigate('/');
@@ -36,19 +43,21 @@ export const useAdminCheck = () => {
         }
 
         if (!data?.isAdmin) {
+          console.warn('[useAdminCheck] User is not admin:', data);
           setIsAdmin(false);
           toast({
             title: 'Acceso denegado',
-            description: 'No tienes permisos de administrador',
+            description: `${user.email} no tiene rol de administrador.`,
             variant: 'destructive',
           });
           navigate('/');
           return;
         }
 
+        console.info('[useAdminCheck] Admin access granted');
         setIsAdmin(true);
       } catch (error) {
-        console.error('Error in admin check:', error);
+        console.error('[useAdminCheck] Unexpected error:', error);
         setIsAdmin(false);
         navigate('/');
       } finally {

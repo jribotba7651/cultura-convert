@@ -40,6 +40,7 @@ export default function ResourceDownload() {
   const [loading, setLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [downloadStarted, setDownloadStarted] = useState(false);
+  const [signedDownloadUrl, setSignedDownloadUrl] = useState<string | null>(null);
   const [formData, setFormData] = useState({
     name: "",
     email: "",
@@ -78,13 +79,6 @@ export default function ResourceDownload() {
     } finally {
       setLoading(false);
     }
-  };
-
-  const getPublicUrl = (filePath: string) => {
-    const { data } = supabase.storage
-      .from('consulting-resources')
-      .getPublicUrl(filePath);
-    return data.publicUrl;
   };
 
   const formatFileSize = (bytes: number) => {
@@ -131,32 +125,39 @@ export default function ResourceDownload() {
     setIsSubmitting(true);
 
     try {
-      // Guardar lead
-      const { error } = await supabase.functions.invoke("submit-consulting-lead", {
+      // Guardar lead y obtener signed URL
+      const { data, error } = await supabase.functions.invoke("submit-consulting-lead", {
         body: { 
           ...formData,
-          resourceDownloaded: resource?.title_es || resource?.title_en 
+          resourceDownloaded: resource?.title_es || resource?.title_en,
+          resourceSlug: resource?.slug,
         },
       });
 
       if (error) throw error;
 
-      // Incrementar contador
-      if (resource) {
+      const signedUrl = (data as any)?.downloadUrl as string | undefined;
+
+      if (resource && signedUrl) {
+        // Incrementar contador
         await supabase
           .from('consulting_resources')
           .update({ download_count: resource.download_count + 1 })
           .eq('id', resource.id);
-        
+
+        setSignedDownloadUrl(signedUrl);
+
         // Iniciar descarga
-        window.open(getPublicUrl(resource.file_path), '_blank');
-        
+        window.open(signedUrl, '_blank');
+
         setDownloadStarted(true);
         toast.success(
-          language === "es" 
-            ? "¡Descarga iniciada! Revisa tu email para más recursos." 
+          language === "es"
+            ? "¡Descarga iniciada! Revisa tu email para más recursos."
             : "Download started! Check your email for more resources."
         );
+      } else {
+        throw new Error("No download URL returned");
       }
     } catch (error) {
       console.error("Error:", error);
@@ -388,7 +389,7 @@ export default function ResourceDownload() {
                         ? "Si la descarga no comienza automáticamente, "
                         : "If the download doesn't start automatically, "}
                       <button 
-                        onClick={() => resource && window.open(getPublicUrl(resource.file_path), '_blank')}
+                        onClick={() => signedDownloadUrl && window.open(signedDownloadUrl, '_blank')}
                         className="text-primary underline"
                       >
                         {language === "es" ? "haz click aquí" : "click here"}

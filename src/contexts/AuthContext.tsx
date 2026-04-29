@@ -66,7 +66,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
         
         if (error) {
           console.error('Error getting session:', error.message);
-        } else if (process.env.NODE_ENV === 'development') {
+        } else if (import.meta.env.DEV) {
           console.log('Initial session loaded');
         }
         

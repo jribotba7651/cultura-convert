@@ -23,7 +23,7 @@ export const useActivityTracker = () => {
   useEffect(() => {
     if (!user?.id) return;
 
-    let activityTimeout: NodeJS.Timeout;
+    let activityTimeout: ReturnType<typeof setTimeout>;
     
     const handleActivity = () => {
       // Debounce activity tracking to avoid excessive calls

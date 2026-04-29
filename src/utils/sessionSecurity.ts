@@ -14,7 +14,7 @@ class SessionSecurityManager {
   private sessionData: Map<string, SessionActivity> = new Map();
   private readonly INACTIVITY_TIMEOUT = 30 * 60 * 1000; // 30 minutes
   private readonly MAX_SESSION_DURATION = 24 * 60 * 60 * 1000; // 24 hours
-  private inactivityTimer: NodeJS.Timeout | null = null;
+  private inactivityTimer: ReturnType<typeof setTimeout> | null = null;
 
   /**
    * Initialize session tracking for a user

@@ -107,13 +107,6 @@ const Consulting = () => {
     }
   };
 
-  const getPublicUrl = (filePath: string) => {
-    const { data } = supabase.storage
-      .from('consulting-resources')
-      .getPublicUrl(filePath);
-    return data.publicUrl;
-  };
-
   const formatFileSize = (bytes: number) => {
     return (bytes / (1024 * 1024)).toFixed(2) + ' MB';
   };
@@ -128,31 +121,34 @@ const Consulting = () => {
     setIsSubmittingDownload(true);
 
     try {
-      // Guardar lead en la base de datos
-      const { error } = await supabase.functions.invoke("submit-consulting-lead", {
+      // Guardar lead y obtener signed URL
+      const { data, error } = await supabase.functions.invoke("submit-consulting-lead", {
         body: { 
           ...downloadFormData,
-          resourceDownloaded: selectedResource?.title_es || selectedResource?.title_en 
+          resourceDownloaded: selectedResource?.title_es || selectedResource?.title_en,
+          resourceSlug: selectedResource?.slug,
         },
       });
 
       if (error) throw error;
 
-      // Incrementar contador de descargas
-      if (selectedResource) {
+      const signedUrl = (data as any)?.downloadUrl as string | undefined;
+
+      if (selectedResource && signedUrl) {
         await supabase
           .from('consulting_resources')
           .update({ download_count: selectedResource.download_count + 1 })
           .eq('id', selectedResource.id);
-        
-        // Abrir descarga
-        window.open(getPublicUrl(selectedResource.file_path), '_blank');
-        
+
+        window.open(signedUrl, '_blank');
+
         toast.success(
-          language === "es" 
-            ? "¡Descarga iniciada! Revisa tu email para más recursos." 
+          language === "es"
+            ? "¡Descarga iniciada! Revisa tu email para más recursos."
             : "Download started! Check your email for more resources."
         );
+      } else {
+        throw new Error("No download URL returned");
       }
 
       // Limpiar y cerrar

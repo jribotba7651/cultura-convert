@@ -22,6 +22,7 @@ interface ConsultingLeadRequest {
   industry?: string;
   mainChallenge?: string;
   resourceDownloaded?: string;
+  resourceSlug?: string;
 }
 
 const handler = async (req: Request): Promise<Response> => {
@@ -44,6 +45,7 @@ const handler = async (req: Request): Promise<Response> => {
       industry,
       mainChallenge,
       resourceDownloaded,
+      resourceSlug,
     }: ConsultingLeadRequest = await req.json();
 
     // Validate required fields
@@ -96,13 +98,35 @@ const handler = async (req: Request): Promise<Response> => {
       );
     }
 
+    // Generate signed download URL if resource slug provided
+    let signedDownloadUrl: string | null = null;
+    if (resourceSlug) {
+      const { data: resource } = await supabaseClient
+        .from("consulting_resources")
+        .select("file_path")
+        .eq("slug", resourceSlug)
+        .maybeSingle();
+
+      if (resource?.file_path) {
+        const { data: signed, error: signErr } = await supabaseClient
+          .storage
+          .from("consulting-resources")
+          .createSignedUrl(resource.file_path, 60 * 60); // 1 hour
+
+        if (signErr) {
+          console.error("Failed to create signed URL:", signErr);
+        } else {
+          signedDownloadUrl = signed?.signedUrl ?? null;
+        }
+      }
+    }
+
     // Send confirmation email with download link
     const downloadResource = resourceDownloaded || "Purchasing Controls Guide";
     const safeName = escapeHtml(name);
     const safeDownloadResource = escapeHtml(downloadResource);
-    const resourceSlug = encodeURIComponent(
-      (resourceDownloaded || "").toLowerCase().replace(/\s+/g, '-')
-    );
+    const downloadUrlForEmail = signedDownloadUrl
+      ?? `https://jibaroenlaluna.com/resources/${encodeURIComponent((resourceSlug || "").toLowerCase())}`;
     
     const emailResponse = await resend.emails.send({
       from: "Jíbaro en la Luna <onboarding@resend.dev>",
@@ -114,10 +138,11 @@ const handler = async (req: Request): Promise<Response> => {
         
         <div style="margin: 30px 0; padding: 20px; background-color: #f0f9ff; border-left: 4px solid #3b82f6;">
           <h2 style="margin-top: 0;">📥 Descarga tu recurso</h2>
-          <p><a href="https://jibaroenlaluna.com/resources/${resourceSlug}.pdf" 
+          <p><a href="${downloadUrlForEmail}" 
                 style="display: inline-block; padding: 12px 24px; background-color: #3b82f6; color: white; text-decoration: none; border-radius: 6px; font-weight: bold;">
             Descargar ahora
           </a></p>
+          <p style="font-size: 12px; color: #666; margin-top: 10px;">Este enlace expira en 1 hora por seguridad.</p>
         </div>
 
         <h3>Lo que incluye:</h3>
@@ -147,6 +172,7 @@ const handler = async (req: Request): Promise<Response> => {
       JSON.stringify({ 
         success: true, 
         leadId: lead.id,
+        downloadUrl: signedDownloadUrl,
         message: "Resource access sent to your email" 
       }),
       {

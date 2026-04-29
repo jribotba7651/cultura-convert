@@ -9,6 +9,10 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+const escapeHtml = (str: string) =>
+  str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+     .replace(/"/g, '&quot;').replace(/'/g, '&#x27;');
+
 interface ContactInquiryRequest {
   name: string;
   email: string;
@@ -72,17 +76,20 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     // Send confirmation email to user
+    const safeName = escapeHtml(name);
+    const safeMessage = escapeHtml(message);
+    const safeEmail = escapeHtml(email);
     await resend.emails.send({
       from: "Jíbaro en la Luna <onboarding@resend.dev>",
       to: [email],
       subject: "Recibimos tu consulta - Jíbaro en la Luna Consulting",
       html: `
-        <h1>¡Gracias por contactarnos, ${name}!</h1>
+        <h1>¡Gracias por contactarnos, ${safeName}!</h1>
         <p>Hemos recibido tu consulta y te responderemos en breve.</p>
         
         <div style="margin: 20px 0; padding: 15px; background-color: #f3f4f6; border-radius: 8px;">
           <p><strong>Tu mensaje:</strong></p>
-          <p style="white-space: pre-wrap;">${message}</p>
+          <p style="white-space: pre-wrap;">${safeMessage}</p>
         </div>
 
         <p>Normalmente respondemos dentro de 24-48 horas hábiles.</p>
@@ -97,13 +104,13 @@ const handler = async (req: Request): Promise<Response> => {
       await resend.emails.send({
         from: "Jíbaro en la Luna <onboarding@resend.dev>",
         to: [adminEmail],
-        subject: `Nueva consulta de ${name}`,
+        subject: `Nueva consulta de ${name.replace(/[\r\n]/g, ' ')}`,
         html: `
           <h2>Nueva consulta de consulting</h2>
-          <p><strong>Nombre:</strong> ${name}</p>
-          <p><strong>Email:</strong> ${email}</p>
+          <p><strong>Nombre:</strong> ${safeName}</p>
+          <p><strong>Email:</strong> ${safeEmail}</p>
           <p><strong>Mensaje:</strong></p>
-          <p style="white-space: pre-wrap; background-color: #f3f4f6; padding: 15px; border-radius: 8px;">${message}</p>
+          <p style="white-space: pre-wrap; background-color: #f3f4f6; padding: 15px; border-radius: 8px;">${safeMessage}</p>
         `,
       });
     }

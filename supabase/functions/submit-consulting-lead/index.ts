@@ -9,6 +9,10 @@ const corsHeaders = {
   "Access-Control-Allow-Headers": "authorization, x-client-info, apikey, content-type",
 };
 
+const escapeHtml = (str: string) =>
+  str.replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+     .replace(/"/g, '&quot;').replace(/'/g, '&#x27;');
+
 interface ConsultingLeadRequest {
   name: string;
   email: string;
@@ -94,18 +98,23 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Send confirmation email with download link
     const downloadResource = resourceDownloaded || "Purchasing Controls Guide";
+    const safeName = escapeHtml(name);
+    const safeDownloadResource = escapeHtml(downloadResource);
+    const resourceSlug = encodeURIComponent(
+      (resourceDownloaded || "").toLowerCase().replace(/\s+/g, '-')
+    );
     
     const emailResponse = await resend.emails.send({
       from: "Jíbaro en la Luna <onboarding@resend.dev>",
       to: [email],
-      subject: `Tu recurso: ${downloadResource}`,
+      subject: `Tu recurso: ${downloadResource.replace(/[\r\n]/g, ' ')}`,
       html: `
-        <h1>¡Gracias por tu interés, ${name}!</h1>
-        <p>Aquí está tu acceso al recurso: <strong>${downloadResource}</strong></p>
+        <h1>¡Gracias por tu interés, ${safeName}!</h1>
+        <p>Aquí está tu acceso al recurso: <strong>${safeDownloadResource}</strong></p>
         
         <div style="margin: 30px 0; padding: 20px; background-color: #f0f9ff; border-left: 4px solid #3b82f6;">
           <h2 style="margin-top: 0;">📥 Descarga tu recurso</h2>
-          <p><a href="https://jibaroenlaluna.com/resources/${resourceDownloaded?.toLowerCase().replace(/\s+/g, '-')}.pdf" 
+          <p><a href="https://jibaroenlaluna.com/resources/${resourceSlug}.pdf" 
                 style="display: inline-block; padding: 12px 24px; background-color: #3b82f6; color: white; text-decoration: none; border-radius: 6px; font-weight: bold;">
             Descargar ahora
           </a></p>

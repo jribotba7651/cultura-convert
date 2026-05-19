@@ -16,7 +16,7 @@ const PrivacyPolicy = () => {
         <title>{language === 'es' ? 'Política de Privacidad' : 'Privacy Policy'} - Jibaro Tic Tac Toe</title>
         <meta name="description" content={language === 'es' ? 'Política de Privacidad para la aplicación móvil Jibaro Tic Tac Toe' : 'Privacy Policy for Jibaro Tic Tac Toe mobile application'} />
         <meta name="robots" content="index, follow" />
-        <link rel="canonical" href="https://jibaroenaluna.com/privacy-policy" />
+        <link rel="canonical" href="https://www.jibaroenlaluna.com/privacy-policy" />
       </Helmet>
 
       <Navigation />

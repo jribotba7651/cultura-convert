@@ -61,8 +61,7 @@ const booksData: Record<string, BookData> = {
       en: "Five religious figures arrive at the summit of Mount Roraima: Jesus, Buddha, Muhammad, Krishna, and Quetzalcoatl. For the first time, the founders of the world's most influential spiritual traditions meet face to face."
     },
     coverImage: lasQueSiempreEstuvieronCover,
-    amazonHardcoverUrl: "https://a.co/d/hJpEIi0",
-    amazonSoftcoverUrl: "https://a.co/d/dGGqrQO",
+    amazonUrl: "https://a.co/d/dGGqrQO",
     author: "Juan C. Ribot Guzmán",
     promise: {
       es: "Descubre las voces femeninas que la historia silenció.",

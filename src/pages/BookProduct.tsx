@@ -612,18 +612,31 @@ const BookProduct = () => {
     );
   }
 
-  const canonicalUrl = `https://ifctpzrmqcpqtgwepvoq.supabase.co/libro/${slug}`;
+  const canonicalUrl = `https://www.jibaroenlaluna.com/libro/${slug}`;
+  const rawDescription = book.description[language] || '';
+  const metaDescription = rawDescription.length > 157
+    ? `${rawDescription.slice(0, 157).trimEnd()}...`
+    : rawDescription;
 
   return (
     <div className="min-h-screen bg-background">
       <Helmet>
         <title>{book.title} | Juan C. Ribot & Rosnelma García</title>
-        <meta name="description" content={book.description[language]} />
+        <meta name="description" content={metaDescription} />
         <link rel="canonical" href={canonicalUrl} />
         <meta property="og:title" content={book.title} />
         <meta property="og:description" content={book.promise[language]} />
         <meta property="og:type" content="book" />
         <meta property="og:url" content={canonicalUrl} />
+        <script type="application/ld+json">{JSON.stringify({
+          "@context": "https://schema.org",
+          "@type": "Book",
+          "name": book.title,
+          "author": { "@type": "Person", "name": book.author },
+          "description": metaDescription,
+          "image": book.coverImage,
+          "url": canonicalUrl,
+        })}</script>
       </Helmet>
       
       <Navigation />

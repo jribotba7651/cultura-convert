@@ -764,38 +764,15 @@ const BookProduct = () => {
                     : 'Also available on:'}
                 </p>
                 
-                {book.amazonHardcoverUrl && book.amazonSoftcoverUrl ? (
-                  <div className="flex flex-col sm:flex-row gap-3">
-                    <Button
-                      variant="outline"
-                      size="lg"
-                      onClick={() => handleAmazonClick(book.amazonHardcoverUrl!, 'hardcover')}
-                      className="flex-1"
-                    >
-                      <ExternalLink className="mr-2 h-4 w-4" />
-                      Amazon (Hardcover)
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="lg"
-                      onClick={() => handleAmazonClick(book.amazonSoftcoverUrl!, 'softcover')}
-                      className="flex-1"
-                    >
-                      <ExternalLink className="mr-2 h-4 w-4" />
-                      Amazon (Softcover)
-                    </Button>
-                  </div>
-                ) : (
-                  <Button
-                    variant="outline"
-                    size="lg"
-                    onClick={() => handleAmazonClick(getAmazonUrl()!)}
-                    className="w-full sm:w-auto"
-                  >
-                    <ExternalLink className="mr-2 h-4 w-4" />
-                    Amazon
-                  </Button>
-                )}
+                <Button
+                  variant="outline"
+                  size="lg"
+                  onClick={() => handleAmazonClick(getAmazonUrl()!)}
+                  className="w-full"
+                >
+                  <ExternalLink className="mr-2 h-4 w-4" />
+                  Amazon
+                </Button>
               </div>
             )}
           </div>

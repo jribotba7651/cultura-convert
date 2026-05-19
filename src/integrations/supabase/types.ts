@@ -747,6 +747,7 @@ export type Database = {
           download_token: string
           downloaded_at: string | null
           email: string
+          expires_at: string
           id: string
           language: string
         }
@@ -756,6 +757,7 @@ export type Database = {
           download_token?: string
           downloaded_at?: string | null
           email: string
+          expires_at?: string
           id?: string
           language: string
         }
@@ -765,6 +767,7 @@ export type Database = {
           download_token?: string
           downloaded_at?: string | null
           email?: string
+          expires_at?: string
           id?: string
           language?: string
         }

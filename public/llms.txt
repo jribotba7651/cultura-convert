@@ -1,0 +1,28 @@
+# Jíbaro en la Luna — Escritores Puertorriqueños
+
+> Literatura puertorriqueña contemporánea de Juan C. Ribot Guzmán y Rosnelma García Amalbert. Tienda de libros, blog, servicios de consultoría y recursos culturales.
+
+## Pages
+
+- [Inicio](/): Catálogo destacado de libros y autores.
+- [Nosotros](/nosotros): Sobre los autores y el proyecto.
+- [Blog](/blog): Artículos sobre cultura, identidad y diáspora puertorriqueña.
+- [Tienda](/store): Libros y productos disponibles para compra directa.
+- [Servicios](/services): Servicios profesionales ofrecidos.
+- [Consultoría](/consulting): Consultoría de liderazgo bicultural.
+- [Proyectos](/proyectos): Proyectos en curso y colaboraciones.
+
+## Libros
+
+- [Las Que Siempre Estuvieron](/libro/las-que-siempre-estuvieron): Diálogo entre cinco figuras religiosas y las mujeres silenciadas por la historia.
+- [Raíces En Tierra Ajena](/libro/raices-en-tierra-ajena): Familia, exilio y esperanza en la América dividida de hoy.
+- [Cartas de Newark](/libro/cartas-de-newark): Identidad y diáspora puertorriqueña en Nueva Jersey.
+- [Nietos en la Diáspora](/libro/nietos-en-la-diaspora): 500 años de historia puertorriqueña y migración.
+- [Jíbara en la Luna (English)](/libro/jibara-en-la-luna-english): 22 años navegando Corporate America como Latina.
+- [Jíbara en la Luna (Español)](/libro/jibara-en-la-luna-espanol): Guía de liderazgo consciente bicultural.
+- [Las Aventuras de Luna y Avo](/libro/las-aventuras-de-luna-y-avo): Libro infantil sobre valentía e imaginación.
+- [Sofía Marie, 'Sofí Mary' o Paloma](/libro/sofia-marie-paloma): Novela de suspenso ambientada en Puerto Rico.
+
+## Optional
+
+- [Privacy Policy](/privacy-policy): Política de privacidad del sitio.

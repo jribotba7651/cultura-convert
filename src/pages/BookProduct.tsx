@@ -61,8 +61,7 @@ const booksData: Record<string, BookData> = {
       en: "Five religious figures arrive at the summit of Mount Roraima: Jesus, Buddha, Muhammad, Krishna, and Quetzalcoatl. For the first time, the founders of the world's most influential spiritual traditions meet face to face."
     },
     coverImage: lasQueSiempreEstuvieronCover,
-    amazonHardcoverUrl: "https://a.co/d/hJpEIi0",
-    amazonSoftcoverUrl: "https://a.co/d/dGGqrQO",
+    amazonUrl: "https://a.co/d/dGGqrQO",
     author: "Juan C. Ribot Guzmán",
     promise: {
       es: "Descubre las voces femeninas que la historia silenció.",
@@ -764,38 +763,15 @@ const BookProduct = () => {
                     : 'Also available on:'}
                 </p>
                 
-                {book.amazonHardcoverUrl && book.amazonSoftcoverUrl ? (
-                  <div className="flex flex-col sm:flex-row gap-3">
-                    <Button
-                      variant="outline"
-                      size="lg"
-                      onClick={() => handleAmazonClick(book.amazonHardcoverUrl!, 'hardcover')}
-                      className="flex-1"
-                    >
-                      <ExternalLink className="mr-2 h-4 w-4" />
-                      Amazon (Hardcover)
-                    </Button>
-                    <Button
-                      variant="outline"
-                      size="lg"
-                      onClick={() => handleAmazonClick(book.amazonSoftcoverUrl!, 'softcover')}
-                      className="flex-1"
-                    >
-                      <ExternalLink className="mr-2 h-4 w-4" />
-                      Amazon (Softcover)
-                    </Button>
-                  </div>
-                ) : (
-                  <Button
-                    variant="outline"
-                    size="lg"
-                    onClick={() => handleAmazonClick(getAmazonUrl()!)}
-                    className="w-full sm:w-auto"
-                  >
-                    <ExternalLink className="mr-2 h-4 w-4" />
-                    Amazon
-                  </Button>
-                )}
+                <Button
+                  variant="outline"
+                  size="lg"
+                  onClick={() => handleAmazonClick(getAmazonUrl()!)}
+                  className="w-full"
+                >
+                  <ExternalLink className="mr-2 h-4 w-4" />
+                  Amazon
+                </Button>
               </div>
             )}
           </div>

@@ -358,8 +358,8 @@ const AboutUs = () => {
               </h3>
               <p className="text-muted-foreground mb-4 leading-relaxed">
                 {language === 'es' 
-                  ? 'Ejecutiva estratégica de Calidad de Proveedores con más de 22 años arquitectando marcos de gobernanza y liderando organizaciones de calidad en dispositivos médicos, productos combinados y operaciones farmacéuticas. Actualmente en rol de nivel director reportando directamente al VP de Calidad.'
-                  : 'Strategic Supplier Quality executive with 22+ years architecting governance frameworks and leading quality organizations across medical devices, combination products, and pharmaceutical operations. Currently serving in director-level capacity reporting directly to VP of Quality.'}
+                  ? 'Ejecutiva estratégica de Calidad de Proveedores con más de 24 años arquitectando marcos de gobernanza y liderando organizaciones de calidad en dispositivos médicos, productos combinados y operaciones farmacéuticas. Actualmente en rol de nivel director reportando directamente al VP de Calidad.'
+                  : 'Strategic Supplier Quality executive with 24+ years architecting governance frameworks and leading quality organizations across medical devices, combination products, and pharmaceutical operations. Currently serving in director-level capacity reporting directly to VP of Quality.'}
               </p>
               <p className="text-muted-foreground mb-6 leading-relaxed">
                 {language === 'es'

@@ -117,7 +117,7 @@ const Services = () => {
                   <div className="absolute -bottom-6 -right-6 bg-primary text-primary-foreground p-4 rounded-xl shadow-lg">
                     <div className="flex items-center gap-2">
                       <Award className="h-5 w-5" />
-                      <span className="font-semibold">22+ {language === 'en' ? 'Years' : 'Años'}</span>
+                      <span className="font-semibold">24+ {language === 'en' ? 'Years' : 'Años'}</span>
                     </div>
                     <p className="text-sm opacity-90">
                       {language === 'en' ? 'Leadership Experience' : 'Experiencia en Liderazgo'}

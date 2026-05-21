@@ -89,8 +89,8 @@ const Services = () => {
                 </h1>
                 <p className="text-lg text-muted-foreground leading-relaxed">
                   {language === 'en' 
-                    ? 'Professional coaching and leadership development for Latino professionals navigating Corporate America. 22 years of engineering leadership experience.'
-                    : 'Coaching profesional y desarrollo de liderazgo para profesionales latinos navegando Corporate América. 22 años de experiencia en liderazgo en ingeniería.'
+                    ? 'Professional coaching and leadership development for Latino professionals navigating Corporate America. 24 years of engineering leadership experience.'
+                    : 'Coaching profesional y desarrollo de liderazgo para profesionales latinos navegando Corporate América. 24 años de experiencia en liderazgo en ingeniería.'
                   }
                 </p>
                 <div className="flex flex-wrap gap-4">

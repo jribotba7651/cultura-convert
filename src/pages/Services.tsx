@@ -74,7 +74,7 @@ const Services = () => {
     const body = language === 'en'
       ? 'Hello Rosnelma,%0D%0A%0D%0AI would like to schedule a consultation. Please let me know your availability.%0D%0A%0D%0AThank you!'
       : 'Hola Rosnelma,%0D%0A%0D%0AMe gustaría agendar una consulta. Por favor, déjame saber tu disponibilidad.%0D%0A%0D%0A¡Gracias!';
-    window.location.href = `mailto:rosnelma@jibaroenlaluna.com?subject=${encodeURIComponent(subject)}&body=${body}`;
+    window.location.href = `mailto:jribot@jibaroenlaluna.com?subject=${encodeURIComponent(subject)}&body=${body}`;
   };
 
   return (
@@ -105,7 +105,7 @@ const Services = () => {
                     {language === 'en' ? 'Book Consultation' : 'Reservar Consulta'}
                   </Button>
                   <Button variant="outline" size="lg" className="gap-2" asChild>
-                    <a href="mailto:rosnelma@jibaroenlaluna.com">
+                    <a href="mailto:jribot@jibaroenlaluna.com">
                       <Mail className="h-5 w-5" />
                       {language === 'en' ? 'Contact' : 'Contactar'}
                     </a>
@@ -206,8 +206,8 @@ const Services = () => {
                     </div>
                     <div className="flex items-center gap-3">
                       <Mail className="h-5 w-5 text-primary" />
-                      <a href="mailto:rosnelma@jibaroenlaluna.com" className="text-foreground hover:text-primary transition-colors">
-                        rosnelma@jibaroenlaluna.com
+                      <a href="mailto:jribot@jibaroenlaluna.com" className="text-foreground hover:text-primary transition-colors">
+                        jribot@jibaroenlaluna.com
                       </a>
                     </div>
                     <div className="flex items-center gap-3">

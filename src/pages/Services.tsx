@@ -68,7 +68,13 @@ const Services = () => {
   ];
 
   const handleBookAppointment = () => {
-    window.open('https://jibaroenlaluna.simplybook.me/v2/', '_blank');
+    const subject = language === 'en'
+      ? 'Consultation Request'
+      : 'Solicitud de Consulta';
+    const body = language === 'en'
+      ? 'Hello Rosnelma,%0D%0A%0D%0AI would like to schedule a consultation. Please let me know your availability.%0D%0A%0D%0AThank you!'
+      : 'Hola Rosnelma,%0D%0A%0D%0AMe gustaría agendar una consulta. Por favor, déjame saber tu disponibilidad.%0D%0A%0D%0A¡Gracias!';
+    window.location.href = `mailto:rosnelma@jibaroenlaluna.com?subject=${encodeURIComponent(subject)}&body=${body}`;
   };
 
   return (

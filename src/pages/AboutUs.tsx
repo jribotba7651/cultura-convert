@@ -328,7 +328,7 @@ const AboutUs = () => {
                 {language === 'es' ? 'Ejecutiva de Calidad de Proveedores' : 'Supplier Quality Executive'}
               </p>
               <p className="text-muted-foreground mb-4">
-                {language === 'es' ? '22+ años de experiencia' : '22+ years of experience'}
+                {language === 'es' ? '24+ años de experiencia' : '24+ years of experience'}
               </p>
               <div className="flex flex-wrap justify-center lg:justify-start gap-2 mb-4">
                 <Badge variant="outline" className="text-xs">FDA/ISO 13485</Badge>

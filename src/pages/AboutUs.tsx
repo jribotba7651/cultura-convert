@@ -328,7 +328,7 @@ const AboutUs = () => {
                 {language === 'es' ? 'Ejecutiva de Calidad de Proveedores' : 'Supplier Quality Executive'}
               </p>
               <p className="text-muted-foreground mb-4">
-                {language === 'es' ? '22+ años de experiencia' : '22+ years of experience'}
+                {language === 'es' ? '24+ años de experiencia' : '24+ years of experience'}
               </p>
               <div className="flex flex-wrap justify-center lg:justify-start gap-2 mb-4">
                 <Badge variant="outline" className="text-xs">FDA/ISO 13485</Badge>
@@ -358,8 +358,8 @@ const AboutUs = () => {
               </h3>
               <p className="text-muted-foreground mb-4 leading-relaxed">
                 {language === 'es' 
-                  ? 'Ejecutiva estratégica de Calidad de Proveedores con más de 22 años arquitectando marcos de gobernanza y liderando organizaciones de calidad en dispositivos médicos, productos combinados y operaciones farmacéuticas. Actualmente en rol de nivel director reportando directamente al VP de Calidad.'
-                  : 'Strategic Supplier Quality executive with 22+ years architecting governance frameworks and leading quality organizations across medical devices, combination products, and pharmaceutical operations. Currently serving in director-level capacity reporting directly to VP of Quality.'}
+                  ? 'Ejecutiva estratégica de Calidad de Proveedores con más de 24 años arquitectando marcos de gobernanza y liderando organizaciones de calidad en dispositivos médicos, productos combinados y operaciones farmacéuticas. Actualmente en rol de nivel director reportando directamente al VP de Calidad.'
+                  : 'Strategic Supplier Quality executive with 24+ years architecting governance frameworks and leading quality organizations across medical devices, combination products, and pharmaceutical operations. Currently serving in director-level capacity reporting directly to VP of Quality.'}
               </p>
               <p className="text-muted-foreground mb-6 leading-relaxed">
                 {language === 'es'

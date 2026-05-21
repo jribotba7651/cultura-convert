@@ -89,8 +89,8 @@ const Services = () => {
                 </h1>
                 <p className="text-lg text-muted-foreground leading-relaxed">
                   {language === 'en' 
-                    ? 'Professional coaching and leadership development for Latino professionals navigating Corporate America. 22 years of engineering leadership experience.'
-                    : 'Coaching profesional y desarrollo de liderazgo para profesionales latinos navegando Corporate América. 22 años de experiencia en liderazgo en ingeniería.'
+                    ? 'Professional coaching and leadership development for Latino professionals navigating Corporate America. 24 years of engineering leadership experience.'
+                    : 'Coaching profesional y desarrollo de liderazgo para profesionales latinos navegando Corporate América. 24 años de experiencia en liderazgo en ingeniería.'
                   }
                 </p>
                 <div className="flex flex-wrap gap-4">
@@ -117,7 +117,7 @@ const Services = () => {
                   <div className="absolute -bottom-6 -right-6 bg-primary text-primary-foreground p-4 rounded-xl shadow-lg">
                     <div className="flex items-center gap-2">
                       <Award className="h-5 w-5" />
-                      <span className="font-semibold">22+ {language === 'en' ? 'Years' : 'Años'}</span>
+                      <span className="font-semibold">24+ {language === 'en' ? 'Years' : 'Años'}</span>
                     </div>
                     <p className="text-sm opacity-90">
                       {language === 'en' ? 'Leadership Experience' : 'Experiencia en Liderazgo'}

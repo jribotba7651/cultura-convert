@@ -3,7 +3,7 @@ import Navigation from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Mail, Phone, Calendar, Clock, MapPin, Star, Users, Award } from "lucide-react";
+import { Mail, Calendar, Clock, MapPin, Star, Users, Award } from "lucide-react";
 import rosnelmaProfile from "@/assets/rosnelma-garcia-profile.jpg";
 
 const Services = () => {
@@ -198,12 +198,6 @@ const Services = () => {
                 </CardHeader>
                 <CardContent className="space-y-6">
                   <div className="space-y-4">
-                    <div className="flex items-center gap-3">
-                      <Phone className="h-5 w-5 text-primary" />
-                      <a href="tel:+17876334714" className="text-foreground hover:text-primary transition-colors">
-                        +1 (787) 633-4714
-                      </a>
-                    </div>
                     <div className="flex items-center gap-3">
                       <Mail className="h-5 w-5 text-primary" />
                       <a href="mailto:jribot@jibaroenlaluna.com" className="text-foreground hover:text-primary transition-colors">

@@ -3,7 +3,7 @@ import Navigation from "@/components/Navigation";
 import { Button } from "@/components/ui/button";
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
-import { Mail, Phone, Calendar, Clock, MapPin, Star, Users, Award } from "lucide-react";
+import { Mail, Calendar, Clock, MapPin, Star, Users, Award } from "lucide-react";
 import rosnelmaProfile from "@/assets/rosnelma-garcia-profile.jpg";
 
 const Services = () => {

@@ -20,6 +20,7 @@ import raicesEnTierraAjenaCover from "@/assets/raices-en-tierra-ajena-cover.jpg"
 import nietosEnLaDiasporaCover from "@/assets/nietos-en-la-diaspora-cover.jpg";
 import lasQueSiempreEstuvieronCover from "@/assets/las-que-siempre-estuvieron-cover.jpg";
 import theWomenWhoAlwaysWereCover from "@/assets/the-women-who-always-were-cover.jpg";
+import salEnLaSangreCover from "@/assets/sal-en-la-sangre-cover.jpg";
 
 // Datos de ejemplo para los libros de Juan C. Ribot Guzmán
 const juanBooks: Book[] = [
@@ -66,6 +67,17 @@ const juanBooks: Book[] = [
     status: "published" as const,
     amazonUrl: "https://a.co/d/4dgdLk4",
     coverImage: cartasDeNewarkCover,
+  },
+  {
+    title: "Sal en la Sangre",
+    slug: "sal-en-la-sangre",
+    description: {
+      es: "La isla guarda secretos. El mar guarda verdades. Su abuela guardó ambos. Una novela de Juan C. Ribot Guzmán sobre memoria, herencia y los silencios que viajan por la sangre.",
+      en: "The island keeps secrets. The sea keeps truths. Her grandmother kept both. A novel by Juan C. Ribot Guzmán about memory, heritage, and the silences that travel through blood."
+    },
+    status: "published" as const,
+    amazonUrl: "https://a.co/d/0fMdL5v7",
+    coverImage: salEnLaSangreCover,
   },
 ];
 

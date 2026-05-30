@@ -28,6 +28,7 @@ import jibaraEnglishCover from '@/assets/jibara-en-la-luna-english-cover.jpg';
 import nietosEnLaDiasporaCover from '@/assets/nietos-en-la-diaspora-cover.jpg';
 import lasQueEstuvieronCover from '@/assets/las-que-siempre-estuvieron-cover.jpg';
 import lunayAvoCover from '@/assets/las-aventuras-luna-avo-cover.jpg';
+import salEnLaSangreCover from '@/assets/sal-en-la-sangre-cover.jpg';
 
 // Helper to resolve image paths
 const resolveImagePath = (path: string): string => {
@@ -56,6 +57,8 @@ const resolveImagePath = (path: string): string => {
     '/assets/las-que-siempre-estuvieron-cover.jpg': lasQueEstuvieronCover,
     '/src/assets/las-aventuras-luna-avo-cover.jpg': lunayAvoCover,
     '/assets/las-aventuras-luna-avo-cover.jpg': lunayAvoCover,
+    '/src/assets/sal-en-la-sangre-cover.jpg': salEnLaSangreCover,
+    '/assets/sal-en-la-sangre-cover.jpg': salEnLaSangreCover,
   };
   
   return imageMap[path] || '/placeholder.svg';

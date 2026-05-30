@@ -11,6 +11,7 @@ import raicesCover from '@/assets/raices-en-tierra-ajena-cover.jpg';
 import sofiaCover from '@/assets/sofia-marie-paloma-cover.jpg';
 import jibaraCover from '@/assets/jibara-en-la-luna-cover.jpg';
 import cartasCover from '@/assets/cartas-de-newark-cover.jpg';
+import salEnLaSangreCover from '@/assets/sal-en-la-sangre-cover.jpg';
 
 // Helper to resolve image paths
 const resolveImagePath = (path: string): string => {
@@ -27,6 +28,8 @@ const resolveImagePath = (path: string): string => {
     '/src/assets/sofia-marie-paloma-cover.jpg': sofiaCover,
     '/src/assets/jibara-en-la-luna-cover.jpg': jibaraCover,
     '/src/assets/cartas-de-newark-cover.jpg': cartasCover,
+    '/src/assets/sal-en-la-sangre-cover.jpg': salEnLaSangreCover,
+    '/assets/sal-en-la-sangre-cover.jpg': salEnLaSangreCover,
   };
   
   return imageMap[path] || '/placeholder.svg';

@@ -138,6 +138,16 @@ const rosnelmaBooks: Book[] = [
     amazonUrl: "https://www.amazon.com/dp/B0FB82RBP6",
     coverImage: sofiaMariePalomaCover,
   },
+  {
+    title: "Las Siete Guardianas del Mar",
+    slug: "las-siete-guardianas-del-mar",
+    description: {
+      es: "A los quince años, Isabela del Mar pensaba que las almejas mágicas de su abuela eran solo cuentos. Hasta que encontró una con forma de corazón. Y latía. En el pueblo costero de Manatí, Puerto Rico, Isabela descubre siete almejas guardianas que encierran la sabiduría y el poder espiritual de los taínos, guiada por Yukiyú, un joven espíritu taíno atrapado entre mundos desde hace quinientos años. Una novela de realismo mágico juvenil que combina herencia taína, familia puertorriqueña y una magia que no salva sin cobrar. Para lectores de Isabel Allende, Silvia Moreno-García y Elizabeth Acevedo.",
+      en: "At fifteen, Isabela del Mar thought her grandmother's magical clams were just stories. Until she found one shaped like a heart. And it was beating. In the coastal town of Manatí, Puerto Rico, Isabela discovers seven guardian clams that hold the wisdom and spiritual power of the Taínos, guided by Yukiyú, a young Taíno spirit trapped between worlds for five hundred years. A young adult magical realism novel that blends Taíno heritage, Puerto Rican family, and a magic that doesn't save without taking. For readers of Isabel Allende, Silvia Moreno-García, and Elizabeth Acevedo. (Spanish Edition)"
+    },
+    status: "published" as const,
+    amazonUrl: "https://a.co/d/06G7GUJn",
+  },
 ];
 
 const Index = () => {

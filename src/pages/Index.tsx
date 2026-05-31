@@ -21,6 +21,7 @@ import nietosEnLaDiasporaCover from "@/assets/nietos-en-la-diaspora-cover.jpg";
 import lasQueSiempreEstuvieronCover from "@/assets/las-que-siempre-estuvieron-cover.jpg";
 import theWomenWhoAlwaysWereCover from "@/assets/the-women-who-always-were-cover.jpg";
 import salEnLaSangreCover from "@/assets/sal-en-la-sangre-cover.jpg";
+import lasSieteGuardianasDelMarCover from "@/assets/las-siete-guardianas-del-mar-cover.jpg";
 
 // Datos de ejemplo para los libros de Juan C. Ribot Guzmán
 const juanBooks: Book[] = [
@@ -147,6 +148,7 @@ const rosnelmaBooks: Book[] = [
     },
     status: "published" as const,
     amazonUrl: "https://a.co/d/06G7GUJn",
+    coverImage: lasSieteGuardianasDelMarCover,
   },
 ];
 

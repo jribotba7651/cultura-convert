@@ -28,8 +28,9 @@ serve(async (req) => {
       );
     }
 
-    // Insert page view
-    const { error } = await supabase
+    // Fire-and-forget the insert so the client gets an immediate response
+    // and the edge function does not hit the 150s idle timeout.
+    const insertPromise = supabase
       .from('analytics_page_views')
       .insert({
         path,
@@ -37,17 +38,17 @@ serve(async (req) => {
         user_agent: userAgent || null,
         device_type: deviceType || null,
         referrer: referrer || null,
+      })
+      .then(({ error }) => {
+        if (error) console.error('Error inserting page view:', error);
+        else console.log(`[Analytics] Tracked: ${path} (session: ${sessionId.substring(0, 8)}...)`);
       });
 
-    if (error) {
-      console.error('Error inserting page view:', error);
-      return new Response(
-        JSON.stringify({ error: 'Failed to track page view' }),
-        { status: 500, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
-      );
+    // @ts-ignore - EdgeRuntime is available in Supabase Edge Functions
+    if (typeof EdgeRuntime !== 'undefined' && EdgeRuntime.waitUntil) {
+      // @ts-ignore
+      EdgeRuntime.waitUntil(insertPromise);
     }
-
-    console.log(`[Analytics] Tracked: ${path} (session: ${sessionId.substring(0, 8)}...)`);
 
     return new Response(
       JSON.stringify({ success: true }),

@@ -86,6 +86,7 @@ const AppContent = () => {
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/privacy-policy-en" element={<Navigate to="/privacy-policy?lang=en" replace />} />
           <Route path="/privacy-policy-es" element={<Navigate to="/privacy-policy?lang=es" replace />} />
+          <Route path="/multiconvert-privacy-policy" element={<MultiConvertPrivacy />} />
         <Route path="/recursos/:slug" element={<ResourceDownload />} />
         <Route path="/resources/:slug" element={<ResourceDownload />} />
         <Route path="/share/resource/:slug" element={<ResourceDownload />} />

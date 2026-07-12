@@ -33,6 +33,7 @@ import NotFound from "./pages/NotFound";
 import ResourceDownload from "./pages/ResourceDownload";
 import TicTacToeSupport from "./pages/TicTacToeSupport";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
+import MultiConvertPrivacy from "./pages/MultiConvertPrivacy";
 import ProfessionalProfile from "./pages/ProfessionalProfile";
 import AboutUs from "./pages/AboutUs";
 import BookProduct from "./pages/BookProduct";

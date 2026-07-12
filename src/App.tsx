@@ -33,6 +33,7 @@ import NotFound from "./pages/NotFound";
 import ResourceDownload from "./pages/ResourceDownload";
 import TicTacToeSupport from "./pages/TicTacToeSupport";
 import PrivacyPolicy from "./pages/PrivacyPolicy";
+import MultiConvertPrivacy from "./pages/MultiConvertPrivacy";
 import ProfessionalProfile from "./pages/ProfessionalProfile";
 import AboutUs from "./pages/AboutUs";
 import BookProduct from "./pages/BookProduct";
@@ -85,6 +86,7 @@ const AppContent = () => {
           <Route path="/privacy-policy" element={<PrivacyPolicy />} />
           <Route path="/privacy-policy-en" element={<Navigate to="/privacy-policy?lang=en" replace />} />
           <Route path="/privacy-policy-es" element={<Navigate to="/privacy-policy?lang=es" replace />} />
+          <Route path="/multiconvert-privacy-policy" element={<MultiConvertPrivacy />} />
         <Route path="/recursos/:slug" element={<ResourceDownload />} />
         <Route path="/resources/:slug" element={<ResourceDownload />} />
         <Route path="/share/resource/:slug" element={<ResourceDownload />} />

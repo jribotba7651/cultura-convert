@@ -291,7 +291,7 @@ const AdminAnalytics = () => {
 
   const setMockData = () => {
     const endDate = new Date();
-    const days = timeRange === '7d' ? 7 : timeRange === '90d' ? 90 : 30;
+    const days = RANGE_DAYS[timeRange] ?? 90;
 
     const mockChartData: AnalyticsData[] = [];
     let visitorsTotal = 0;

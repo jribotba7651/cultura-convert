@@ -31,6 +31,9 @@ import cartasDeNewarkCover from "@/assets/cartas-de-newark-cover.jpg";
 import raicesEnTierraAjenaCover from "@/assets/raices-en-tierra-ajena-cover.jpg";
 import nietosEnLaDiasporaCover from "@/assets/nietos-en-la-diaspora-cover.jpg";
 import lasQueSiempreEstuvieronCover from "@/assets/las-que-siempre-estuvieron-cover.jpg";
+import lasSieteGuardianasDelMarCover from "@/assets/las-siete-guardianas-del-mar-cover.jpg";
+import salEnLaSangreCover from "@/assets/sal-en-la-sangre-cover.jpg";
+import theWomenWhoAlwaysWereCover from "@/assets/the-women-who-always-were-cover.jpg";
 
 interface BookData {
   title: string;
@@ -392,6 +395,132 @@ const booksData: Record<string, BookData> = {
       { q: { es: "¿Es autobiográfica?", en: "Is it autobiographical?" }, a: { es: "Es ficción inspirada en patrones que he observado en muchas familias.", en: "It's fiction inspired by patterns I've observed in many families." } }
     ],
     relatedBooks: ["jibara-en-la-luna-english", "las-aventuras-de-luna-y-avo"]
+  },
+  "las-siete-guardianas-del-mar": {
+    title: "Las Siete Guardianas del Mar",
+    slug: "las-siete-guardianas-del-mar",
+    description: {
+      es: "A los quince años, Isabela del Mar pensaba que las almejas mágicas de su abuela eran solo cuentos. Hasta que encontró una con forma de corazón. Y latía.",
+      en: "At fifteen, Isabela del Mar thought her grandmother's magical clams were just stories. Until she found one shaped like a heart. And it was beating. (Spanish Edition)"
+    },
+    coverImage: lasSieteGuardianasDelMarCover,
+    amazonUrl: "https://a.co/d/06G7GUJn",
+    author: "Rosnelma García Amalbert",
+    promise: {
+      es: "Descubre la magia taína que vive en la sangre de una familia puertorriqueña.",
+      en: "Discover the Taíno magic that lives in the blood of a Puerto Rican family."
+    },
+    benefits: {
+      es: ["Realismo mágico juvenil con raíces taínas", "Una protagonista valiente y cercana", "Herencia puertorriqueña contada con ternura"],
+      en: ["Young adult magical realism with Taíno roots", "A brave, relatable protagonist", "Puerto Rican heritage told with tenderness"]
+    },
+    whoIsFor: {
+      es: ["Lectores jóvenes de fantasía y realismo mágico", "Familias que quieren conectar con su herencia taína", "Lectores de Isabel Allende y Elizabeth Acevedo"],
+      en: ["Young readers of fantasy and magical realism", "Families connecting with Taíno heritage", "Readers of Isabel Allende and Elizabeth Acevedo"]
+    },
+    whatYoullLearn: {
+      es: ["La sabiduría espiritual taína", "Que toda magia tiene un precio", "El valor de la memoria familiar"],
+      en: ["Taíno spiritual wisdom", "That all magic has a price", "The value of family memory"]
+    },
+    whatsInside: {
+      es: ["El hallazgo de la primera almeja", "Manatí y el mar como personajes", "Yukiyú, el espíritu atrapado", "La prueba de las siete guardianas"],
+      en: ["Finding the first clam", "Manatí and the sea as characters", "Yukiyú, the trapped spirit", "The trial of the seven guardians"]
+    },
+    authorNote: {
+      es: "Escribí esta novela para que nuestros jóvenes sepan que la magia de Puerto Rico no está en los cuentos ajenos, sino en su propia sangre.",
+      en: "I wrote this novel so our young readers know that Puerto Rico's magic isn't in someone else's stories, but in their own blood."
+    },
+    testimonials: [
+      { text: { es: "Una historia que abraza la herencia taína con belleza.", en: "A story that embraces Taíno heritage beautifully." }, author: "Lectora de Manatí" }
+    ],
+    faq: [
+      { q: { es: "¿Es para adolescentes?", en: "Is it for teens?" }, a: { es: "Sí, es una novela juvenil que también disfrutan los adultos.", en: "Yes, it's a young adult novel that adults also enjoy." } }
+    ],
+    relatedBooks: ["sofia-marie-paloma", "las-aventuras-de-luna-y-avo"]
+  },
+  "sal-en-la-sangre": {
+    title: "Sal en la Sangre",
+    slug: "sal-en-la-sangre",
+    description: {
+      es: "La isla guarda secretos. El mar guarda verdades. Su abuela guardó ambos. Una novela sobre memoria, herencia y los silencios que viajan por la sangre.",
+      en: "The island keeps secrets. The sea keeps truths. Her grandmother kept both. A novel about memory, heritage, and the silences that travel through blood."
+    },
+    coverImage: salEnLaSangreCover,
+    amazonUrl: "https://a.co/d/0fMdL5v7",
+    author: "Juan C. Ribot Guzmán",
+    promise: {
+      es: "Enfrenta los silencios que tu familia nunca nombró.",
+      en: "Confront the silences your family never named."
+    },
+    benefits: {
+      es: ["Una narrativa íntima sobre herencia familiar", "El Caribe como memoria viva", "Personajes que se quedan contigo"],
+      en: ["An intimate narrative about family inheritance", "The Caribbean as living memory", "Characters that stay with you"]
+    },
+    whoIsFor: {
+      es: ["Lectores de ficción literaria caribeña", "Quienes exploran su historia familiar", "Amantes de la narrativa sobre migración e identidad"],
+      en: ["Readers of Caribbean literary fiction", "Those exploring their family history", "Lovers of narratives about migration and identity"]
+    },
+    whatYoullLearn: {
+      es: ["Cómo los silencios se heredan", "El peso de la memoria isleña", "Que reconstruir el pasado también sana"],
+      en: ["How silences are inherited", "The weight of island memory", "That reconstructing the past also heals"]
+    },
+    whatsInside: {
+      es: ["El regreso a la isla", "Las cartas de la abuela", "El mar como testigo", "La verdad que nadie quiso decir"],
+      en: ["The return to the island", "The grandmother's letters", "The sea as witness", "The truth no one wanted to tell"]
+    },
+    authorNote: {
+      es: "Toda familia caribeña carga un secreto salado. Esta novela es mi manera de nombrarlo sin miedo.",
+      en: "Every Caribbean family carries a salted secret. This novel is my way of naming it without fear."
+    },
+    testimonials: [
+      { text: { es: "Una novela que sabe a mar y a memoria.", en: "A novel that tastes of sea and memory." }, author: "Lector de Puerto Rico" }
+    ],
+    faq: [
+      { q: { es: "¿Está disponible en inglés?", en: "Is it available in English?" }, a: { es: "Por ahora está disponible en español.", en: "For now it's available in Spanish." } }
+    ],
+    relatedBooks: ["raices-en-tierra-ajena", "cartas-de-newark"]
+  },
+  "the-women-who-always-were": {
+    title: "The Women Who Always Were: A Novel of Mary, Khadija, Mahapajapati, Radha, and Ixchel",
+    slug: "the-women-who-always-were",
+    description: {
+      es: "Five men climb a mountain to talk about what was done in their names. They are not the ones who will speak. (English edition only.)",
+      en: "Five men climb a mountain to talk about what was done in their names. They are not the ones who will speak."
+    },
+    coverImage: theWomenWhoAlwaysWereCover,
+    amazonUrl: "https://a.co/d/08c9NFgj",
+    author: "Juan C. Ribot Guzmán",
+    promise: {
+      es: "Hear the women the great religions erased. (English edition only.)",
+      en: "Hear the women the great religions erased."
+    },
+    benefits: {
+      es: ["A literary reckoning with religious history", "Five founders, five women, one conversation", "A Puerto Rican and Caribbean perspective"],
+      en: ["A literary reckoning with religious history", "Five founders, five women, one conversation", "A Puerto Rican and Caribbean perspective"]
+    },
+    whoIsFor: {
+      es: ["Readers of literary and philosophical fiction", "Anyone questioning inherited religious narratives", "Readers of The Red Tent and The Book of Longings"],
+      en: ["Readers of literary and philosophical fiction", "Anyone questioning inherited religious narratives", "Readers of The Red Tent and The Book of Longings"]
+    },
+    whatYoullLearn: {
+      es: ["How women were erased from sacred history", "What dialogue between traditions could look like", "That listening is harder than preaching"],
+      en: ["How women were erased from sacred history", "What dialogue between traditions could look like", "That listening is harder than preaching"]
+    },
+    whatsInside: {
+      es: ["Four days at the summit of Roraima", "The descent to Ixchel's village", "The women walking up the road", "The answer, and the work that follows"],
+      en: ["Four days at the summit of Roraima", "The descent to Ixchel's village", "The women walking up the road", "The answer, and the work that follows"]
+    },
+    authorNote: {
+      es: "This is the English-language companion to Las Que Siempre Estuvieron, written for readers who want the women heard in their own words.",
+      en: "This is the English-language companion to Las Que Siempre Estuvieron, written for readers who want the women heard in their own words."
+    },
+    testimonials: [
+      { text: { es: "Quiet and devastating.", en: "Quiet and devastating." }, author: "Early reader" }
+    ],
+    faq: [
+      { q: { es: "Is there a Spanish edition?", en: "Is there a Spanish edition?" }, a: { es: "Yes — Las Que Siempre Estuvieron.", en: "Yes — Las Que Siempre Estuvieron." } }
+    ],
+    relatedBooks: ["las-que-siempre-estuvieron", "raices-en-tierra-ajena"]
   }
 };
 

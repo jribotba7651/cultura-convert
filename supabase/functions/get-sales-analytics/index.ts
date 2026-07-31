@@ -69,7 +69,8 @@ Deno.serve(async (req) => {
         created_at
       `)
       .gte('created_at', startdate)
-      .lte('created_at', enddate)
+      // enddate is an exclusive upper bound (next day), so orders placed today are included
+      .lt('created_at', enddate)
       .order('created_at', { ascending: true });
 
     if (ordersError) {

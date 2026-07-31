@@ -54,7 +54,7 @@ const AdminAnalytics = () => {
   const { isAdmin, loading: adminLoading } = useAdminCheck();
   const { language } = useLanguage();
   const [loading, setLoading] = useState(true);
-  const [timeRange, setTimeRange] = useState('30d');
+  const [timeRange, setTimeRange] = useState('all');
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData[]>([]);
   const [totalVisitors, setTotalVisitors] = useState(0);
   const [totalPageViews, setTotalPageViews] = useState(0);
@@ -94,6 +94,27 @@ const AdminAnalytics = () => {
     return pageNames[path]?.[language] || path;
   };
 
+  const RANGE_DAYS: Record<string, number> = { '7d': 7, '30d': 30, '90d': 90 };
+  const ALL_TIME_START = '2025-01-01';
+
+  // endExclusiveStr is tomorrow's date so callers can use `.lt` and include
+  // everything that happened today. endInclusiveStr is today, for endpoints
+  // that already append a T23:59:59 suffix themselves.
+  const getDateRange = (range: string) => {
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
+
+    const start = new Date(today);
+    start.setDate(today.getDate() - (RANGE_DAYS[range] ?? 30));
+
+    return {
+      startDateStr: range === 'all' ? ALL_TIME_START : start.toISOString().split('T')[0],
+      endInclusiveStr: today.toISOString().split('T')[0],
+      endExclusiveStr: tomorrow.toISOString().split('T')[0],
+    };
+  };
+
   useEffect(() => {
     if (isAdmin) {
       fetchAnalytics();
@@ -104,13 +125,7 @@ const AdminAnalytics = () => {
   const fetchAnalytics = async () => {
     setLoading(true);
     try {
-      const endDate = new Date();
-      const days = timeRange === '7d' ? 7 : timeRange === '90d' ? 90 : 30;
-      const startDate = new Date(endDate);
-      startDate.setDate(endDate.getDate() - days);
-
-      const startDateStr = startDate.toISOString().split('T')[0];
-      const endDateStr = endDate.toISOString().split('T')[0];
+      const { startDateStr, endInclusiveStr: endDateStr } = getDateRange(timeRange);
       
       console.log('Fetching internal analytics from:', startDateStr, 'to', endDateStr);
 
@@ -214,13 +229,7 @@ const AdminAnalytics = () => {
 
   const fetchSalesAnalytics = async () => {
     try {
-      const endDate = new Date();
-      const days = timeRange === '7d' ? 7 : timeRange === '90d' ? 90 : 30;
-      const startDate = new Date(endDate);
-      startDate.setDate(endDate.getDate() - days);
-
-      const startDateStr = startDate.toISOString().split('T')[0];
-      const endDateStr = endDate.toISOString().split('T')[0];
+      const { startDateStr, endExclusiveStr: endDateStr } = getDateRange(timeRange);
       
       console.log('Fetching sales analytics from:', startDateStr, 'to', endDateStr);
 
@@ -282,7 +291,7 @@ const AdminAnalytics = () => {
 
   const setMockData = () => {
     const endDate = new Date();
-    const days = timeRange === '7d' ? 7 : timeRange === '90d' ? 90 : 30;
+    const days = RANGE_DAYS[timeRange] ?? 90;
 
     const mockChartData: AnalyticsData[] = [];
     let visitorsTotal = 0;
@@ -378,6 +387,7 @@ const AdminAnalytics = () => {
                 <SelectItem value="7d">Últimos 7 días</SelectItem>
                 <SelectItem value="30d">Últimos 30 días</SelectItem>
                 <SelectItem value="90d">Últimos 90 días</SelectItem>
+                <SelectItem value="all">Todo el tiempo</SelectItem>
               </SelectContent>
             </Select>
           </div>

@@ -101,11 +101,21 @@ const AdminAnalytics = () => {
     }
   }, [isAdmin, timeRange]);
 
+  const rangeToDays = (range: string) => {
+    switch (range) {
+      case '7d': return 7;
+      case '90d': return 90;
+      case '365d': return 365;
+      case 'all': return 3650;
+      default: return 30;
+    }
+  };
+
   const fetchAnalytics = async () => {
     setLoading(true);
     try {
       const endDate = new Date();
-      const days = timeRange === '7d' ? 7 : timeRange === '90d' ? 90 : 30;
+      const days = rangeToDays(timeRange);
       const startDate = new Date(endDate);
       startDate.setDate(endDate.getDate() - days);
 
@@ -215,12 +225,13 @@ const AdminAnalytics = () => {
   const fetchSalesAnalytics = async () => {
     try {
       const endDate = new Date();
-      const days = timeRange === '7d' ? 7 : timeRange === '90d' ? 90 : 30;
+      const days = rangeToDays(timeRange);
       const startDate = new Date(endDate);
       startDate.setDate(endDate.getDate() - days);
 
-      const startDateStr = startDate.toISOString().split('T')[0];
-      const endDateStr = endDate.toISOString().split('T')[0];
+      // Include the whole end day so orders created today are not dropped
+      const startDateStr = `${startDate.toISOString().split('T')[0]}T00:00:00.000Z`;
+      const endDateStr = `${endDate.toISOString().split('T')[0]}T23:59:59.999Z`;
       
       console.log('Fetching sales analytics from:', startDateStr, 'to', endDateStr);
 
@@ -282,7 +293,7 @@ const AdminAnalytics = () => {
 
   const setMockData = () => {
     const endDate = new Date();
-    const days = timeRange === '7d' ? 7 : timeRange === '90d' ? 90 : 30;
+    const days = rangeToDays(timeRange);
 
     const mockChartData: AnalyticsData[] = [];
     let visitorsTotal = 0;
@@ -378,6 +389,8 @@ const AdminAnalytics = () => {
                 <SelectItem value="7d">Últimos 7 días</SelectItem>
                 <SelectItem value="30d">Últimos 30 días</SelectItem>
                 <SelectItem value="90d">Últimos 90 días</SelectItem>
+                <SelectItem value="365d">Último año</SelectItem>
+                <SelectItem value="all">Todo el historial</SelectItem>
               </SelectContent>
             </Select>
           </div>

@@ -12,10 +12,15 @@ interface DirectCheckoutSectionProps {
   books: Book[];
 }
 
+// Must stay in sync with DIRECT_PURCHASE_BOOKS in src/pages/BookProduct.tsx
+// Follow-up ticket: replace both with an `is_directly_purchasable` column on products.
 const DIRECT_CHECKOUT_SLUGS = [
   'cartas-de-newark',
   'raices-en-tierra-ajena',
-  'jibara-en-la-luna-espanol'
+  'jibara-en-la-luna-espanol',
+  'sal-en-la-sangre',
+  'sofia-marie-paloma',
+  'las-siete-guardianas-del-mar'
 ];
 
 export const DirectCheckoutSection = ({ books }: DirectCheckoutSectionProps) => {

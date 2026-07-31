@@ -404,7 +404,7 @@ const handler = async (req: Request): Promise<Response> => {
       const emailHtml = getAdminNewOrderHTML(orderData);
       
       const emailResponse = await resend.emails.send({
-        from: 'Sistema de Órdenes <noreply@resend.dev>',
+        from: ADMIN_FROM,
         to: [email],
         subject: `🎉 Nueva Orden - ${orderData.customerName} ($${orderData.amount})`,
         html: emailHtml,
@@ -473,7 +473,7 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     const emailResponse = await resend.emails.send({
-      from: 'Jíbaro en la Luna <noreply@resend.dev>',
+      from: ORDER_FROM,
       to: [user.email],
       subject: subject,
       html: emailHtml,

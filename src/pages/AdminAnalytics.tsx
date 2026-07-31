@@ -104,13 +104,7 @@ const AdminAnalytics = () => {
   const fetchAnalytics = async () => {
     setLoading(true);
     try {
-      const endDate = new Date();
-      const days = timeRange === '7d' ? 7 : timeRange === '90d' ? 90 : 30;
-      const startDate = new Date(endDate);
-      startDate.setDate(endDate.getDate() - days);
-
-      const startDateStr = startDate.toISOString().split('T')[0];
-      const endDateStr = endDate.toISOString().split('T')[0];
+      const { startDateStr, endInclusiveStr: endDateStr } = getDateRange(timeRange);
       
       console.log('Fetching internal analytics from:', startDateStr, 'to', endDateStr);
 

@@ -30,6 +30,7 @@ import AdminBlog from "./pages/AdminBlog";
 import AdminBlogMigration from "./pages/AdminBlogMigration";
 import AdminNewsletter from "./pages/AdminNewsletter";
 import AdminResources from "./pages/AdminResources";
+import AdminInventory from "./pages/AdminInventory";
 import NotFound from "./pages/NotFound";
 import ResourceDownload from "./pages/ResourceDownload";
 import TicTacToeSupport from "./pages/TicTacToeSupport";
@@ -103,6 +104,7 @@ const AppContent = () => {
             <Route path="/admin/blog/migration" element={<AdminBlogMigration />} />
             <Route path="/admin/newsletter" element={<AdminNewsletter />} />
             <Route path="/admin/resources" element={<AdminResources />} />
+            <Route path="/admin/inventory" element={<AdminInventory />} />
         <Route path="/test" element={<TestComponent />} />
         {/* ADD ALL CUSTOM ROUTES ABOVE THE CATCH-ALL "*" ROUTE */}
         <Route path="*" element={<NotFound />} />

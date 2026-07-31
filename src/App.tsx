@@ -19,6 +19,7 @@ import ProductDetails from "./pages/ProductDetails";
 import Checkout from "./pages/Checkout";
 import OrderConfirmation from "./pages/OrderConfirmation";
 import Auth from "./pages/Auth";
+import ResetPassword from "./pages/ResetPassword";
 import Services from "./pages/Services";
 import Consulting from "./pages/Consulting";
 import Projects from "./pages/Projects";
@@ -93,6 +94,8 @@ const AppContent = () => {
         <Route path="/checkout" element={<Checkout />} />
         <Route path="/order-confirmation/:orderId" element={<OrderConfirmation />} />
         <Route path="/auth" element={<Auth />} />
+        <Route path="/reset-password" element={<ResetPassword />} />
+        <Route path="/cambiar-password" element={<Navigate to="/reset-password" replace />} />
         <Route path="/mis-pedidos" element={<MyOrders />} />
         <Route path="/admin/orders" element={<AdminOrders />} />
         <Route path="/admin/analytics" element={<AdminAnalytics />} />

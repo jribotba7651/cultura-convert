@@ -12,7 +12,7 @@ import {
 import { Avatar, AvatarFallback } from '@/components/ui/avatar';
 import { useAuth } from '@/contexts/AuthContext';
 import { useLanguage } from '@/contexts/LanguageContext';
-import { User, LogOut, BarChart3, Package, Mail, FileText } from 'lucide-react';
+import { User, LogOut, BarChart3, Package, Mail, FileText, KeyRound } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
 
 const UserMenu = () => {
@@ -115,6 +115,12 @@ const UserMenu = () => {
           <Link to="/mis-pedidos" className="flex items-center cursor-pointer">
             <User className="mr-2 h-4 w-4" />
             <span>{t('myOrders')}</span>
+          </Link>
+        </DropdownMenuItem>
+        <DropdownMenuItem asChild>
+          <Link to="/reset-password" className="flex items-center cursor-pointer">
+            <KeyRound className="mr-2 h-4 w-4" />
+            <span>{t('changePassword')}</span>
           </Link>
         </DropdownMenuItem>
         {isAdmin && (

@@ -15,6 +15,13 @@ import { Book } from 'lucide-react';
 // Extended order type to include has_manual_fulfillment
 interface ExtendedOrder extends Order {
   has_manual_fulfillment?: boolean;
+  order_items?: Array<{
+    id: string;
+    quantity: number;
+    unit_price_cents: number;
+    total_price_cents: number;
+    products?: { title?: Record<string, string> | null } | null;
+  }>;
 }
 
 const OrderConfirmation = () => {
@@ -359,8 +366,24 @@ const OrderConfirmation = () => {
               </CardTitle>
             </CardHeader>
             <CardContent>
-              {/* Order items would be displayed here if we had them in the order data */}
               <div className="space-y-4">
+                {order.order_items && order.order_items.length > 0 && (
+                  <div className="space-y-3">
+                    {order.order_items.map((item) => (
+                      <div key={item.id} className="flex justify-between text-sm">
+                        <span className="pr-4">
+                          {item.products?.title?.[language] ||
+                            item.products?.title?.es ||
+                            item.products?.title?.en ||
+                            (language === 'es' ? 'Producto' : 'Item')}
+                          {' × '}{item.quantity}
+                        </span>
+                        <span>{formatPrice(item.total_price_cents)}</span>
+                      </div>
+                    ))}
+                    <Separator />
+                  </div>
+                )}
                 <div className="flex justify-between text-sm">
                   <span>{language === 'es' ? 'Subtotal' : 'Subtotal'}</span>
                   <span>{formatPrice(order.total_amount_cents - order.shipping_amount_cents - order.tax_amount_cents)}</span>
@@ -379,6 +402,17 @@ const OrderConfirmation = () => {
                 <div className="flex justify-between font-medium text-lg">
                   <span>{language === 'es' ? 'Total' : 'Total'}</span>
                   <span>{formatPrice(order.total_amount_cents)}</span>
+                </div>
+                <div className="rounded-lg border border-border bg-muted/40 p-4 text-sm">
+                  <p className="font-medium flex items-center gap-2">
+                    <Truck className="h-4 w-4" />
+                    {language === 'es' ? 'Entrega estimada' : 'Estimated delivery'}
+                  </p>
+                  <p className="text-muted-foreground mt-1">
+                    {language === 'es'
+                      ? '5 a 10 días hábiles después del envío. Te enviaremos el número de seguimiento por correo en 1-3 días hábiles.'
+                      : '5 to 10 business days after shipping. We will email your tracking number within 1-3 business days.'}
+                  </p>
                 </div>
               </div>
             </CardContent>

@@ -563,6 +563,13 @@ export type Database = {
             referencedRelation: "products"
             referencedColumns: ["id"]
           },
+          {
+            foreignKeyName: "order_items_product_id_fkey"
+            columns: ["product_id"]
+            isOneToOne: false
+            referencedRelation: "products_public"
+            referencedColumns: ["id"]
+          },
         ]
       }
       orders: {
@@ -796,7 +803,62 @@ export type Database = {
       }
     }
     Views: {
-      [_ in never]: never
+      products_public: {
+        Row: {
+          category_id: string | null
+          compare_at_price_cents: number | null
+          created_at: string | null
+          description: Json | null
+          id: string | null
+          images: string[] | null
+          is_active: boolean | null
+          price_cents: number | null
+          printify_product_id: string | null
+          tags: string[] | null
+          title: Json | null
+          updated_at: string | null
+          variants: Json | null
+        }
+        Insert: {
+          category_id?: string | null
+          compare_at_price_cents?: number | null
+          created_at?: string | null
+          description?: Json | null
+          id?: string | null
+          images?: string[] | null
+          is_active?: boolean | null
+          price_cents?: number | null
+          printify_product_id?: string | null
+          tags?: string[] | null
+          title?: Json | null
+          updated_at?: string | null
+          variants?: Json | null
+        }
+        Update: {
+          category_id?: string | null
+          compare_at_price_cents?: number | null
+          created_at?: string | null
+          description?: Json | null
+          id?: string | null
+          images?: string[] | null
+          is_active?: boolean | null
+          price_cents?: number | null
+          printify_product_id?: string | null
+          tags?: string[] | null
+          title?: Json | null
+          updated_at?: string | null
+          variants?: Json | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "products_category_id_fkey"
+            columns: ["category_id"]
+            isOneToOne: false
+            referencedRelation: "categories"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Functions: {
       check_order_access_rate_limit: {

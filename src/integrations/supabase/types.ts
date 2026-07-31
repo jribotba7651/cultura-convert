@@ -664,6 +664,7 @@ export type Database = {
           price_cents: number
           printify_data: Json | null
           printify_product_id: string | null
+          stock_count: number | null
           tags: string[] | null
           title: Json
           updated_at: string
@@ -680,6 +681,7 @@ export type Database = {
           price_cents: number
           printify_data?: Json | null
           printify_product_id?: string | null
+          stock_count?: number | null
           tags?: string[] | null
           title: Json
           updated_at?: string
@@ -696,6 +698,7 @@ export type Database = {
           price_cents?: number
           printify_data?: Json | null
           printify_product_id?: string | null
+          stock_count?: number | null
           tags?: string[] | null
           title?: Json
           updated_at?: string
@@ -814,6 +817,7 @@ export type Database = {
           is_active: boolean | null
           price_cents: number | null
           printify_product_id: string | null
+          stock_count: number | null
           tags: string[] | null
           title: Json | null
           updated_at: string | null
@@ -829,6 +833,7 @@ export type Database = {
           is_active?: boolean | null
           price_cents?: number | null
           printify_product_id?: string | null
+          stock_count?: number | null
           tags?: string[] | null
           title?: Json | null
           updated_at?: string | null
@@ -844,6 +849,7 @@ export type Database = {
           is_active?: boolean | null
           price_cents?: number | null
           printify_product_id?: string | null
+          stock_count?: number | null
           tags?: string[] | null
           title?: Json | null
           updated_at?: string | null

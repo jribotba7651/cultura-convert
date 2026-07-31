@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { CheckCircle, Package, Truck, Home } from 'lucide-react';
+import { CheckCircle, Package, Truck, Home, AlertTriangle, Mail } from 'lucide-react';
 import Navigation from '@/components/Navigation';
 import AccountCreationPrompt from '@/components/AccountCreationPrompt';
 import { Button } from '@/components/ui/button';
@@ -25,6 +25,7 @@ const OrderConfirmation = () => {
   
   const [order, setOrder] = useState<ExtendedOrder | null>(null);
   const [loading, setLoading] = useState(true);
+  const [loadError, setLoadError] = useState<string | null>(null);
   const [showAccountPrompt, setShowAccountPrompt] = useState(false);
 
   useEffect(() => {
@@ -35,6 +36,7 @@ const OrderConfirmation = () => {
 
   const fetchOrder = async (id: string) => {
     try {
+      setLoadError(null);
       // Get access token from localStorage for anonymous orders
       const accessToken = localStorage.getItem(`order_token_${id}`);
       
@@ -67,8 +69,8 @@ const OrderConfirmation = () => {
       
     } catch (error: any) {
       console.error('Error fetching order:', error);
-      // Redirect to store with error message
-      navigate('/store');
+      // NEVER redirect silently: always show the customer something actionable.
+      setLoadError(error?.message || 'unknown_error');
     } finally {
       setLoading(false);
     }
@@ -141,18 +143,67 @@ const OrderConfirmation = () => {
   }
 
   if (!order) {
+    const supportEmail = 'jribot@jibaroenlaluna.com';
     return (
       <div className="min-h-screen bg-background">
         <Navigation />
-        <div className="container mx-auto px-4 py-8">
-          <div className="text-center py-12">
-            <p className="text-muted-foreground text-lg mb-4">
-              {language === 'es' ? 'Pedido no encontrado' : 'Order not found'}
-            </p>
-            <Button onClick={() => navigate('/store')}>
-              {language === 'es' ? 'Volver a la tienda' : 'Back to store'}
-            </Button>
-          </div>
+        <div className="container mx-auto px-4 py-12">
+          <Card className="max-w-2xl mx-auto">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-3">
+                <AlertTriangle className="h-6 w-6 text-amber-500" />
+                {language === 'es'
+                  ? 'Algo salió mal con la confirmación'
+                  : 'Something went wrong with confirmation'}
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-5">
+              <p className="text-muted-foreground">
+                {language === 'es'
+                  ? 'No pudimos mostrar los detalles de tu pedido en este momento, pero es muy probable que tu compra se haya procesado correctamente. Si el pago fue aprobado, recibirás un correo de confirmación.'
+                  : "We couldn't display your order details right now, but your order most likely went through. If the payment was approved, you will receive a confirmation email."}
+              </p>
+
+              {orderId && (
+                <div>
+                  <p className="text-sm text-muted-foreground">
+                    {language === 'es' ? 'Número de pedido' : 'Order number'}
+                  </p>
+                  <p className="font-mono text-sm break-all">{orderId}</p>
+                </div>
+              )}
+
+              <div className="rounded-lg border border-border bg-muted/40 p-4">
+                <p className="flex items-center gap-2 font-medium">
+                  <Mail className="h-4 w-4" />
+                  {language === 'es' ? 'Soporte' : 'Support'}
+                </p>
+                <p className="text-sm text-muted-foreground mt-1">
+                  {language === 'es'
+                    ? 'Escríbenos con tu número de pedido y lo revisamos de inmediato:'
+                    : 'Email us with your order number and we will review it right away:'}{' '}
+                  <a className="underline" href={`mailto:${supportEmail}?subject=${encodeURIComponent(`Order ${orderId ?? ''}`)}`}>
+                    {supportEmail}
+                  </a>
+                </p>
+              </div>
+
+              {loadError && (
+                <p className="text-xs text-muted-foreground font-mono break-all">
+                  {language === 'es' ? 'Detalle técnico: ' : 'Technical detail: '}{loadError}
+                </p>
+              )}
+
+              <div className="flex flex-col sm:flex-row gap-3">
+                <Button onClick={() => orderId && fetchOrder(orderId)} variant="default">
+                  {language === 'es' ? 'Intentar de nuevo' : 'Try again'}
+                </Button>
+                <Button onClick={() => navigate('/store')} variant="outline">
+                  {language === 'es' ? 'Volver a la tienda' : 'Back to store'}
+                </Button>
+              </div>
+            </CardContent>
+          </Card>
         </div>
       </div>
     );

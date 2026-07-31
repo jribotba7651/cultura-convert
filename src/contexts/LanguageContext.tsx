@@ -105,6 +105,7 @@ const translations = {
     
     // Orders
     myOrders: "Mis Pedidos",
+    changePassword: "Cambiar contraseña",
     manageBlog: "Gestionar Blog",
     manageResources: "Gestionar Recursos",
     manageNewsletter: "Gestionar Newsletter",
@@ -234,6 +235,7 @@ const translations = {
     
     // Orders
     myOrders: "My Orders",
+    changePassword: "Change password",
     manageBlog: "Manage Blog",
     manageResources: "Manage Resources",
     manageNewsletter: "Manage Newsletter",

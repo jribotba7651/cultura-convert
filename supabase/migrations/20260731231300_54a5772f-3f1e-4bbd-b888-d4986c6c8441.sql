@@ -1,0 +1,1 @@
+GRANT SELECT (stock_count) ON public.products TO anon, authenticated;

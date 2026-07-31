@@ -22,9 +22,6 @@ const DIRECT_PURCHASE_BOOKS: Record<string, string> = {
   "cartas-de-newark": "f704387c-08c6-4177-a8a3-ff35018eacd9",
   "raices-en-tierra-ajena": "2eb33c81-0056-4907-aea7-584b22fdfe2d",
   "jibara-en-la-luna-espanol": "bcff5050-24b2-4006-afc3-6686b025b6c1",
-  "sal-en-la-sangre": "cba9c05d-a98d-4268-b8a0-6fb479bf8f36",
-  "sofia-marie-paloma": "1f3f37bb-0cef-4f96-9048-805293675cac",
-  "las-siete-guardianas-del-mar": "fc7b9c5f-db9f-4880-84d6-eab96cea3f8b",
 };
 
 // Import all book covers

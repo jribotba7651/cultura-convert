@@ -17,10 +17,7 @@ interface DirectCheckoutSectionProps {
 const DIRECT_CHECKOUT_SLUGS = [
   'cartas-de-newark',
   'raices-en-tierra-ajena',
-  'jibara-en-la-luna-espanol',
-  'sal-en-la-sangre',
-  'sofia-marie-paloma',
-  'las-siete-guardianas-del-mar'
+  'jibara-en-la-luna-espanol'
 ];
 
 export const DirectCheckoutSection = ({ books }: DirectCheckoutSectionProps) => {

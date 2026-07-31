@@ -5,6 +5,14 @@ import { Resend } from 'https://esm.sh/resend@2.0.0';
 const resend = new Resend(Deno.env.get('RESEND_API_KEY') as string);
 const hookSecret = Deno.env.get('SEND_EMAIL_HOOK_SECRET') as string;
 
+// Customer-facing sender. Requires jibaroenlaluna.com to be a verified domain in Resend.
+// Override without a code change by setting the ORDERS_FROM_EMAIL secret.
+const ORDER_FROM = Deno.env.get('ORDERS_FROM_EMAIL') ||
+  'Jíbaro en la Luna <noreply@jibaroenlaluna.com>';
+// Admin notifications keep the Resend sandbox sender: it delivers to the Resend
+// account owner (jribot@gmail.com) and works today even without domain verification.
+const ADMIN_FROM = 'Sistema de Órdenes <noreply@resend.dev>';
+
 const corsHeaders = {
   'Access-Control-Allow-Origin': '*',
   'Access-Control-Allow-Headers': 'authorization, x-client-info, apikey, content-type',

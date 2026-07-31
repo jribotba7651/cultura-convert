@@ -54,7 +54,7 @@ const AdminAnalytics = () => {
   const { isAdmin, loading: adminLoading } = useAdminCheck();
   const { language } = useLanguage();
   const [loading, setLoading] = useState(true);
-  const [timeRange, setTimeRange] = useState('30d');
+  const [timeRange, setTimeRange] = useState('all');
   const [analyticsData, setAnalyticsData] = useState<AnalyticsData[]>([]);
   const [totalVisitors, setTotalVisitors] = useState(0);
   const [totalPageViews, setTotalPageViews] = useState(0);

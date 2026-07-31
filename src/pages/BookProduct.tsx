@@ -465,7 +465,6 @@ const BookProduct = () => {
         variants: productData.variants as any[] || undefined,
         is_active: productData.is_active || true,
         printify_product_id: productData.printify_product_id || undefined,
-        printify_data: productData.printify_data,
         created_at: productData.created_at,
         updated_at: productData.updated_at,
       };

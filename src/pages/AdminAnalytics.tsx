@@ -94,6 +94,27 @@ const AdminAnalytics = () => {
     return pageNames[path]?.[language] || path;
   };
 
+  const RANGE_DAYS: Record<string, number> = { '7d': 7, '30d': 30, '90d': 90 };
+  const ALL_TIME_START = '2025-01-01';
+
+  // endExclusiveStr is tomorrow's date so callers can use `.lt` and include
+  // everything that happened today. endInclusiveStr is today, for endpoints
+  // that already append a T23:59:59 suffix themselves.
+  const getDateRange = (range: string) => {
+    const today = new Date();
+    const tomorrow = new Date(today);
+    tomorrow.setDate(today.getDate() + 1);
+
+    const start = new Date(today);
+    start.setDate(today.getDate() - (RANGE_DAYS[range] ?? 30));
+
+    return {
+      startDateStr: range === 'all' ? ALL_TIME_START : start.toISOString().split('T')[0],
+      endInclusiveStr: today.toISOString().split('T')[0],
+      endExclusiveStr: tomorrow.toISOString().split('T')[0],
+    };
+  };
+
   useEffect(() => {
     if (isAdmin) {
       fetchAnalytics();

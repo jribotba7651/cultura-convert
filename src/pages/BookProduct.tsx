@@ -443,8 +443,8 @@ const BookProduct = () => {
       
       // Fetch product from Supabase
       const { data: productData, error } = await supabase
-        .from('products')
-        .select('*')
+        .from('products_public')
+        .select('id, printify_product_id, title, description, category_id, images, variants, tags, price_cents, compare_at_price_cents, is_active, created_at, updated_at')
         .eq('id', directPurchaseProductId)
         .single();
       

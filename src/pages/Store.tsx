@@ -36,8 +36,8 @@ const Store = () => {
     try {
       console.log('Fetching products...');
       const { data, error } = await supabase
-        .from('products')
-        .select('*')
+        .from('products_public')
+        .select('id, printify_product_id, title, description, category_id, images, variants, tags, price_cents, compare_at_price_cents, is_active, created_at, updated_at')
         .eq('is_active', true)
         .order('created_at', { ascending: false });
 
@@ -59,8 +59,8 @@ const Store = () => {
         } finally {
           // Try to fetch again after sync attempt
           const { data: refreshed } = await supabase
-            .from('products')
-            .select('*')
+            .from('products_public')
+            .select('id, printify_product_id, title, description, category_id, images, variants, tags, price_cents, compare_at_price_cents, is_active, created_at, updated_at')
             .eq('is_active', true)
             .order('created_at', { ascending: false });
           setProducts((refreshed || []) as unknown as Product[]);

@@ -32,29 +32,47 @@ const handler = async (req: Request): Promise<Response> => {
 
     console.log('Verifying access for order:', order_id);
 
-    // Extract client information for logging
-    const clientIP = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || '127.0.0.1';
+    // Extract client information for logging.
+    // x-forwarded-for can be a comma-separated chain ("1.2.3.4, 10.0.0.1") behind proxies.
+    // Postgres `inet` only accepts a single address, so take the FIRST entry only.
+    const rawForwarded = req.headers.get('x-forwarded-for') || req.headers.get('x-real-ip') || '';
+    const clientIP = rawForwarded.split(',')[0]?.trim() || '127.0.0.1';
     const userAgent = req.headers.get('user-agent') || 'Unknown';
 
-    // Check rate limiting before processing the request
-    const { data: rateLimitCheck } = await supabase.rpc('check_order_access_rate_limit', {
-      p_ip_address: clientIP,
-      p_order_id: order_id
-    });
+    // Rate limiting is defense-in-depth, NOT a customer-facing gate.
+    // If the check itself errors (bad IP, RPC failure), we log and FAIL OPEN.
+    let rateLimited = false;
+    try {
+      const { data: rateLimitCheck, error: rateLimitError } = await supabase.rpc(
+        'check_order_access_rate_limit',
+        { p_ip_address: clientIP, p_order_id: order_id }
+      );
+      if (rateLimitError) {
+        console.error('Rate limit RPC failed, failing open:', rateLimitError);
+      } else if (rateLimitCheck === false) {
+        rateLimited = true;
+      }
+    } catch (rateLimitException) {
+      console.error('Rate limit check threw, failing open:', rateLimitException);
+    }
 
-    if (!rateLimitCheck) {
+    if (rateLimited) {
       console.log(`Rate limit exceeded for IP ${clientIP} on order ${order_id}`);
-      await supabase.rpc('log_order_access', {
-        p_order_id: order_id,
-        p_access_method: 'token',
-        p_ip_address: clientIP,
-        p_user_agent: userAgent,
-        p_success: false,
-        p_error_message: 'Rate limit exceeded'
-      });
+      try {
+        await supabase.rpc('log_order_access', {
+          p_order_id: order_id,
+          p_access_method: 'token',
+          p_ip_address: clientIP,
+          p_user_agent: userAgent,
+          p_success: false,
+          p_error_message: 'Rate limit exceeded'
+        });
+      } catch (logError) {
+        console.error('Failed to log rate limit event:', logError);
+      }
       
       return new Response(
-        JSON.stringify({ error: 'Too many failed attempts. Please try again later.' }),
+        JSON.stringify({ error: 'Too many failed attempts. Please try again later.', code: 'rate_limited' }),
         { 
           status: 429,
           headers: { ...corsHeaders, 'Content-Type': 'application/json' }
@@ -157,27 +175,35 @@ const handler = async (req: Request): Promise<Response> => {
       errorMessage = 'User does not own this order';
     }
 
-    // Log access attempt
-    await supabase.rpc('log_order_access', {
-      p_order_id: order_id,
-      p_access_method: accessMethod || 'unknown',
-      p_ip_address: clientIP,
-      p_user_agent: userAgent,
-      p_success: hasAccess,
-      p_error_message: errorMessage || null
-    });
+    // Log access attempt (never allow logging failures to break the response)
+    try {
+      await supabase.rpc('log_order_access', {
+        p_order_id: order_id,
+        p_access_method: accessMethod || 'unknown',
+        p_ip_address: clientIP,
+        p_user_agent: userAgent,
+        p_success: hasAccess,
+        p_error_message: errorMessage || null
+      });
+    } catch (logError) {
+      console.error('Failed to log order access:', logError);
+    }
 
     if (!hasAccess) {
-      // Record failed access attempt for rate limiting
-      await supabase.rpc('record_order_access_attempt', {
-        p_ip_address: clientIP,
-        p_order_id: order_id,
-        p_success: false
-      });
+      // Record failed access attempt for rate limiting (best effort)
+      try {
+        await supabase.rpc('record_order_access_attempt', {
+          p_ip_address: clientIP,
+          p_order_id: order_id,
+          p_success: false
+        });
+      } catch (attemptError) {
+        console.error('Failed to record access attempt:', attemptError);
+      }
 
       console.log('Access denied for order:', order_id, '-', errorMessage);
       return new Response(
-        JSON.stringify({ error: 'Access denied' }),
+        JSON.stringify({ error: 'Access denied', code: 'access_denied' }),
         {
           headers: { ...corsHeaders, 'Content-Type': 'application/json' },
           status: 403,

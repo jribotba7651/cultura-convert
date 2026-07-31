@@ -371,7 +371,7 @@ const handler = async (req: Request): Promise<Response> => {
       const emailHtml = getOrderConfirmationHTML(orderData);
       
       const emailResponse = await resend.emails.send({
-        from: 'Jíbaro en la Luna <noreply@resend.dev>',
+        from: ORDER_FROM,
         to: [email],
         subject: `🌙 ¡Gracias por tu compra! - Orden #${orderData.orderId}`,
         html: emailHtml,

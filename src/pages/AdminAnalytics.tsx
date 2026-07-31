@@ -387,6 +387,7 @@ const AdminAnalytics = () => {
                 <SelectItem value="7d">Últimos 7 días</SelectItem>
                 <SelectItem value="30d">Últimos 30 días</SelectItem>
                 <SelectItem value="90d">Últimos 90 días</SelectItem>
+                <SelectItem value="all">Todo el tiempo</SelectItem>
               </SelectContent>
             </Select>
           </div>

@@ -120,7 +120,7 @@ const UserMenu = () => {
         <DropdownMenuItem asChild>
           <Link to="/reset-password" className="flex items-center cursor-pointer">
             <KeyRound className="mr-2 h-4 w-4" />
-            <span>{t('changePassword') || 'Cambiar contraseña'}</span>
+            <span>{t('changePassword')}</span>
           </Link>
         </DropdownMenuItem>
         {isAdmin && (

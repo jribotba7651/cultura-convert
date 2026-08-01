@@ -18,7 +18,18 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? ''
     );
 
-    const { path, sessionId, userAgent, deviceType, referrer } = await req.json();
+    const body = await req.json();
+    const {
+      path,
+      sessionId,
+      userAgent,
+      deviceType,
+      referrer,
+      landingReferrer,
+    } = body;
+
+    const str = (v: unknown, max = 200): string | null =>
+      typeof v === 'string' && v.trim() ? v.trim().slice(0, max) : null;
 
     // Basic validation
     if (!path || !sessionId) {
@@ -38,6 +49,12 @@ serve(async (req) => {
         user_agent: userAgent || null,
         device_type: deviceType || null,
         referrer: referrer || null,
+        landing_referrer: str(landingReferrer, 500),
+        utm_source: str(body.utm_source),
+        utm_medium: str(body.utm_medium),
+        utm_campaign: str(body.utm_campaign),
+        utm_content: str(body.utm_content),
+        utm_term: str(body.utm_term),
       })
       .then(({ error }) => {
         if (error) console.error('Error inserting page view:', error);

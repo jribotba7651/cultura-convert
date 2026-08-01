@@ -45,11 +45,25 @@ serve(async (req) => {
       );
     }
 
-    // Parse query params
+    // Parse params from body (POST via supabase.functions.invoke) or query string
     const url = new URL(req.url);
-    const startdate = url.searchParams.get('startdate') || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-    const enddate = url.searchParams.get('enddate') || new Date().toISOString().split('T')[0];
-    const granularity = url.searchParams.get('granularity') || 'daily';
+    let body: Record<string, unknown> = {};
+    if (req.method === 'POST') {
+      try {
+        body = await req.json();
+      } catch {
+        body = {};
+      }
+    }
+    const asDate = (v: unknown) =>
+      typeof v === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v) ? v : null;
+
+    const startdate = asDate(body.startdate) || asDate(url.searchParams.get('startdate')) ||
+      new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    const enddate = asDate(body.enddate) || asDate(url.searchParams.get('enddate')) ||
+      new Date().toISOString().split('T')[0];
+    const granularity = (typeof body.granularity === 'string' ? body.granularity : null) ||
+      url.searchParams.get('granularity') || 'daily';
 
     console.log(`[Analytics] Fetching data from ${startdate} to ${enddate} (${granularity})`);
 

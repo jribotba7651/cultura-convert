@@ -15,6 +15,7 @@ import { useCart } from '@/contexts/CartContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { getStoredAttribution } from '@/hooks/useAnalytics';
 import { sanitizeText, validateInput } from '@/utils/sanitize';
 import { validateAddress, formatZipCode } from '@/utils/addressValidation';
 import { validateCheckoutForm, type ValidationError } from '@/utils/validation';

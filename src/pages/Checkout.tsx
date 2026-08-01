@@ -384,7 +384,8 @@ const CheckoutForm = () => {
               },
               customer_email: updatedFormData.email,
               customer_name: updatedFormData.name,
-              customer_phone: updatedFormData.phone
+              customer_phone: updatedFormData.phone,
+              attribution: getStoredAttribution()
             }
           });
 
@@ -635,7 +636,8 @@ const CheckoutForm = () => {
           customer_email: formData.email,
           customer_name: formData.name,
           customer_phone: formData.phone,
-          user_id: userId
+          user_id: userId,
+          attribution: getStoredAttribution()
         }
       });
 

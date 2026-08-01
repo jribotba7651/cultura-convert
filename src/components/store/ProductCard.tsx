@@ -24,6 +24,11 @@ const resolveImagePath = (path: string): string => {
   if (path.startsWith('http://') || path.startsWith('https://')) {
     return path;
   }
+
+  // Covers served from /public (work in dev and in the published build)
+  if (path.startsWith('/book-covers/') || path.startsWith('/placeholder')) {
+    return path;
+  }
   
   // Map /src/assets paths to imported images
   const imageMap: Record<string, string> = {
@@ -33,10 +38,23 @@ const resolveImagePath = (path: string): string => {
     '/src/assets/cartas-de-newark-cover.jpg': cartasCover,
     '/src/assets/sal-en-la-sangre-cover.jpg': salEnLaSangreCover,
     '/assets/sal-en-la-sangre-cover.jpg': salEnLaSangreCover,
+    '/assets/raices-en-tierra-ajena-cover.jpg': raicesCover,
+    '/assets/sofia-marie-paloma-cover.jpg': sofiaCover,
+    '/assets/jibara-en-la-luna-cover.jpg': jibaraCover,
+    '/assets/cartas-de-newark-cover.jpg': cartasCover,
   };
   
   return imageMap[path] || '/placeholder.svg';
 };
+
+// Signed-copy ("Autografiado") editions are not fulfillable yet: show them as
+// "Próximamente" instead of allowing a purchase.
+const COMING_SOON_PRODUCT_IDS = new Set<string>([
+  'cf374f84-a61b-425b-8003-60ebf506a780', // Cartas de Newark (Autografiado)
+  '8c41ab87-8d33-44bb-a590-b422093ec555', // Raíces En Tierra Ajena (Autografiado)
+  'e928cd74-3ecf-4478-bd80-acde162f99f2', // JÍBARA EN LA LUNA (Autografiado)
+  '1f3f37bb-0cef-4f96-9048-805293675cac', // Sofía Marie, 'Sofí Mary' o Paloma (Autografiado)
+]);
 
 interface ProductCardProps {
   product: Product;
@@ -74,6 +92,7 @@ export const ProductCard = ({ product, onProductClick }: ProductCardProps) => {
   };
 
   const hasDiscount = product.compare_at_price_cents && product.compare_at_price_cents > product.price_cents;
+  const isComingSoon = COMING_SOON_PRODUCT_IDS.has(product.id);
 
   return (
     <Card 
@@ -95,7 +114,13 @@ export const ProductCard = ({ product, onProductClick }: ProductCardProps) => {
             );
           })()}
           
-          {hasDiscount && (
+          {isComingSoon && (
+            <Badge className="absolute top-3 left-3 bg-secondary text-secondary-foreground">
+              {language === 'es' ? 'Próximamente' : 'Coming Soon'}
+            </Badge>
+          )}
+
+          {hasDiscount && !isComingSoon && (
             <Badge className="absolute top-3 left-3 bg-destructive text-destructive-foreground">
               {language === 'es' ? 'Oferta' : 'Sale'}
             </Badge>
@@ -159,13 +184,24 @@ export const ProductCard = ({ product, onProductClick }: ProductCardProps) => {
       </CardContent>
 
       <CardFooter className="p-4 pt-0">
-        <Button 
-          onClick={handleAddToCart}
-          className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
-        >
-          <ShoppingCart className="w-4 h-4 mr-2" />
-          {language === 'es' ? 'Agregar al carrito' : 'Add to cart'}
-        </Button>
+        {isComingSoon ? (
+          <Button
+            disabled
+            variant="secondary"
+            className="w-full"
+            onClick={(e) => e.stopPropagation()}
+          >
+            {language === 'es' ? 'Próximamente' : 'Coming Soon'}
+          </Button>
+        ) : (
+          <Button 
+            onClick={handleAddToCart}
+            className="w-full bg-primary hover:bg-primary/90 text-primary-foreground"
+          >
+            <ShoppingCart className="w-4 h-4 mr-2" />
+            {language === 'es' ? 'Agregar al carrito' : 'Add to cart'}
+          </Button>
+        )}
       </CardFooter>
     </Card>
   );

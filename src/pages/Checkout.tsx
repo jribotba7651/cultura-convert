@@ -15,6 +15,7 @@ import { useCart } from '@/contexts/CartContext';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
+import { getStoredAttribution } from '@/hooks/useAnalytics';
 import { sanitizeText, validateInput } from '@/utils/sanitize';
 import { validateAddress, formatZipCode } from '@/utils/addressValidation';
 import { validateCheckoutForm, type ValidationError } from '@/utils/validation';
@@ -384,7 +385,8 @@ const CheckoutForm = () => {
               },
               customer_email: updatedFormData.email,
               customer_name: updatedFormData.name,
-              customer_phone: updatedFormData.phone
+              customer_phone: updatedFormData.phone,
+              attribution: getStoredAttribution()
             }
           });
 
@@ -635,7 +637,8 @@ const CheckoutForm = () => {
           customer_email: formData.email,
           customer_name: formData.name,
           customer_phone: formData.phone,
-          user_id: userId
+          user_id: userId,
+          attribution: getStoredAttribution()
         }
       });
 

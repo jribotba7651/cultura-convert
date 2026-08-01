@@ -93,6 +93,37 @@ const getDeviceType = (): string => {
   return 'desktop';
 };
 
+// Read the stored attribution (UTM + landing referrer) without touching the
+// timestamps. Used at checkout to attribute a sale to its traffic source.
+// Returns nulls when nothing is stored (organic/direct or expired window).
+export type OrderAttribution = {
+  utm_source: string | null;
+  utm_medium: string | null;
+  utm_campaign: string | null;
+  utm_content: string | null;
+  utm_term: string | null;
+  landing_referrer: string | null;
+};
+
+export const getStoredAttribution = (): OrderAttribution => {
+  const stored = readStoredUtm();
+  const values = stored?.values ?? {};
+  let landingReferrer: string | null = null;
+  try {
+    landingReferrer = sessionStorage.getItem(LANDING_REF_KEY) || null;
+  } catch {
+    landingReferrer = null;
+  }
+  return {
+    utm_source: values.utm_source ?? null,
+    utm_medium: values.utm_medium ?? null,
+    utm_campaign: values.utm_campaign ?? null,
+    utm_content: values.utm_content ?? null,
+    utm_term: values.utm_term ?? null,
+    landing_referrer: landingReferrer,
+  };
+};
+
 export const useAnalytics = () => {
   const location = useLocation();
 

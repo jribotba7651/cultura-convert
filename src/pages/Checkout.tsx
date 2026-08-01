@@ -619,6 +619,8 @@ const CheckoutForm = () => {
       }
 
       // Create payment intent
+      const attribution = getStoredAttribution();
+      console.log('🔎 Attribution payload:', attribution);
       const { data, error } = await supabase.functions.invoke('create-stripe-payment-intent', {
         body: {
           items: items.map(item => ({
@@ -638,7 +640,7 @@ const CheckoutForm = () => {
           customer_name: formData.name,
           customer_phone: formData.phone,
           user_id: userId,
-          attribution: getStoredAttribution()
+          attribution
         }
       });
 

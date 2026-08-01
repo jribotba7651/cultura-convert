@@ -102,7 +102,9 @@ serve(async (req) => {
           
           console.log('Order has Printify items:', hasPrintifyItems, 'Manual fulfillment:', order.has_manual_fulfillment);
 
-          // Actualizar estado de la orden
+          // Actualizar estado de la orden.
+          // NOTE: attribution columns (utm_* / landing_referrer) are write-once —
+          // set at order creation and intentionally never touched here.
           const { error: updateError } = await supabase
             .from('orders')
             .update({ 

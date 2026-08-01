@@ -52,7 +52,24 @@ interface CreatePaymentIntentRequest {
   customer_email: string;
   customer_name: string;
   customer_phone?: string;
+  attribution?: {
+    utm_source?: string | null;
+    utm_medium?: string | null;
+    utm_campaign?: string | null;
+    utm_content?: string | null;
+    utm_term?: string | null;
+    landing_referrer?: string | null;
+  };
 }
+
+// Attribution values are write-once: stored on the order row at creation and
+// never updated afterwards (see webhook-stripe).
+const cleanAttr = (value: unknown): string | null => {
+  if (typeof value !== 'string') return null;
+  const trimmed = value.trim();
+  if (!trimmed) return null;
+  return trimmed.slice(0, 500);
+};
 
 // Country normalization helper
 function normalizeCountry(input: any): string {
@@ -198,8 +215,19 @@ const handler = async (req: Request): Promise<Response> => {
       billing_address,
       customer_email,
       customer_name,
-      customer_phone
+      customer_phone,
+      attribution
     }: CreatePaymentIntentRequest = await req.json();
+
+    const orderAttribution = {
+      utm_source: cleanAttr(attribution?.utm_source),
+      utm_medium: cleanAttr(attribution?.utm_medium),
+      utm_campaign: cleanAttr(attribution?.utm_campaign),
+      utm_content: cleanAttr(attribution?.utm_content),
+      utm_term: cleanAttr(attribution?.utm_term),
+      landing_referrer: cleanAttr(attribution?.landing_referrer),
+    };
+    console.log('Order attribution:', JSON.stringify(orderAttribution));
 
     console.log('Creating payment intent for items:', items.length);
     console.log('Customer email:', customer_email);
@@ -353,6 +381,7 @@ const handler = async (req: Request): Promise<Response> => {
         status: 'pending',
         currency: 'USD',
         has_manual_fulfillment: hasManualFulfillment,
+        ...orderAttribution,
       })
       .select('id')
       .single();

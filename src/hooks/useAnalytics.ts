@@ -124,17 +124,6 @@ export const getStoredAttribution = (): OrderAttribution => {
   };
 };
 
-const getDeviceTypeUnused = (): string => {
-  const ua = navigator.userAgent;
-  if (/Mobile|Android|iPhone|iPad|iPod/i.test(ua)) {
-    return 'mobile';
-  }
-  if (/Tablet/i.test(ua)) {
-    return 'tablet';
-  }
-  return 'desktop';
-};
-
 export const useAnalytics = () => {
   const location = useLocation();
 

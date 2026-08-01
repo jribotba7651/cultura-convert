@@ -45,11 +45,25 @@ serve(async (req) => {
       );
     }
 
-    // Parse query params
+    // Parse params from body (POST via supabase.functions.invoke) or query string
     const url = new URL(req.url);
-    const startdate = url.searchParams.get('startdate') || new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
-    const enddate = url.searchParams.get('enddate') || new Date().toISOString().split('T')[0];
-    const granularity = url.searchParams.get('granularity') || 'daily';
+    let body: Record<string, unknown> = {};
+    if (req.method === 'POST') {
+      try {
+        body = await req.json();
+      } catch {
+        body = {};
+      }
+    }
+    const asDate = (v: unknown) =>
+      typeof v === 'string' && /^\d{4}-\d{2}-\d{2}$/.test(v) ? v : null;
+
+    const startdate = asDate(body.startdate) || asDate(url.searchParams.get('startdate')) ||
+      new Date(Date.now() - 30 * 24 * 60 * 60 * 1000).toISOString().split('T')[0];
+    const enddate = asDate(body.enddate) || asDate(url.searchParams.get('enddate')) ||
+      new Date().toISOString().split('T')[0];
+    const granularity = (typeof body.granularity === 'string' ? body.granularity : null) ||
+      url.searchParams.get('granularity') || 'daily';
 
     console.log(`[Analytics] Fetching data from ${startdate} to ${enddate} (${granularity})`);
 
@@ -80,6 +94,47 @@ serve(async (req) => {
     const pageMap = new Map<string, { views: number, visitors: Set<string> }>();
     const deviceMap = new Map<string, number>();
 
+    // --- Traffic source normalization (additive, does not affect existing counts) ---
+    const hostOf = (ref: string): string => {
+      try {
+        return new URL(ref).hostname.toLowerCase();
+      } catch {
+        return ref.toLowerCase().replace(/^https?:\/\//, '').split('/')[0];
+      }
+    };
+
+    const DEV_SOURCE = '__dev__';
+
+    const normalizeSource = (ref: string | null): string => {
+      if (!ref || !ref.trim()) return 'Directo';
+      const h = hostOf(ref);
+      if (!h) return 'Directo';
+      if (/(^|\.)lovable\.dev$|(^|\.)lovableproject\.com$|(^|\.)lovable\.app$/.test(h)) return DEV_SOURCE;
+      if (/(^|\.)facebook\.com$|(^|\.)fb\.me$/.test(h)) return 'Facebook';
+      if (/(^|\.)instagram\.com$/.test(h)) return 'Instagram';
+      if (/(^|\.)google\.[a-z.]+$/.test(h)) return 'Google';
+      if (/(^|\.)bing\.com$/.test(h)) return 'Bing';
+      if (/(^|\.)linkedin\.com$|(^|\.)lnkd\.in$/.test(h)) return 'LinkedIn';
+      if (/(^|\.)t\.co$|(^|\.)twitter\.com$|(^|\.)x\.com$/.test(h)) return 'Twitter/X';
+      if (/(^|\.)jibaroenlaluna\.com$/.test(h)) return 'Interno (navegación)';
+      if (/(^|\.)duckduckgo\.com$/.test(h)) return 'DuckDuckGo';
+      if (/(^|\.)yahoo\.[a-z.]+$/.test(h)) return 'Yahoo';
+      return h;
+    };
+
+    type SourceAgg = { views: number; visitors: Set<string> };
+    const sourceAll = new Map<string, SourceAgg>();
+    const sourceBooks = new Map<string, SourceAgg>();
+    let devPageViews = 0;
+    let internalPageViews = 0;
+
+    const bump = (map: Map<string, SourceAgg>, key: string, session: string) => {
+      if (!map.has(key)) map.set(key, { views: 0, visitors: new Set() });
+      const agg = map.get(key)!;
+      agg.views += 1;
+      agg.visitors.add(session);
+    };
+
     rawData.forEach((row) => {
       const date = new Date(row.created_at).toISOString().split('T')[0];
       
@@ -102,6 +157,18 @@ serve(async (req) => {
       // Device aggregation
       const device = row.device_type || 'unknown';
       deviceMap.set(device, (deviceMap.get(device) || 0) + 1);
+
+      // Source aggregation
+      const source = normalizeSource(row.referrer);
+      if (source === DEV_SOURCE) {
+        devPageViews += 1;
+      } else {
+        if (source === 'Interno (navegación)') internalPageViews += 1;
+        bump(sourceAll, source, row.session_id);
+        if (typeof row.path === 'string' && row.path.startsWith('/libro')) {
+          bump(sourceBooks, source, row.session_id);
+        }
+      }
     });
 
     // Format response
@@ -128,6 +195,11 @@ serve(async (req) => {
     const totalVisitors = new Set(rawData.map(r => r.session_id)).size;
     const totalPageViews = rawData.length;
 
+    const toSourceList = (map: Map<string, SourceAgg>) =>
+      Array.from(map.entries())
+        .map(([source, agg]) => ({ source, views: agg.views, visitors: agg.visitors.size }))
+        .sort((a, b) => b.views - a.views);
+
     console.log(`[Analytics] Returning: ${totalVisitors} visitors, ${totalPageViews} pageviews`);
 
     return new Response(
@@ -137,6 +209,10 @@ serve(async (req) => {
         devices,
         totalVisitors,
         totalPageViews,
+        sources: toSourceList(sourceAll),
+        sourcesBooks: toSourceList(sourceBooks),
+        devPageViews,
+        internalPageViews,
       }),
       { status: 200, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );

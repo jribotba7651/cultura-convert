@@ -12,6 +12,7 @@ import { LineChart, Line, BarChart, Bar, PieChart, Pie, Cell, XAxis, YAxis, Cart
 import { ArrowLeft, Users, Eye, Clock, TrendingUp, Smartphone, Monitor, Globe, ShoppingCart, DollarSign, TrendingDown } from 'lucide-react';
 import { toast } from 'sonner';
 import { useLanguage } from '@/contexts/LanguageContext';
+import TrafficSourcesPanel, { TrafficSource } from '@/components/admin/TrafficSourcesPanel';
 
 interface AnalyticsData {
   date: string;
@@ -62,6 +63,10 @@ const AdminAnalytics = () => {
   const [bounceRate, setBounceRate] = useState(0);
   const [deviceData, setDeviceData] = useState<DeviceData[]>([]);
   const [topPages, setTopPages] = useState<PageData[]>([]);
+  const [sources, setSources] = useState<TrafficSource[]>([]);
+  const [sourcesBooks, setSourcesBooks] = useState<TrafficSource[]>([]);
+  const [devPageViews, setDevPageViews] = useState(0);
+  const [internalPageViews, setInternalPageViews] = useState(0);
   const [usingMock, setUsingMock] = useState(false);
 
   // Sales state
@@ -153,6 +158,7 @@ const AdminAnalytics = () => {
 
       if (data && data.series && data.series.length > 0) {
         processAnalyticsData(data);
+        applySourceData(data);
       } else {
         console.log('No analytics data available for this period');
         setUsingMock(true);
@@ -225,6 +231,13 @@ const AdminAnalytics = () => {
           { page: '/services', views: Math.round(pageViews * 0.15), visitors: Math.round(visitors * 0.15) },
         ];
     setTopPages(topPagesFromAPI);
+  };
+
+  const applySourceData = (data: any) => {
+    setSources(data?.sources || []);
+    setSourcesBooks(data?.sourcesBooks || []);
+    setDevPageViews(data?.devPageViews || 0);
+    setInternalPageViews(data?.internalPageViews || 0);
   };
 
   const fetchSalesAnalytics = async () => {
@@ -516,6 +529,7 @@ const AdminAnalytics = () => {
         <Tabs defaultValue="traffic" className="space-y-4">
           <TabsList>
             <TabsTrigger value="traffic">Tráfico</TabsTrigger>
+            <TabsTrigger value="sources">Fuentes</TabsTrigger>
             <TabsTrigger value="devices">Dispositivos</TabsTrigger>
             <TabsTrigger value="pages">Páginas</TabsTrigger>
             <TabsTrigger value="sales">Ventas</TabsTrigger>
@@ -555,6 +569,15 @@ const AdminAnalytics = () => {
                 </ResponsiveContainer>
               </CardContent>
             </Card>
+          </TabsContent>
+
+          <TabsContent value="sources" className="space-y-4">
+            <TrafficSourcesPanel
+              sources={sources}
+              sourcesBooks={sourcesBooks}
+              devPageViews={devPageViews}
+              internalPageViews={internalPageViews}
+            />
           </TabsContent>
 
           <TabsContent value="devices" className="space-y-4">

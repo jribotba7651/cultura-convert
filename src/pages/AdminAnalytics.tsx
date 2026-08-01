@@ -571,11 +571,16 @@ const AdminAnalytics = () => {
             </Card>
           </TabsContent>
 
-          <TabsContent value="devices" className="space-y-4">
-            <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
-              <div className="hidden" />
-            </div>
+          <TabsContent value="sources" className="space-y-4">
+            <TrafficSourcesPanel
+              sources={sources}
+              sourcesBooks={sourcesBooks}
+              devPageViews={devPageViews}
+              internalPageViews={internalPageViews}
+            />
           </TabsContent>
+
+          <TabsContent value="devices" className="space-y-4">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               <Card>
                 <CardHeader>

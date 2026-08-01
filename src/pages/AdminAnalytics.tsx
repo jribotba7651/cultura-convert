@@ -572,10 +572,6 @@ const AdminAnalytics = () => {
           </TabsContent>
 
           <TabsContent value="devices" className="space-y-4">
-            <div className="hidden" />
-          </TabsContent>
-
-          <TabsContent value="devices-real" className="space-y-4">
             <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
               <Card>
                 <CardHeader>

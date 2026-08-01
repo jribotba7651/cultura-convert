@@ -43,28 +43,46 @@ export type Database = {
           created_at: string
           device_type: string | null
           id: string
+          landing_referrer: string | null
           path: string
           referrer: string | null
           session_id: string
           user_agent: string | null
+          utm_campaign: string | null
+          utm_content: string | null
+          utm_medium: string | null
+          utm_source: string | null
+          utm_term: string | null
         }
         Insert: {
           created_at?: string
           device_type?: string | null
           id?: string
+          landing_referrer?: string | null
           path: string
           referrer?: string | null
           session_id: string
           user_agent?: string | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
         }
         Update: {
           created_at?: string
           device_type?: string | null
           id?: string
+          landing_referrer?: string | null
           path?: string
           referrer?: string | null
           session_id?: string
           user_agent?: string | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
         }
         Relationships: []
       }

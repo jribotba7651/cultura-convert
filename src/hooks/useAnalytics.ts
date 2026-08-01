@@ -117,6 +117,11 @@ const resolveLandingReferrer = (): string | null => {
   try {
     const existing = sessionStorage.getItem(LANDING_REF_KEY);
     if (existing !== null) return existing || null;
+    const cookie = readAttrCookie();
+    if (cookie?.landing_referrer) {
+      sessionStorage.setItem(LANDING_REF_KEY, cookie.landing_referrer);
+      return cookie.landing_referrer;
+    }
     const ref = document.referrer || '';
     sessionStorage.setItem(LANDING_REF_KEY, ref);
     return ref || null;
@@ -150,13 +155,15 @@ export type OrderAttribution = {
 
 export const getStoredAttribution = (): OrderAttribution => {
   const stored = readStoredUtm();
-  const values = stored?.values ?? {};
+  const cookie = readAttrCookie();
+  const values: UtmValues = stored?.values ?? cookie?.values ?? {};
   let landingReferrer: string | null = null;
   try {
     landingReferrer = sessionStorage.getItem(LANDING_REF_KEY) || null;
   } catch {
     landingReferrer = null;
   }
+  if (!landingReferrer) landingReferrer = cookie?.landing_referrer ?? null;
   return {
     utm_source: values.utm_source ?? null,
     utm_medium: values.utm_medium ?? null,
@@ -180,6 +187,8 @@ export const useAnalytics = () => {
         const referrer = document.referrer;
         const utm = resolveUtm(location.search);
         const landingReferrer = resolveLandingReferrer();
+        // Mirror attribution into a domain-wide cookie for cross-subdomain checkout.
+        writeAttrCookie(utm, landingReferrer);
 
         await supabase.functions.invoke('track-pageview', {
           body: {

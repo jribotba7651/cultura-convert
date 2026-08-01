@@ -600,6 +600,7 @@ export type Database = {
           customer_phone: string | null
           has_manual_fulfillment: boolean
           id: string
+          landing_referrer: string | null
           notes: string | null
           printify_order_id: string | null
           profile_id: string | null
@@ -613,6 +614,11 @@ export type Database = {
           tracking_url: string | null
           updated_at: string
           user_id: string | null
+          utm_campaign: string | null
+          utm_content: string | null
+          utm_medium: string | null
+          utm_source: string | null
+          utm_term: string | null
         }
         Insert: {
           billing_address: Json
@@ -623,6 +629,7 @@ export type Database = {
           customer_phone?: string | null
           has_manual_fulfillment?: boolean
           id?: string
+          landing_referrer?: string | null
           notes?: string | null
           printify_order_id?: string | null
           profile_id?: string | null
@@ -636,6 +643,11 @@ export type Database = {
           tracking_url?: string | null
           updated_at?: string
           user_id?: string | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
         }
         Update: {
           billing_address?: Json
@@ -646,6 +658,7 @@ export type Database = {
           customer_phone?: string | null
           has_manual_fulfillment?: boolean
           id?: string
+          landing_referrer?: string | null
           notes?: string | null
           printify_order_id?: string | null
           profile_id?: string | null
@@ -659,6 +672,11 @@ export type Database = {
           tracking_url?: string | null
           updated_at?: string
           user_id?: string | null
+          utm_campaign?: string | null
+          utm_content?: string | null
+          utm_medium?: string | null
+          utm_source?: string | null
+          utm_term?: string | null
         }
         Relationships: [
           {

@@ -229,6 +229,16 @@ const handler = async (req: Request): Promise<Response> => {
     };
     console.log('Order attribution:', JSON.stringify(orderAttribution));
 
+    // Sanity check: social referrer but no attribution means client-side storage
+    // (localStorage/cookie) failed to sync — worth catching early.
+    const hasAttribution = Object.values(orderAttribution).some((v) => v !== null);
+    if (!hasAttribution) {
+      const ref = (req.headers.get('referer') || req.headers.get('origin') || '').toLowerCase();
+      if (/facebook|instagram|fb\.me|l\.instagram/.test(ref)) {
+        console.warn(`ATTRIBUTION WARNING: social referrer (${ref}) but empty attribution payload — possible client storage sync bug`);
+      }
+    }
+
     console.log('Creating payment intent for items:', items.length);
     console.log('Customer email:', customer_email);
 

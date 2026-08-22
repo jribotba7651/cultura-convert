@@ -9,17 +9,29 @@ import { supabase } from '@/integrations/supabase/client';
 import { useEffect, useState } from 'react';
 import { cleanMarkdown } from '@/utils/htmlCleaner';
 
+const ASSET_ORIGIN = 'https://cultura-convert.lovable.app';
+
+const normalizeAssetUrl = (url?: string): string | undefined => {
+  if (!url?.startsWith('/__l5e/assets-v1/')) return url;
+  return `${ASSET_ORIGIN}${url}`;
+};
+
 // Convert markdown-style links to HTML and handle basic markdown
 const processContent = (content: string): string => {
   if (!content) return '';
+
+  const contentWithPortableAssets = content.replace(
+    /src=(['"])(\/__l5e\/assets-v1\/[^'"]+)\1/g,
+    (_match, quote: string, path: string) => `src=${quote}${ASSET_ORIGIN}${path}${quote}`,
+  );
   
   // Check if content is already HTML (from TipTap editor)
-  if (content.includes('<p>') || content.includes('<div>') || content.includes('<figure')) {
-    return content;
+  if (contentWithPortableAssets.includes('<p>') || contentWithPortableAssets.includes('<div>') || contentWithPortableAssets.includes('<figure')) {
+    return contentWithPortableAssets;
   }
   
   // Convert markdown links [text](url) to HTML
-  let processed = content.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">$1</a>');
+  let processed = contentWithPortableAssets.replace(/\[([^\]]+)\]\(([^)]+)\)/g, '<a href="$2" target="_blank" rel="noopener noreferrer" class="text-primary hover:underline">$1</a>');
   
   // Convert double newlines to paragraphs
   const paragraphs = processed.split(/\n\n+/);
@@ -147,7 +159,7 @@ const BlogPost = () => {
 
           {post.cover_image && (
             <img
-              src={post.cover_image}
+              src={normalizeAssetUrl(post.cover_image)}
               alt={language === 'es' ? post.title_es : post.title_en}
               className="w-full h-auto rounded-lg mb-8"
             />

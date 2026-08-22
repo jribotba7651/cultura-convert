@@ -1,7 +1,6 @@
 import { useState, useEffect } from "react";
 import { useLanguage } from "@/contexts/LanguageContext";
 import Navigation from "@/components/Navigation";
-import { NewsletterModal } from "@/components/NewsletterModal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Textarea } from "@/components/ui/textarea";
@@ -457,7 +456,6 @@ const Consulting = () => {
   return (
     <div className="min-h-screen bg-gradient-to-b from-background to-secondary/10">
       <Navigation />
-      <NewsletterModal />
       
       {/* Hero Section */}
       <section className="pt-24 pb-16 px-4">

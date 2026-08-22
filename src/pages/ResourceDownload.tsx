@@ -3,7 +3,6 @@ import { useParams, useNavigate } from "react-router-dom";
 import { Helmet } from "react-helmet";
 import { useLanguage } from "@/contexts/LanguageContext";
 import Navigation from "@/components/Navigation";
-import { NewsletterModal } from "@/components/NewsletterModal";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
@@ -213,7 +212,6 @@ export default function ResourceDownload() {
       </Helmet>
       
       <Navigation />
-      <NewsletterModal />
       <main className="min-h-screen bg-gradient-to-b from-primary/5 to-background pt-20">
         <div className="container mx-auto px-4 py-12 max-w-5xl">
           {/* Hero Section */}

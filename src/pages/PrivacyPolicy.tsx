@@ -1,5 +1,4 @@
 import Navigation from "@/components/Navigation";
-import { NewsletterModal } from "@/components/NewsletterModal";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Helmet } from "react-helmet";
 import { useLanguage } from "@/contexts/LanguageContext";
@@ -20,7 +19,6 @@ const PrivacyPolicy = () => {
       </Helmet>
 
       <Navigation />
-      <NewsletterModal />
 
       <main className="container mx-auto px-4 py-16 max-w-4xl">
         <Card>

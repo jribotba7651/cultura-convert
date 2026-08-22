@@ -3,7 +3,6 @@ import { useLanguage } from "@/contexts/LanguageContext";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
 import { AdSenseAd } from "@/components/AdSenseAd";
-import { NewsletterModal } from "@/components/NewsletterModal";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import { supabase } from '@/integrations/supabase/client';
@@ -109,7 +108,6 @@ const BlogPost = () => {
   return (
     <div className="min-h-screen bg-background">
       <Navigation />
-      <NewsletterModal />
       
       <main className="container mx-auto px-4 py-8 max-w-4xl">
         <Link to="/blog" className="inline-flex items-center text-primary hover:text-primary/80 mb-8">

@@ -277,95 +277,121 @@ export function TipTapEditor({ content, contentJson, onChange, placeholder, post
         className="hidden"
       />
 
-      <div className="flex flex-wrap gap-1 p-2 border-b bg-muted/50">
+      <div className="flex flex-wrap gap-2 p-3 border-b bg-muted/60">
         <Button
           type="button"
-          variant="ghost"
+          variant="outline"
           size="sm"
           onClick={() => editor.chain().focus().toggleHeading({ level: 2 }).run()}
-          className={cn(editor.isActive('heading', { level: 2 }) && 'bg-accent')}
+          className={cn(
+            'shadow-sm hover:shadow hover:bg-background',
+            editor.isActive('heading', { level: 2 }) && 'bg-accent text-accent-foreground ring-1 ring-primary/30 shadow'
+          )}
         >
           <Heading2 className="h-4 w-4" />
         </Button>
         <Button
           type="button"
-          variant="ghost"
+          variant="outline"
           size="sm"
           onClick={() => editor.chain().focus().toggleHeading({ level: 3 }).run()}
-          className={cn(editor.isActive('heading', { level: 3 }) && 'bg-accent')}
+          className={cn(
+            'shadow-sm hover:shadow hover:bg-background',
+            editor.isActive('heading', { level: 3 }) && 'bg-accent text-accent-foreground ring-1 ring-primary/30 shadow'
+          )}
         >
           <Heading3 className="h-4 w-4" />
         </Button>
         <Button
           type="button"
-          variant="ghost"
+          variant="outline"
           size="sm"
           onClick={() => editor.chain().focus().toggleBold().run()}
-          className={cn(editor.isActive('bold') && 'bg-accent')}
+          className={cn(
+            'shadow-sm hover:shadow hover:bg-background',
+            editor.isActive('bold') && 'bg-accent text-accent-foreground ring-1 ring-primary/30 shadow'
+          )}
         >
           <Bold className="h-4 w-4" />
         </Button>
         <Button
           type="button"
-          variant="ghost"
+          variant="outline"
           size="sm"
           onClick={() => editor.chain().focus().toggleItalic().run()}
-          className={cn(editor.isActive('italic') && 'bg-accent')}
+          className={cn(
+            'shadow-sm hover:shadow hover:bg-background',
+            editor.isActive('italic') && 'bg-accent text-accent-foreground ring-1 ring-primary/30 shadow'
+          )}
         >
           <Italic className="h-4 w-4" />
         </Button>
         <Button
           type="button"
-          variant="ghost"
+          variant="outline"
           size="sm"
           onClick={() => editor.chain().focus().toggleBulletList().run()}
-          className={cn(editor.isActive('bulletList') && 'bg-accent')}
+          className={cn(
+            'shadow-sm hover:shadow hover:bg-background',
+            editor.isActive('bulletList') && 'bg-accent text-accent-foreground ring-1 ring-primary/30 shadow'
+          )}
         >
           <List className="h-4 w-4" />
         </Button>
         <Button
           type="button"
-          variant="ghost"
+          variant="outline"
           size="sm"
           onClick={() => editor.chain().focus().toggleOrderedList().run()}
-          className={cn(editor.isActive('orderedList') && 'bg-accent')}
+          className={cn(
+            'shadow-sm hover:shadow hover:bg-background',
+            editor.isActive('orderedList') && 'bg-accent text-accent-foreground ring-1 ring-primary/30 shadow'
+          )}
         >
           <ListOrdered className="h-4 w-4" />
         </Button>
         <Button
           type="button"
-          variant="ghost"
+          variant="outline"
           size="sm"
           onClick={() => editor.chain().focus().toggleBlockquote().run()}
-          className={cn(editor.isActive('blockquote') && 'bg-accent')}
+          className={cn(
+            'shadow-sm hover:shadow hover:bg-background',
+            editor.isActive('blockquote') && 'bg-accent text-accent-foreground ring-1 ring-primary/30 shadow'
+          )}
         >
           <Quote className="h-4 w-4" />
         </Button>
         <Button
           type="button"
-          variant="ghost"
+          variant="outline"
           size="sm"
           onClick={setLink}
-          className={cn(editor.isActive('link') && 'bg-accent')}
+          className={cn(
+            'shadow-sm hover:shadow hover:bg-background',
+            editor.isActive('link') && 'bg-accent text-accent-foreground ring-1 ring-primary/30 shadow'
+          )}
         >
           <LinkIcon className="h-4 w-4" />
         </Button>
         {editor.isActive('link') && (
           <Button
             type="button"
-            variant="ghost"
+            variant="outline"
             size="sm"
             onClick={() => editor.chain().focus().unsetLink().run()}
+            className="shadow-sm hover:shadow hover:bg-background"
           >
             <Unlink className="h-4 w-4" />
           </Button>
         )}
         <Button
           type="button"
-          variant="ghost"
+          variant="outline"
           size="sm"
           onClick={() => fileInputRef.current?.click()}
           disabled={uploading}
+          className="shadow-sm hover:shadow hover:bg-background"
         >
           {uploading ? (
             <Loader2 className="h-4 w-4 animate-spin" />
@@ -375,12 +401,12 @@ export function TipTapEditor({ content, contentJson, onChange, placeholder, post
         </Button>
         <Button
           type="button"
-          variant="ghost"
+          variant="outline"
           size="sm"
           onClick={() => docxInputRef.current?.click()}
           disabled={importing}
           title="Importar .docx"
-          className="gap-1"
+          className="gap-1 shadow-sm hover:shadow hover:bg-background"
         >
           {importing ? (
             <Loader2 className="h-4 w-4 animate-spin" />

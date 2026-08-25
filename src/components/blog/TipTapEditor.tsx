@@ -15,6 +15,7 @@ import {
   ImagePlus,
   FileText,
   FileType2,
+  Wand2,
   Loader2
 
 } from 'lucide-react';
@@ -24,6 +25,7 @@ import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
 import type { Json } from '@/integrations/supabase/types';
 import { ResizableImage } from './ResizableImageExtension';
+import { autoFormatBlogHtml } from '@/utils/blogAutoFormat';
 
 interface TipTapEditorProps {
   content: string;

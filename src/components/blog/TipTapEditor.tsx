@@ -406,8 +406,11 @@ export function TipTapEditor({ content, contentJson, onChange, placeholder, post
             const ctx = canvas.getContext('2d');
             if (!ctx) continue;
 
-            if (typeof ImageBitmap !== 'undefined' && img.bitmap instanceof ImageBitmap) {
-              ctx.drawImage(img.bitmap, 0, 0);
+            // pdf.js exposes decoded images either as a drawable source
+            // (ImageBitmap / VideoFrame) or as raw pixel data.
+            if (img.bitmap) {
+              ctx.drawImage(img.bitmap as CanvasImageSource, 0, 0);
+              if (typeof img.bitmap.close === 'function') img.bitmap.close();
             } else if (img.data) {
               const src: Uint8Array = img.data;
               const out = ctx.createImageData(width, height);

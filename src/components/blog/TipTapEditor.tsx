@@ -14,6 +14,7 @@ import {
   Unlink,
   ImagePlus,
   FileText,
+  FileType2,
   Loader2
 
 } from 'lucide-react';

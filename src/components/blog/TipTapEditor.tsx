@@ -640,6 +640,23 @@ export function TipTapEditor({ content, contentJson, onChange, placeholder, post
           )}
           <span className="text-xs">Import .docx</span>
         </Button>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={() => pdfInputRef.current?.click()}
+          disabled={importingPdf}
+          title="Importar PDF"
+          className="gap-1 shadow-sm hover:shadow hover:bg-background"
+        >
+          {importingPdf ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <FileType2 className="h-4 w-4" />
+          )}
+          <span className="text-xs">Import PDF</span>
+        </Button>
+
 
       </div>
       <EditorContent editor={editor} />

@@ -13,7 +13,9 @@ import {
   Link as LinkIcon,
   Unlink,
   ImagePlus,
+  FileText,
   Loader2
+
 } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';

@@ -102,7 +102,10 @@ const isNoiseLine = (text: string) => {
   return false;
 };
 
-const isSeparatorOnly = (text: string) => /^[\s·•§¶*_\-–—.]+$/.test(text.trim());
+const isSeparatorOnly = (text: string) =>
+  /^[\s·•§¶*_\-–—.]+$/.test(text.trim()) ||
+  // Stray punctuation left over from decorative PDF slides ("?", "!", "…")
+  (text.trim().length <= 3 && !/[A-Za-z0-9ÁÉÍÓÚÑáéíóúñ]/.test(text.trim()));
 
 /**
  * Cleans and re-structures blog HTML. Images, figures, lists, blockquotes and

@@ -492,6 +492,29 @@ export function TipTapEditor({ content, contentJson, onChange, placeholder, post
     e.target.value = '';
   }, [handlePdfImport]);
 
+  const handleAutoFormat = useCallback(() => {
+    if (!editor) return;
+    const current = editor.getHTML();
+    const formatted = autoFormatBlogHtml(current);
+
+    if (!formatted || formatted === current) {
+      toast({
+        title: 'Todo en orden',
+        description: 'El contenido ya está bien formateado',
+      });
+      return;
+    }
+
+    editor.commands.setContent(formatted, { emitUpdate: true } as any);
+    onChange(editor.getHTML(), editor.getJSON() as Json);
+
+    toast({
+      title: 'Contenido formateado',
+      description: 'Párrafos unidos, títulos normalizados y espacios limpiados',
+    });
+  }, [editor, onChange, toast]);
+
+
 
   if (!editor) {
     return null;

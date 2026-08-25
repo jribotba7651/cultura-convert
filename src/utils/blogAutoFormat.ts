@@ -151,9 +151,7 @@ export const autoFormatBlogHtml = (html: string): string => {
       if (last && last.startsWith('<h2>') && last.endsWith('</h2>')) {
         const prevText = last.slice(4, -5);
         if (!endsSentence(prevText) && prevText.length + heading.length <= 90) {
-          output[output.length - 1] = `<h2>${prevText} ${
-            /^[A-ZÁÉÍÓÚÑ]/.test(heading) ? heading.charAt(0).toLowerCase() + heading.slice(1) : heading
-          }</h2>`;
+          output[output.length - 1] = `<h2>${prevText} ${heading}</h2>`;
           return;
         }
       }

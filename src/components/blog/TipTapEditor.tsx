@@ -463,7 +463,7 @@ export function TipTapEditor({ content, contentJson, onChange, placeholder, post
       }
 
       const html = htmlParts.join('');
-      editor.commands.setContent(html, { emitUpdate: true } as any);
+      editor.commands.setContent(autoFormatBlogHtml(html), { emitUpdate: true } as any);
       onChange(editor.getHTML(), editor.getJSON() as Json);
 
       toast({

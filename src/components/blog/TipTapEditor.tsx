@@ -34,8 +34,11 @@ interface TipTapEditorProps {
 
 export function TipTapEditor({ content, contentJson, onChange, placeholder, postId }: TipTapEditorProps) {
   const [uploading, setUploading] = useState(false);
+  const [importing, setImporting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const docxInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+
 
   const editor = useEditor({
     extensions: [

@@ -13,7 +13,9 @@ import {
   Link as LinkIcon,
   Unlink,
   ImagePlus,
+  FileText,
   Loader2
+
 } from 'lucide-react';
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { cn } from '@/lib/utils';
@@ -32,8 +34,11 @@ interface TipTapEditorProps {
 
 export function TipTapEditor({ content, contentJson, onChange, placeholder, postId }: TipTapEditorProps) {
   const [uploading, setUploading] = useState(false);
+  const [importing, setImporting] = useState(false);
   const fileInputRef = useRef<HTMLInputElement>(null);
+  const docxInputRef = useRef<HTMLInputElement>(null);
   const { toast } = useToast();
+
 
   const editor = useEditor({
     extensions: [
@@ -163,6 +168,94 @@ export function TipTapEditor({ content, contentJson, onChange, placeholder, post
     e.target.value = '';
   }, [handleImageUpload]);
 
+  const uploadDocxImage = useCallback(async (base64: string, contentType: string, index: number) => {
+    const binary = atob(base64);
+    const bytes = new Uint8Array(binary.length);
+    for (let i = 0; i < binary.length; i++) bytes[i] = binary.charCodeAt(i);
+    const ext = (contentType?.split('/')[1] || 'png').replace('jpeg', 'jpg');
+    const folder = postId || 'drafts';
+    const filePath = `${folder}/docx-${Date.now()}-${index}.${ext}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('blog-images')
+      .upload(filePath, new Blob([bytes], { type: contentType || 'image/png' }), {
+        contentType: contentType || 'image/png',
+      });
+
+    if (uploadError) throw uploadError;
+
+    const { data } = supabase.storage.from('blog-images').getPublicUrl(filePath);
+    return data.publicUrl;
+  }, [postId]);
+
+  const handleDocxImport = useCallback(async (file: File) => {
+    if (!editor) return;
+
+    if (!file.name.toLowerCase().endsWith('.docx')) {
+      toast({
+        title: 'Formato no soportado',
+        description: 'Solo se pueden importar archivos .docx',
+        variant: 'destructive',
+      });
+      return;
+    }
+
+    setImporting(true);
+    try {
+      const mammoth = await import('mammoth/mammoth.browser');
+      const arrayBuffer = await file.arrayBuffer();
+      let imageIndex = 0;
+
+      const result = await mammoth.convertToHtml(
+        { arrayBuffer },
+        {
+          convertImage: mammoth.images.imgElement(async (image: any) => {
+            const base64 = await image.read('base64');
+            const src = await uploadDocxImage(base64, image.contentType, imageIndex++);
+            return { src };
+          }),
+        }
+      );
+
+      const html = result.value?.trim();
+      if (!html) {
+        toast({
+          title: 'Documento vacío',
+          description: 'No se encontró contenido en el archivo',
+          variant: 'destructive',
+        });
+        return;
+      }
+
+      editor.commands.setContent(html, { emitUpdate: true } as any);
+      onChange(editor.getHTML(), editor.getJSON() as Json);
+
+      toast({
+        title: 'Documento importado',
+        description: imageIndex > 0
+          ? `Contenido cargado con ${imageIndex} imagen(es)`
+          : 'Contenido cargado en el editor',
+      });
+    } catch (error) {
+      console.error('Error importing .docx:', error);
+      toast({
+        title: 'Error',
+        description: 'No se pudo importar el documento',
+        variant: 'destructive',
+      });
+    } finally {
+      setImporting(false);
+    }
+  }, [editor, onChange, toast, uploadDocxImage]);
+
+  const handleDocxInputChange = useCallback((e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      handleDocxImport(file);
+    }
+    e.target.value = '';
+  }, [handleDocxImport]);
+
   if (!editor) {
     return null;
   }
@@ -176,6 +269,14 @@ export function TipTapEditor({ content, contentJson, onChange, placeholder, post
         onChange={handleFileInputChange}
         className="hidden"
       />
+      <input
+        ref={docxInputRef}
+        type="file"
+        accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document"
+        onChange={handleDocxInputChange}
+        className="hidden"
+      />
+
       <div className="flex flex-wrap gap-1 p-2 border-b bg-muted/50">
         <Button
           type="button"
@@ -272,6 +373,23 @@ export function TipTapEditor({ content, contentJson, onChange, placeholder, post
             <ImagePlus className="h-4 w-4" />
           )}
         </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => docxInputRef.current?.click()}
+          disabled={importing}
+          title="Importar .docx"
+          className="gap-1"
+        >
+          {importing ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <FileText className="h-4 w-4" />
+          )}
+          <span className="text-xs">Import .docx</span>
+        </Button>
+
       </div>
       <EditorContent editor={editor} />
     </div>

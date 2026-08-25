@@ -373,6 +373,23 @@ export function TipTapEditor({ content, contentJson, onChange, placeholder, post
             <ImagePlus className="h-4 w-4" />
           )}
         </Button>
+        <Button
+          type="button"
+          variant="ghost"
+          size="sm"
+          onClick={() => docxInputRef.current?.click()}
+          disabled={importing}
+          title="Importar .docx"
+          className="gap-1"
+        >
+          {importing ? (
+            <Loader2 className="h-4 w-4 animate-spin" />
+          ) : (
+            <FileText className="h-4 w-4" />
+          )}
+          <span className="text-xs">Import .docx</span>
+        </Button>
+
       </div>
       <EditorContent editor={editor} />
     </div>

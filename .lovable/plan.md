@@ -1,34 +1,27 @@
-## Diagnóstico
+# Importar PDF en el editor del blog
 
-Verifiqué la base de datos y los logs:
-- Tu rol `admin` está correctamente asignado a `jribot@gmail.com` en `user_roles` ✅
-- El edge function `check-admin-access` responde `Admin check for user jribot@gmail.com: true` ✅
+Añadir un botón **Import PDF** junto al de **Import .docx** en la barra del editor, con el mismo flujo: eliges el archivo y el contenido entra en el editor.
 
-O sea, el backend está perfecto. El problema es del lado del cliente en `jibaroenlaluna.com`.
+## Diferencia importante con .docx
 
-## Causa más probable
+Un `.docx` guarda la estructura real (títulos, párrafos, listas, imágenes). Un PDF no: solo guarda texto colocado en coordenadas. Por eso el resultado del import de PDF será:
 
-Las sesiones de Supabase se guardan en `localStorage` **por dominio**. Si iniciaste sesión en el preview de Lovable (`*.lovable.app`), esa sesión NO existe en `jibaroenlaluna.com`. Necesitas hacer login otra vez en ese dominio específico.
+- Texto extraído en párrafos, respetando saltos de página y líneas en blanco.
+- Detección heurística de títulos: líneas cortas con letra notablemente más grande se convierten en `H2`.
+- Sin recuperación fiel de negritas/cursivas ni de listas numeradas originales.
+- Las imágenes embebidas del PDF se extraen y se suben al bucket `blog-images` cuando el PDF las tiene como imágenes reales; si el PDF es un escaneo (una imagen por página) no hay texto que extraer y avisamos al usuario con un mensaje.
 
-Causa secundaria posible: el `UserMenu` y `useAdminCheck` fallan silenciosamente cuando el `check-admin-access` devuelve error — no hay forma visual de saber si es "no soy admin", "no estoy logueado" o "hubo un error de red".
+El texto siempre queda editable, así que se puede ajustar después en el editor.
 
-## Cambios propuestos
+## Alcance
 
-### 1. `src/components/UserMenu.tsx`
-- Añadir estado `checkingAdmin` para no ocultar el menú mientras todavía está verificando.
-- Loggear con `console.warn` el error completo si el invoke falla (status, mensaje, contexto), para que en producción puedas abrir la consola y ver exactamente por qué.
-- No llamar al edge function si no hay sesión activa (evita ruido).
+- Nuevo botón con icono de PDF y spinner mientras procesa, mismo estilo (`variant="outline"`, `shadow-sm`) que el resto del toolbar.
+- Validación: solo `.pdf`, tamaño máximo 20MB.
+- Toasts en español: éxito con conteo de páginas/imágenes, error si falla, aviso si el PDF no tiene texto seleccionable.
 
-### 2. `src/hooks/useAdminCheck.ts`
-- Mismos logs detallados: si entras directo a `/admin/blog` y te rechaza, la consola te dirá si fue por falta de sesión, error de red, o porque no eres admin.
-- Mensaje de toast más específico según la causa.
+## Detalles técnicos
 
-### 3. Sin cambios en backend
-- El edge function ya tiene CORS correcto y funciona. No se toca.
-- No se toca la BD ni RLS.
-
-## Cómo probar después
-
-1. Abre `https://jibaroenlaluna.com` en una pestaña nueva.
-2. Si no ves tu avatar (solo "Sign in"), entra con `jribot@gmail.com` → el menú admin aparecerá.
-3. Si ves tu avatar pero no el menú admin, abre la consola del navegador (F12) y los nuevos logs te dirán exactamente qué pasó.
+- Archivo a modificar: `src/components/blog/TipTapEditor.tsx`.
+- Dependencia nueva: `pdfjs-dist` (import dinámico, igual que `mammoth`, para no cargarla en el bundle inicial); worker configurado vía `?url` de Vite.
+- Extracción: `getDocument().getPage(n).getTextContent()` para el texto; agrupación de items por posición vertical para reconstruir líneas y párrafos; `page.getOperatorList()` / `page.objs` para las imágenes embebidas, subidas con la función `uploadDocxImage` existente (se renombra a `uploadEditorImage` y se reutiliza).
+- El HTML resultante se inserta con `editor.commands.setContent(html, { emitUpdate: true })` y se propaga con `onChange`, idéntico al flujo de `.docx`.

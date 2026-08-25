@@ -699,6 +699,18 @@ export function TipTapEditor({ content, contentJson, onChange, placeholder, post
           )}
           <span className="text-xs">Import PDF</span>
         </Button>
+        <Button
+          type="button"
+          variant="outline"
+          size="sm"
+          onClick={handleAutoFormat}
+          title="Auto-formatear todo el contenido"
+          className="gap-1 shadow-sm hover:shadow hover:bg-background"
+        >
+          <Wand2 className="h-4 w-4" />
+          <span className="text-xs">Auto-formatear</span>
+        </Button>
+
 
 
       </div>

@@ -188,6 +188,21 @@ export function TipTapEditor({ content, contentJson, onChange, placeholder, post
     return data.publicUrl;
   }, [postId]);
 
+  const uploadEditorBlob = useCallback(async (blob: Blob, prefix: string, index: number) => {
+    const ext = (blob.type?.split('/')[1] || 'png').replace('jpeg', 'jpg');
+    const folder = postId || 'drafts';
+    const filePath = `${folder}/${prefix}-${Date.now()}-${index}.${ext}`;
+
+    const { error: uploadError } = await supabase.storage
+      .from('blog-images')
+      .upload(filePath, blob, { contentType: blob.type || 'image/png' });
+
+    if (uploadError) throw uploadError;
+
+    const { data } = supabase.storage.from('blog-images').getPublicUrl(filePath);
+    return data.publicUrl;
+  }, [postId]);
+
   const handleDocxImport = useCallback(async (file: File) => {
     if (!editor) return;
 

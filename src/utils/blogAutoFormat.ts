@@ -35,13 +35,29 @@ const normalizeText = (text: string): string =>
     .replace(/\s+/g, ' ')
     .trim();
 
+const ACRONYMS = new Set([
+  'AI', 'IA', 'IT', 'LLM', 'LLC', 'GPT', 'API', 'USA', 'EEUU', 'ONU', 'LSD',
+  'FM', 'AM', 'PM', 'TV', 'UCSF', 'NASA', 'ADN', 'DNA', 'CEO', 'PDF', 'URL',
+]);
+
 const toTitleishCase = (text: string): string => {
   const letters = text.replace(/[^A-Za-zÁÉÍÓÚÑáéíóúñ]/g, '');
   if (!letters) return text;
   const upperRatio = letters.replace(/[^A-ZÁÉÍÓÚÑ]/g, '').length / letters.length;
   if (upperRatio < 0.85) return text;
-  const lower = text.toLowerCase();
-  return lower.charAt(0).toUpperCase() + lower.slice(1);
+
+  const lowered = text
+    .split(' ')
+    .map((word) => {
+      const bare = word.replace(/[^A-Za-z]/g, '');
+      if (ACRONYMS.has(bare)) return word;
+      const lower = word.toLowerCase();
+      // Keep the English pronoun "I" capitalized.
+      return lower === 'i' ? 'I' : lower;
+    })
+    .join(' ');
+
+  return lowered.charAt(0).toUpperCase() + lowered.slice(1);
 };
 
 const endsSentence = (text: string) => /[.!?:;"»”)\]]$/.test(text.trim());

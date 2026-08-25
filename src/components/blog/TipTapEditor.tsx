@@ -501,6 +501,14 @@ export function TipTapEditor({ content, contentJson, onChange, placeholder, post
         onChange={handleDocxInputChange}
         className="hidden"
       />
+      <input
+        ref={pdfInputRef}
+        type="file"
+        accept=".pdf,application/pdf"
+        onChange={handlePdfInputChange}
+        className="hidden"
+      />
+
 
       <div className="flex flex-wrap gap-2 p-3 border-b bg-muted/60">
         <Button

@@ -333,14 +333,13 @@ export function TipTapEditor({ content, contentJson, onChange, placeholder, post
           } else {
             lines.push({ y, size, text: item.str });
           }
-          if (item.hasEOL) lines.push({ y: y - 1000000, size, text: '' });
         }
 
         const cleaned = lines
           .map((l) => ({ ...l, text: l.text.replace(/\s+/g, ' ').trim() }))
-          .filter((l, i, arr) => l.text.length > 0 || (i > 0 && arr[i - 1].text.length > 0));
+          .filter((l) => l.text.length > 0);
 
-        const sizes = cleaned.filter((l) => l.text).map((l) => l.size);
+        const sizes = cleaned.map((l) => l.size);
         const bodySize = sizes.length
           ? sizes.slice().sort((a, b) => a - b)[Math.floor(sizes.length / 2)]
           : 12;
@@ -353,21 +352,28 @@ export function TipTapEditor({ content, contentJson, onChange, placeholder, post
           }
         };
 
-        for (const line of cleaned) {
-          if (!line.text) {
-            flush();
-            continue;
-          }
+        cleaned.forEach((line, i) => {
           textFound = true;
+          const prev = cleaned[i - 1];
+          // Large vertical gap between lines => new paragraph
+          if (prev && prev.y - line.y > bodySize * 1.8) flush();
+
           const isHeading = line.size > bodySize * 1.25 && line.text.length < 120;
           if (isHeading) {
             flush();
             htmlParts.push(`<h2>${escapeHtml(line.text)}</h2>`);
-          } else {
-            paragraph.push(line.text);
+            return;
           }
-        }
+          paragraph.push(line.text);
+          // A short line that does not continue into the next one ends the paragraph
+          const next = cleaned[i + 1];
+          if (!next || /[.!?:;»"”]$/.test(line.text)) {
+            const nextIsFarther = next ? line.y - next.y > bodySize * 1.8 : true;
+            if (nextIsFarther) flush();
+          }
+        });
         flush();
+
 
         // --- Embedded images (best effort) ---
         try {

@@ -35,77 +35,14 @@ const normalizeText = (text: string): string =>
     .replace(/\s+/g, ' ')
     .trim();
 
-const ACRONYMS = new Set([
-  'AI', 'IA', 'IT', 'LLM', 'LLC', 'GPT', 'API', 'USA', 'EEUU', 'ONU', 'LSD',
-  'FM', 'AM', 'PM', 'TV', 'UCSF', 'NASA', 'ADN', 'DNA', 'CEO', 'PDF', 'URL',
-]);
-
-const toTitleishCase = (text: string): string => {
-  const letters = text.replace(/[^A-Za-zÁÉÍÓÚÑáéíóúñ]/g, '');
-  if (!letters) return text;
-  const upperRatio = letters.replace(/[^A-ZÁÉÍÓÚÑ]/g, '').length / letters.length;
-  if (upperRatio < 0.85) return text;
-
-  const lowered = text
-    .split(' ')
-    .map((word) => {
-      const bare = word.replace(/[^A-Za-z]/g, '');
-      if (ACRONYMS.has(bare)) return word;
-      const lower = word.toLowerCase();
-      // Keep the English pronoun "I" capitalized.
-      return lower === 'i' ? 'I' : lower;
-    })
-    .join(' ');
-
-  return lowered.charAt(0).toUpperCase() + lowered.slice(1);
-};
-
 const endsSentence = (text: string) => /[.!?:;"»”)\]]$/.test(text.trim());
 const startsContinuation = (text: string) => /^[a-záéíóúñ,;)]/.test(text.trim());
 
-const upperRatio = (text: string) => {
-  const letters = text.replace(/[^A-Za-zÁÉÍÓÚÑáéíóúñ]/g, '');
-  if (!letters) return 0;
-  return letters.replace(/[^A-ZÁÉÍÓÚÑ]/g, '').length / letters.length;
+const escapeHtml = (text: string): string => {
+  const element = document.createElement('div');
+  element.textContent = text;
+  return element.innerHTML;
 };
-
-const isTitleCaseLine = (text: string) => {
-  const words = text.split(/\s+/).filter((w) => /[A-Za-zÁÉÍÓÚÑáéíóúñ]/.test(w));
-  if (words.length === 0 || words.length > 10) return false;
-  const capped = words.filter((w) => /^[A-ZÁÉÍÓÚÑ]/.test(w)).length;
-  return capped / words.length >= 0.6;
-};
-
-const isHeadingCandidate = (text: string) => {
-  if (text.length === 0 || text.length > 90) return false;
-  if (endsSentence(text) && !/:$/.test(text)) return false;
-  const letters = text.replace(/[^A-Za-zÁÉÍÓÚÑáéíóúñ]/g, '');
-  if (letters.length < 3) return false;
-  if (upperRatio(text) >= 0.7 && text.split(/\s+/).length <= 12) return true;
-  // Short mixed-case title lines ("In the Machine", "We Trust")
-  return text.length <= 60 && isTitleCaseLine(text);
-};
-
-/**
- * Page furniture produced by PDF exports: separators, running headers,
- * page numbers, and image placeholder notes.
- */
-const isNoiseLine = (text: string) => {
-  const t = text.trim();
-  if (!t) return true;
-  if (/^[\s·•§¶*_\-–—.]+$/.test(t)) return false; // handled as separator below
-  if (/^\d{1,3}\s*\/\s*\d{1,3}$/.test(t)) return true; // "02 / 12"
-  if (/\b\d{1,3}\s*\/\s*\d{1,3}\s*$/.test(t) && upperRatio(t) >= 0.7) return true; // running header
-  if (/^image\s*\d+\s*[·•\-–—:]/i.test(t)) return true; // "Image 2 · Woman at 3 AM ..."
-  if (/see prompt document\.?$/i.test(t)) return true;
-  if (/·\s*20\d{2}\s*$/.test(t) && t.length <= 80 && upperRatio(t) >= 0.4) return true; // byline/footer
-  return false;
-};
-
-const isSeparatorOnly = (text: string) =>
-  /^[\s·•§¶*_\-–—.]+$/.test(text.trim()) ||
-  // Stray punctuation left over from decorative PDF slides ("?", "!", "…")
-  (text.trim().length <= 3 && !/[A-Za-z0-9ÁÉÍÓÚÑáéíóúñ]/.test(text.trim()));
 
 /**
  * Cleans and re-structures blog HTML. Images, figures, lists, blockquotes and
@@ -122,28 +59,21 @@ export const autoFormatBlogHtml = (html: string): string => {
 
   const blocks: Block[] = Array.from(root.children).map((el) => {
     const tag = el.tagName.toLowerCase();
-    const text = normalizeText(collapseSpacedCaps(el.textContent || ''));
-    const inner = el.innerHTML.includes('<a ') ? normalizeText(el.innerHTML) : text;
+    const originalText = normalizeText(el.textContent || '');
+    const text = normalizeText(collapseSpacedCaps(originalText));
+    // Preserve authored inline markup. Only replace it when repairing a
+    // letter-spaced import because the text itself must change in that case.
+    const inner = text === originalText ? el.innerHTML.trim() : escapeHtml(text);
     return { tag, text, inner, outer: el.outerHTML };
   });
-
-  // Lines repeated across the document are running headers/footers.
-  const counts = new Map<string, number>();
-  blocks.forEach((b) => {
-    if (b.text && b.text.length <= 90) {
-      counts.set(b.text.toLowerCase(), (counts.get(b.text.toLowerCase()) || 0) + 1);
-    }
-  });
-  const isRepeatedFurniture = (text: string) =>
-    text.length <= 90 && (counts.get(text.toLowerCase()) || 0) >= 3;
 
   const output: string[] = [];
   let openParagraph: string[] = [];
 
   const flush = () => {
     if (!openParagraph.length) return;
-    const text = normalizeText(openParagraph.join(' '));
-    if (text) output.push(`<p>${text}</p>`);
+    const inner = openParagraph.join(' ').trim();
+    if (inner) output.push(`<p>${inner}</p>`);
     openParagraph = [];
   };
 
@@ -157,24 +87,14 @@ export const autoFormatBlogHtml = (html: string): string => {
       return;
     }
 
-    if (!text || isSeparatorOnly(text) || isNoiseLine(text) || isRepeatedFurniture(text)) {
+    if (!text) {
       flush();
       return;
     }
 
-    if (/^h[1-6]$/.test(tag) || isHeadingCandidate(text)) {
+    if (/^h[1-6]$/.test(tag)) {
       flush();
-      const heading = toTitleishCase(text);
-      const last = output[output.length - 1];
-      // Merge title lines split across two blocks ("In the Machine" + "We Trust")
-      if (last && last.startsWith('<h2>') && last.endsWith('</h2>')) {
-        const prevText = last.slice(4, -5);
-        if (!endsSentence(prevText) && prevText.length + heading.length <= 90) {
-          output[output.length - 1] = `<h2>${prevText} ${heading}</h2>`;
-          return;
-        }
-      }
-      output.push(`<h2>${heading}</h2>`);
+      output.push(`<${tag}>${inner}</${tag}>`);
       return;
     }
 

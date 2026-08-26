@@ -191,7 +191,6 @@ export function BlogPostEditor({ postId, onClose }: BlogPostEditorProps) {
         published: formData.published,
         featured: formData.featured,
         cover_image: uploadedImageUrl,
-        date: new Date().toISOString(),
       };
 
       if (postId) {
@@ -204,7 +203,7 @@ export function BlogPostEditor({ postId, onClose }: BlogPostEditorProps) {
       } else {
         const { error } = await supabase
           .from('blog_posts')
-          .insert([postData]);
+          .insert([{ ...postData, date: new Date().toISOString() }]);
 
         if (error) throw error;
       }

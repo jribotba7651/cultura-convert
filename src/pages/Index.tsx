@@ -32,7 +32,7 @@ const juanBooks: Book[] = [
       en: "Five men climb a mountain to talk about what was done in their names. They are not the ones who will speak.\n\nJesus arrives at the summit of Roraima barefoot, his sandals lost on the climb. Muhammad carries the last date from Medina in his closed hand. The Buddha, a wooden bowl. Krishna, a bamboo flute. Quetzalcóatl, the silence of a people his followers could not save from the cross.\n\nFor four days they sit at the summit, exchanging the names they have not spoken in two thousand years. Then they descend, together, to a village that appears on no map, where a healer named Ixchel has been keeping the sick alive while they preached. She does not want their sermons. She wants their hands.\n\nOne by one, as the men dig wells and clean wounds and mend roofs, the women come walking up the road. Mary, who stood at the foot of the cross and watched her grief become a weapon to silence other mothers. Khadija, who would have argued every revelation Muhammad later signed alone. Mahapajapati, who nursed Siddhartha with milk she took from her own son. Radha, who waited by the Yamuna until she stopped waiting. They have not come to forgive. They have come to be heard, and then to be answered, and then to put the men back to work beside them.\n\nThe Women Who Always Were is a quiet, devastating novel about five founders of the great religions and the women they left behind, erased, or allowed to be erased. Written from a Puerto Rican and Caribbean perspective, in the lineage of José Saramago's The Gospel According to Jesus Christ, J.M. Coetzee's Elizabeth Costello, and Toni Morrison's Paradise.\n\nFor readers of The Red Tent, The Gospel According to Jesus Christ, Circe, The Book of Longings, and Paradise."
     },
     status: "published" as const,
-    amazonUrl: "https://a.co/d/08c9NFgj",
+    amazonUrl: "https://a.co/d/0cpyXBXE",
     coverImage: theWomenWhoAlwaysWereCover,
   },
   {
@@ -162,7 +162,7 @@ const Index = () => {
       <Navigation />
 
       {/* Hero Section with Featured Books Carousel */}
-      <BooksHero books={allBooks} featured={[5, 0, 3]} />
+      <BooksHero books={allBooks} featured={[6, 5, 0]} />
 
       {/* Featured Bestseller */}
       <FeaturedBook 

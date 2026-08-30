@@ -30,11 +30,9 @@ export default function AdminInventory() {
     try {
       const { data, error } = await supabase.functions.invoke('sync-printify-products');
       if (error) throw error;
-      const result = data as { synced?: number; created?: number; updated?: number; message?: string } | null;
-      toast.success(
-        result?.message ||
-          `Sincronización completa: ${result?.created ?? 0} nuevos, ${result?.updated ?? 0} actualizados`
-      );
+      const result = data as { success?: boolean; message?: string; syncedCount?: number } | null;
+      if (result && result.success === false) throw new Error(result.message || 'Sync failed');
+      toast.success(result?.message || `Sincronización completa (${result?.syncedCount ?? 0} productos)`);
       await fetchRows();
     } catch (err) {
       console.error('Error syncing from Printify:', err);

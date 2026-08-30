@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, Save, Package } from 'lucide-react';
+import { Loader2, Save, Package, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface InventoryRow {
@@ -23,6 +23,26 @@ export default function AdminInventory() {
   const [loading, setLoading] = useState(true);
   const [drafts, setDrafts] = useState<Record<string, string>>({});
   const [savingId, setSavingId] = useState<string | null>(null);
+  const [syncing, setSyncing] = useState(false);
+
+  const syncFromPrintify = async () => {
+    setSyncing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('sync-printify-products');
+      if (error) throw error;
+      const result = data as { synced?: number; created?: number; updated?: number; message?: string } | null;
+      toast.success(
+        result?.message ||
+          `Sincronización completa: ${result?.created ?? 0} nuevos, ${result?.updated ?? 0} actualizados`
+      );
+      await fetchRows();
+    } catch (err) {
+      console.error('Error syncing from Printify:', err);
+      toast.error('No se pudo sincronizar con Printify. Revisa los logs del edge function.');
+    } finally {
+      setSyncing(false);
+    }
+  };
 
   useEffect(() => {
     if (isAdmin) fetchRows();

@@ -6,7 +6,7 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
-import { Loader2, Save, Package } from 'lucide-react';
+import { Loader2, Save, Package, RefreshCw } from 'lucide-react';
 import { toast } from 'sonner';
 
 interface InventoryRow {
@@ -23,6 +23,24 @@ export default function AdminInventory() {
   const [loading, setLoading] = useState(true);
   const [drafts, setDrafts] = useState<Record<string, string>>({});
   const [savingId, setSavingId] = useState<string | null>(null);
+  const [syncing, setSyncing] = useState(false);
+
+  const syncFromPrintify = async () => {
+    setSyncing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke('sync-printify-products');
+      if (error) throw error;
+      const result = data as { success?: boolean; message?: string; syncedCount?: number } | null;
+      if (result && result.success === false) throw new Error(result.message || 'Sync failed');
+      toast.success(result?.message || `Sincronización completa (${result?.syncedCount ?? 0} productos)`);
+      await fetchRows();
+    } catch (err) {
+      console.error('Error syncing from Printify:', err);
+      toast.error('No se pudo sincronizar con Printify. Revisa los logs del edge function.');
+    } finally {
+      setSyncing(false);
+    }
+  };
 
   useEffect(() => {
     if (isAdmin) fetchRows();
@@ -102,9 +120,19 @@ export default function AdminInventory() {
     <div className="min-h-screen bg-background">
       <Navigation />
       <div className="container mx-auto px-4 py-12 max-w-4xl">
-        <div className="flex items-center gap-3 mb-2">
-          <Package className="h-7 w-7 text-primary" />
-          <h1 className="text-3xl font-bold text-foreground">Inventario</h1>
+        <div className="flex items-center justify-between gap-3 mb-2">
+          <div className="flex items-center gap-3">
+            <Package className="h-7 w-7 text-primary" />
+            <h1 className="text-3xl font-bold text-foreground">Inventario</h1>
+          </div>
+          <Button onClick={syncFromPrintify} disabled={syncing} variant="outline">
+            {syncing ? (
+              <Loader2 className="mr-2 h-4 w-4 animate-spin" />
+            ) : (
+              <RefreshCw className="mr-2 h-4 w-4" />
+            )}
+            Sincronizar desde Printify
+          </Button>
         </div>
         <p className="text-muted-foreground mb-8">
           Edita el inventario manual de cada producto. Un campo vacío significa{' '}

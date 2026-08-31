@@ -24,15 +24,18 @@ export default function AdminInventory() {
   const [drafts, setDrafts] = useState<Record<string, string>>({});
   const [savingId, setSavingId] = useState<string | null>(null);
   const [syncing, setSyncing] = useState(false);
+  const [syncSummary, setSyncSummary] = useState<SyncResult | null>(null);
 
   const syncFromPrintify = async () => {
     setSyncing(true);
+    setSyncSummary(null);
     try {
       const { data, error } = await supabase.functions.invoke('sync-printify-products');
       if (error) throw error;
-      const result = data as { success?: boolean; message?: string; syncedCount?: number } | null;
+      const result = data as SyncResult | null;
       if (result && result.success === false) throw new Error(result.message || 'Sync failed');
-      toast.success(result?.message || `Sincronización completa (${result?.syncedCount ?? 0} productos)`);
+      setSyncSummary(result ?? null);
+      toast.success(`Sincronización completa: ${result?.syncedCount ?? 0} productos`);
       await fetchRows();
     } catch (err) {
       console.error('Error syncing from Printify:', err);
@@ -41,6 +44,7 @@ export default function AdminInventory() {
       setSyncing(false);
     }
   };
+
 
   useEffect(() => {
     if (isAdmin) fetchRows();

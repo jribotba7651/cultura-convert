@@ -80,6 +80,23 @@ const ProductDetails = () => {
     });
   };
 
+  const handleShare = async () => {
+    if (!product) return;
+    const result = await shareProduct({
+      title: product.title[language],
+      text: product.description[language]?.slice(0, 100),
+      url: window.location.href,
+    });
+    if (result === 'copied') {
+      toast({
+        title: language === 'es' ? 'Enlace copiado' : 'Link copied',
+        description: language === 'es'
+          ? 'El enlace del producto se copió al portapapeles'
+          : 'Product link copied to clipboard',
+      });
+    }
+  };
+
   if (loading) {
     return (
       <div className="min-h-screen bg-background">
@@ -302,6 +319,15 @@ const ProductDetails = () => {
                   className={isLiked ? 'text-destructive border-destructive' : ''}
                 >
                   <Heart className={`h-4 w-4 ${isLiked ? 'fill-current' : ''}`} />
+                </Button>
+
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={handleShare}
+                  aria-label={language === 'es' ? 'Compartir producto' : 'Share product'}
+                >
+                  <Share2 className="h-4 w-4" />
                 </Button>
               </div>
             </div>

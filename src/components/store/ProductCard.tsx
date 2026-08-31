@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ShoppingCart, Heart } from 'lucide-react';
+import { ShoppingCart, Heart, Share2 } from 'lucide-react';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -8,6 +8,7 @@ import { useCart } from '@/contexts/CartContext';
 import { Product } from '@/types/Store';
 import { useToast } from '@/hooks/use-toast';
 import { truncateText } from '@/utils/htmlCleaner';
+import { shareProduct } from '@/utils/share';
 
 // Import book cover images
 import raicesCover from '@/assets/raices-en-tierra-ajena-cover.jpg';
@@ -91,6 +92,24 @@ export const ProductCard = ({ product, onProductClick }: ProductCardProps) => {
     setIsLiked(!isLiked);
   };
 
+  const handleShare = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const url = `${window.location.origin}/store/product/${product.id}`;
+    const result = await shareProduct({
+      title: product.title[language],
+      text: truncateText(product.description[language] || '', 100),
+      url,
+    });
+    if (result === 'copied') {
+      toast({
+        title: language === 'es' ? 'Enlace copiado' : 'Link copied',
+        description: language === 'es'
+          ? 'El enlace del producto se copió al portapapeles'
+          : 'Product link copied to clipboard',
+      });
+    }
+  };
+
   const hasDiscount = product.compare_at_price_cents && product.compare_at_price_cents > product.price_cents;
   const isComingSoon = COMING_SOON_PRODUCT_IDS.has(product.id);
 
@@ -126,16 +145,27 @@ export const ProductCard = ({ product, onProductClick }: ProductCardProps) => {
             </Badge>
           )}
           
-          <Button
-            variant="ghost"
-            size="icon"
-            className={`absolute top-3 right-3 transition-colors ${
-              isLiked ? 'text-destructive' : 'text-muted-foreground hover:text-destructive'
-            }`}
-            onClick={handleLike}
-          >
-            <Heart className={`h-5 w-5 ${isLiked ? 'fill-current' : ''}`} />
-          </Button>
+          <div className="absolute top-3 right-3 flex flex-col gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              className={`transition-colors ${
+                isLiked ? 'text-destructive' : 'text-muted-foreground hover:text-destructive'
+              }`}
+              onClick={handleLike}
+            >
+              <Heart className={`h-5 w-5 ${isLiked ? 'fill-current' : ''}`} />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-muted-foreground hover:text-primary transition-colors"
+              onClick={handleShare}
+              aria-label={language === 'es' ? 'Compartir producto' : 'Share product'}
+            >
+              <Share2 className="h-5 w-5" />
+            </Button>
+          </div>
         </div>
 
         <div className="p-4">

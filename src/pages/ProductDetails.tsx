@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, ShoppingCart, Heart, Minus, Plus } from 'lucide-react';
+import { ArrowLeft, ShoppingCart, Heart, Minus, Plus, Share2 } from 'lucide-react';
 import Navigation from '@/components/Navigation';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -10,6 +10,7 @@ import { useCart } from '@/contexts/CartContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Product } from '@/types/Store';
 import { useToast } from '@/hooks/use-toast';
+import { shareProduct } from '@/utils/share';
 
 const ProductDetails = () => {
   const { id } = useParams<{ id: string }>();
@@ -77,6 +78,23 @@ const ProductDetails = () => {
         ? `${quantity}x ${product.title[language]} agregado a tu carrito`
         : `${quantity}x ${product.title[language]} added to your cart`,
     });
+  };
+
+  const handleShare = async () => {
+    if (!product) return;
+    const result = await shareProduct({
+      title: product.title[language],
+      text: product.description[language]?.slice(0, 100),
+      url: window.location.href,
+    });
+    if (result === 'copied') {
+      toast({
+        title: language === 'es' ? 'Enlace copiado' : 'Link copied',
+        description: language === 'es'
+          ? 'El enlace del producto se copió al portapapeles'
+          : 'Product link copied to clipboard',
+      });
+    }
   };
 
   if (loading) {
@@ -301,6 +319,15 @@ const ProductDetails = () => {
                   className={isLiked ? 'text-destructive border-destructive' : ''}
                 >
                   <Heart className={`h-4 w-4 ${isLiked ? 'fill-current' : ''}`} />
+                </Button>
+
+                <Button
+                  variant="outline"
+                  size="icon"
+                  onClick={handleShare}
+                  aria-label={language === 'es' ? 'Compartir producto' : 'Share product'}
+                >
+                  <Share2 className="h-4 w-4" />
                 </Button>
               </div>
             </div>

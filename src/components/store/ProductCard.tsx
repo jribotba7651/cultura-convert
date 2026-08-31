@@ -1,5 +1,5 @@
 import { useState } from 'react';
-import { ShoppingCart, Heart } from 'lucide-react';
+import { ShoppingCart, Heart, Share2 } from 'lucide-react';
 import { Card, CardContent, CardFooter } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -8,6 +8,7 @@ import { useCart } from '@/contexts/CartContext';
 import { Product } from '@/types/Store';
 import { useToast } from '@/hooks/use-toast';
 import { truncateText } from '@/utils/htmlCleaner';
+import { shareProduct } from '@/utils/share';
 
 // Import book cover images
 import raicesCover from '@/assets/raices-en-tierra-ajena-cover.jpg';
@@ -89,6 +90,24 @@ export const ProductCard = ({ product, onProductClick }: ProductCardProps) => {
   const handleLike = (e: React.MouseEvent) => {
     e.stopPropagation();
     setIsLiked(!isLiked);
+  };
+
+  const handleShare = async (e: React.MouseEvent) => {
+    e.stopPropagation();
+    const url = `${window.location.origin}/store/product/${product.id}`;
+    const result = await shareProduct({
+      title: product.title[language],
+      text: truncateText(product.description[language] || '', 100),
+      url,
+    });
+    if (result === 'copied') {
+      toast({
+        title: language === 'es' ? 'Enlace copiado' : 'Link copied',
+        description: language === 'es'
+          ? 'El enlace del producto se copió al portapapeles'
+          : 'Product link copied to clipboard',
+      });
+    }
   };
 
   const hasDiscount = product.compare_at_price_cents && product.compare_at_price_cents > product.price_cents;

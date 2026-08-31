@@ -1,6 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
-import { ArrowLeft, ShoppingCart, Heart, Minus, Plus } from 'lucide-react';
+import { ArrowLeft, ShoppingCart, Heart, Minus, Plus, Share2 } from 'lucide-react';
 import Navigation from '@/components/Navigation';
 import { Button } from '@/components/ui/button';
 import { Badge } from '@/components/ui/badge';
@@ -10,6 +10,7 @@ import { useCart } from '@/contexts/CartContext';
 import { supabase } from '@/integrations/supabase/client';
 import { Product } from '@/types/Store';
 import { useToast } from '@/hooks/use-toast';
+import { shareProduct } from '@/utils/share';
 
 const ProductDetails = () => {
   const { id } = useParams<{ id: string }>();

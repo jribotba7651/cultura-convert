@@ -145,16 +145,27 @@ export const ProductCard = ({ product, onProductClick }: ProductCardProps) => {
             </Badge>
           )}
           
-          <Button
-            variant="ghost"
-            size="icon"
-            className={`absolute top-3 right-3 transition-colors ${
-              isLiked ? 'text-destructive' : 'text-muted-foreground hover:text-destructive'
-            }`}
-            onClick={handleLike}
-          >
-            <Heart className={`h-5 w-5 ${isLiked ? 'fill-current' : ''}`} />
-          </Button>
+          <div className="absolute top-3 right-3 flex flex-col gap-1">
+            <Button
+              variant="ghost"
+              size="icon"
+              className={`transition-colors ${
+                isLiked ? 'text-destructive' : 'text-muted-foreground hover:text-destructive'
+              }`}
+              onClick={handleLike}
+            >
+              <Heart className={`h-5 w-5 ${isLiked ? 'fill-current' : ''}`} />
+            </Button>
+            <Button
+              variant="ghost"
+              size="icon"
+              className="text-muted-foreground hover:text-primary transition-colors"
+              onClick={handleShare}
+              aria-label={language === 'es' ? 'Compartir producto' : 'Share product'}
+            >
+              <Share2 className="h-5 w-5" />
+            </Button>
+          </div>
         </div>
 
         <div className="p-4">

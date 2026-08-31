@@ -155,6 +155,46 @@ export default function AdminInventory() {
           existencia. Este campo es solo informativo por ahora.
         </p>
 
+        {syncSummary && (
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle className="text-lg">Resultado de la sincronización</CardTitle>
+              <CardDescription>
+                {syncSummary.totalProducts ?? 0} productos en Printify ·{' '}
+                {syncSummary.syncedCount ?? 0} sincronizados ·{' '}
+                {syncSummary.skipped?.length ?? 0} omitidos ·{' '}
+                {syncSummary.deactivatedCount ?? 0} desactivados
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {!!syncSummary.syncedTitles?.length && (
+                <div>
+                  <p className="text-sm font-medium mb-2">Sincronizados</p>
+                  <ul className="text-sm text-muted-foreground list-disc pl-5 space-y-1">
+                    {syncSummary.syncedTitles.map((t) => (
+                      <li key={t}>{t}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {!!syncSummary.skipped?.length && (
+                <div>
+                  <p className="text-sm font-medium mb-2">Omitidos</p>
+                  <ul className="text-sm text-muted-foreground list-disc pl-5 space-y-1">
+                    {syncSummary.skipped.map((s, i) => (
+                      <li key={`${s.title}-${i}`}>
+                        <span className="text-foreground">{s.title}</span> — {s.reason}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+
+
         {loading ? (
           <div className="flex justify-center py-16">
             <Loader2 className="h-6 w-6 animate-spin text-primary" />

@@ -17,6 +17,17 @@ interface InventoryRow {
   printify_product_id: string | null;
 }
 
+interface SyncResult {
+  success?: boolean;
+  message?: string;
+  syncedCount?: number;
+  syncedTitles?: string[];
+  skipped?: Array<{ title: string; reason: string }>;
+  deactivatedCount?: number;
+  totalProducts?: number;
+}
+
+
 export default function AdminInventory() {
   const { isAdmin, loading: adminLoading } = useAdminCheck();
   const [rows, setRows] = useState<InventoryRow[]>([]);
@@ -24,15 +35,18 @@ export default function AdminInventory() {
   const [drafts, setDrafts] = useState<Record<string, string>>({});
   const [savingId, setSavingId] = useState<string | null>(null);
   const [syncing, setSyncing] = useState(false);
+  const [syncSummary, setSyncSummary] = useState<SyncResult | null>(null);
 
   const syncFromPrintify = async () => {
     setSyncing(true);
+    setSyncSummary(null);
     try {
       const { data, error } = await supabase.functions.invoke('sync-printify-products');
       if (error) throw error;
-      const result = data as { success?: boolean; message?: string; syncedCount?: number } | null;
+      const result = data as SyncResult | null;
       if (result && result.success === false) throw new Error(result.message || 'Sync failed');
-      toast.success(result?.message || `Sincronización completa (${result?.syncedCount ?? 0} productos)`);
+      setSyncSummary(result ?? null);
+      toast.success(`Sincronización completa: ${result?.syncedCount ?? 0} productos`);
       await fetchRows();
     } catch (err) {
       console.error('Error syncing from Printify:', err);
@@ -41,6 +55,7 @@ export default function AdminInventory() {
       setSyncing(false);
     }
   };
+
 
   useEffect(() => {
     if (isAdmin) fetchRows();
@@ -139,6 +154,46 @@ export default function AdminInventory() {
           <strong>sin rastreo</strong>: el flujo de compra no cambia y no se valida
           existencia. Este campo es solo informativo por ahora.
         </p>
+
+        {syncSummary && (
+          <Card className="mb-8">
+            <CardHeader>
+              <CardTitle className="text-lg">Resultado de la sincronización</CardTitle>
+              <CardDescription>
+                {syncSummary.totalProducts ?? 0} productos en Printify ·{' '}
+                {syncSummary.syncedCount ?? 0} sincronizados ·{' '}
+                {syncSummary.skipped?.length ?? 0} omitidos ·{' '}
+                {syncSummary.deactivatedCount ?? 0} desactivados
+              </CardDescription>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              {!!syncSummary.syncedTitles?.length && (
+                <div>
+                  <p className="text-sm font-medium mb-2">Sincronizados</p>
+                  <ul className="text-sm text-muted-foreground list-disc pl-5 space-y-1">
+                    {syncSummary.syncedTitles.map((t) => (
+                      <li key={t}>{t}</li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+              {!!syncSummary.skipped?.length && (
+                <div>
+                  <p className="text-sm font-medium mb-2">Omitidos</p>
+                  <ul className="text-sm text-muted-foreground list-disc pl-5 space-y-1">
+                    {syncSummary.skipped.map((s, i) => (
+                      <li key={`${s.title}-${i}`}>
+                        <span className="text-foreground">{s.title}</span> — {s.reason}
+                      </li>
+                    ))}
+                  </ul>
+                </div>
+              )}
+            </CardContent>
+          </Card>
+        )}
+
+
 
         {loading ? (
           <div className="flex justify-center py-16">

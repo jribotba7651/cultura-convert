@@ -39,6 +39,7 @@ const Store = () => {
         .from('products_public')
         .select('id, printify_product_id, title, description, category_id, images, variants, tags, price_cents, compare_at_price_cents, is_active, created_at, updated_at')
         .eq('is_active', true)
+        .order('updated_at', { ascending: false })
         .order('created_at', { ascending: false });
 
       console.log('Products query result:', { data, error });
@@ -62,6 +63,7 @@ const Store = () => {
             .from('products_public')
             .select('id, printify_product_id, title, description, category_id, images, variants, tags, price_cents, compare_at_price_cents, is_active, created_at, updated_at')
             .eq('is_active', true)
+            .order('updated_at', { ascending: false })
             .order('created_at', { ascending: false });
           setProducts((refreshed || []) as unknown as Product[]);
         }

@@ -484,6 +484,8 @@ const handler = async (req: Request): Promise<Response> => {
         });
 
 
+        const productTitleText = cleanHTML(detailedProduct.title || '') || product.id;
+
         if (existingProduct) {
           const { error: updateError } = await supabase
             .from('products')
@@ -492,6 +494,7 @@ const handler = async (req: Request): Promise<Response> => {
 
           if (updateError) {
             console.error('Failed to update product:', product.id, updateError);
+            skipped.push({ title: productTitleText, reason: `Error al actualizar: ${updateError.message}` });
             continue;
           }
         } else {
@@ -501,14 +504,18 @@ const handler = async (req: Request): Promise<Response> => {
 
           if (insertError) {
             console.error('Failed to insert product:', product.id, insertError);
+            skipped.push({ title: productTitleText, reason: `Error al insertar: ${insertError.message}` });
             continue;
           }
         }
 
         syncedCount++;
+        syncedTitles.push(productTitleText);
+        await ackPublishing(product.id, true);
         console.log(`Synced product: ${product.title} - Price: $${(minPrice/100).toFixed(2)} (${normalizedVariants.length} variants)`);
-      } catch (error) {
+      } catch (error: any) {
         console.error('Error processing product:', product.id, error);
+        skipped.push({ title: product.title || product.id, reason: error?.message || 'Error inesperado' });
       }
     }
 
@@ -519,9 +526,12 @@ const handler = async (req: Request): Promise<Response> => {
         success: true, 
         message: `Successfully synced ${syncedCount} products and deactivated ${deletedProducts.length} deleted products`,
         syncedCount,
+        syncedTitles,
+        skipped,
         deactivatedCount: deletedProducts.length,
         totalProducts: printifyProducts.length
       }),
+
       {
         headers: { ...corsHeaders, 'Content-Type': 'application/json' },
         status: 200,

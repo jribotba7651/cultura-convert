@@ -66,7 +66,7 @@ export default function AdminInventory() {
     const { data, error } = await supabase
       .from('products_public')
       .select('id, title, price_cents, stock_count, printify_product_id')
-      .order('price_cents', { ascending: false });
+      .order('created_at', { ascending: false });
 
     if (error) {
       console.error('Error loading inventory:', error);

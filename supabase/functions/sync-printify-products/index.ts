@@ -359,6 +359,36 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     let syncedCount = 0;
+    const syncedTitles: string[] = [];
+    const skipped: Array<{ title: string; reason: string }> = [];
+
+    // Tell Printify the product finished publishing so it stops showing "Publishing"
+    const ackPublishing = async (productId: string, ok: boolean, reason?: string) => {
+      const endpoint = ok ? 'publishing_succeeded' : 'publishing_failed';
+      const body = ok
+        ? { external: { id: productId, handle: `https://store.jibaroenlaluna.com/store` } }
+        : { reason: reason || 'Skipped by store sync' };
+      try {
+        const res = await fetch(
+          `https://api.printify.com/v1/shops/${shopId}/products/${productId}/${endpoint}.json`,
+          {
+            method: 'POST',
+            headers: {
+              'Authorization': `Bearer ${printifyApiKey}`,
+              'Content-Type': 'application/json',
+            },
+            body: JSON.stringify(body),
+          }
+        );
+        if (!res.ok) {
+          console.warn(`Printify ${endpoint} failed for ${productId}: ${res.status} - ${await res.text()}`);
+        } else {
+          console.log(`Printify ${endpoint} acknowledged for ${productId}`);
+        }
+      } catch (e) {
+        console.warn(`Printify ${endpoint} error for ${productId}:`, e);
+      }
+    };
 
     for (const product of printifyProducts) {
       try {
@@ -374,6 +404,7 @@ const handler = async (req: Request): Promise<Response> => {
 
         if (!detailResponse.ok) {
           console.error(`Failed to fetch product details for ${product.id}: ${detailResponse.status}`);
+          skipped.push({ title: product.title || product.id, reason: `No se pudo leer el detalle en Printify (${detailResponse.status})` });
           continue;
         }
 
@@ -394,8 +425,11 @@ const handler = async (req: Request): Promise<Response> => {
         
         if (availableVariants.length === 0) {
           console.log(`Skipping product ${detailedProduct.title} - no available variants after filtering`);
+          skipped.push({ title: detailedProduct.title || product.id, reason: 'Sin variantes disponibles/habilitadas en Printify' });
+          await ackPublishing(product.id, false, 'No available variants');
           continue;
         }
+
 
         console.log(`Product ${detailedProduct.title} has ${availableVariants.length} variants after intelligent filtering (from ${(detailedProduct.variants || []).length} total)`);
 

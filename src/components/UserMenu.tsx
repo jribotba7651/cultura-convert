@@ -145,6 +145,12 @@ const UserMenu = () => {
               </Link>
             </DropdownMenuItem>
             <DropdownMenuItem asChild>
+              <Link to="/admin/inventory" className="flex items-center cursor-pointer">
+                <Package className="mr-2 h-4 w-4" />
+                <span>Inventario</span>
+              </Link>
+            </DropdownMenuItem>
+            <DropdownMenuItem asChild>
               <Link to="/admin/orders" className="flex items-center cursor-pointer">
                 <Package className="mr-2 h-4 w-4" />
                 <span>{t('manageOrders')}</span>

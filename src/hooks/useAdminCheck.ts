@@ -12,6 +12,10 @@ export const useAdminCheck = () => {
   const { toast } = useToast();
 
   useEffect(() => {
+    const MAX_RETRIES = 3;
+    const RETRY_DELAY_MS = 500;
+    let cancelled = false;
+
     const checkAdminAccess = async () => {
       if (!user) {
         console.warn('[useAdminCheck] No user session — redirecting to /auth');
@@ -19,53 +23,68 @@ export const useAdminCheck = () => {
         return;
       }
 
-      try {
-        console.info('[useAdminCheck] Verifying admin for', user.email, 'on', window.location.origin);
-        const { data, error } = await supabase.functions.invoke('check-admin-access', {
-          method: 'POST',
-        });
+      for (let attempt = 1; attempt <= MAX_RETRIES; attempt++) {
+        try {
+          console.info(
+            `[useAdminCheck] Verifying admin for ${user.email} on ${window.location.origin} (attempt ${attempt}/${MAX_RETRIES})`
+          );
+          const { data, error } = await supabase.functions.invoke('check-admin-access', {
+            method: 'POST',
+          });
 
-        if (error) {
-          console.error('[useAdminCheck] Edge function error:', {
-            message: error.message,
-            name: error.name,
-            context: (error as any)?.context,
-            status: (error as any)?.status,
-          });
+          if (cancelled) return;
+
+          if (error) {
+            console.warn('[useAdminCheck] Edge function error:', {
+              attempt,
+              message: error.message,
+              name: error.name,
+              context: (error as any)?.context,
+              status: (error as any)?.status,
+            });
+            if (attempt < MAX_RETRIES) {
+              await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS));
+              continue;
+            }
+            setIsAdmin(false);
+            setLoading(false);
+            return;
+          }
+
+          if (!data?.isAdmin) {
+            console.warn('[useAdminCheck] User is not admin:', data);
+            setIsAdmin(false);
+            toast({
+              title: 'Acceso denegado',
+              description: `${user.email} no tiene rol de administrador.`,
+              variant: 'destructive',
+            });
+            navigate('/');
+            return;
+          }
+
+          console.info('[useAdminCheck] Admin access granted');
+          setIsAdmin(true);
+          setLoading(false);
+          return;
+        } catch (error) {
+          if (cancelled) return;
+          console.warn('[useAdminCheck] Unexpected error on attempt', attempt, ':', error);
+          if (attempt < MAX_RETRIES) {
+            await new Promise((resolve) => setTimeout(resolve, RETRY_DELAY_MS));
+            continue;
+          }
           setIsAdmin(false);
-          toast({
-            title: 'Error de verificación',
-            description: `No se pudo verificar tu acceso: ${error.message}. Revisa la consola.`,
-            variant: 'destructive',
-          });
-          navigate('/');
+          setLoading(false);
           return;
         }
-
-        if (!data?.isAdmin) {
-          console.warn('[useAdminCheck] User is not admin:', data);
-          setIsAdmin(false);
-          toast({
-            title: 'Acceso denegado',
-            description: `${user.email} no tiene rol de administrador.`,
-            variant: 'destructive',
-          });
-          navigate('/');
-          return;
-        }
-
-        console.info('[useAdminCheck] Admin access granted');
-        setIsAdmin(true);
-      } catch (error) {
-        console.error('[useAdminCheck] Unexpected error:', error);
-        setIsAdmin(false);
-        navigate('/');
-      } finally {
-        setLoading(false);
       }
     };
 
     checkAdminAccess();
+    return () => {
+      cancelled = true;
+    };
   }, [user, navigate, toast]);
 
   return { isAdmin, loading };

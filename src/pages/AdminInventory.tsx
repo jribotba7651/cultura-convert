@@ -17,6 +17,17 @@ interface InventoryRow {
   printify_product_id: string | null;
 }
 
+interface SyncResult {
+  success?: boolean;
+  message?: string;
+  syncedCount?: number;
+  syncedTitles?: string[];
+  skipped?: Array<{ title: string; reason: string }>;
+  deactivatedCount?: number;
+  totalProducts?: number;
+}
+
+
 export default function AdminInventory() {
   const { isAdmin, loading: adminLoading } = useAdminCheck();
   const [rows, setRows] = useState<InventoryRow[]>([]);

@@ -120,12 +120,26 @@ export default function AdminInventory() {
   const titleOf = (row: InventoryRow) =>
     row.title?.es || row.title?.en || row.id;
 
-  if (adminLoading || !isAdmin) {
+  if (adminLoading) {
     return (
       <div className="min-h-screen bg-background">
         <Navigation />
         <div className="flex items-center justify-center py-32">
           <Loader2 className="h-8 w-8 animate-spin text-primary" />
+        </div>
+      </div>
+    );
+  }
+
+  if (!isAdmin) {
+    return (
+      <div className="min-h-screen bg-background">
+        <Navigation />
+        <div className="flex flex-col items-center justify-center py-32 text-center px-4">
+          <p className="text-lg font-medium text-foreground">Acceso no disponible</p>
+          <p className="text-sm text-muted-foreground mt-2 max-w-md">
+            No se pudo verificar tu rol de administrador. Si el problema continúa, vuelve a iniciar sesión.
+          </p>
         </div>
       </div>
     );

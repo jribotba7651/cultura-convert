@@ -48,6 +48,12 @@ export const useAdminCheck = () => {
             }
             setIsAdmin(false);
             setLoading(false);
+            toast({
+              title: 'Error de verificación',
+              description: 'No pudimos confirmar tu acceso de administrador. Por favor, intenta de nuevo.',
+              variant: 'destructive',
+            });
+            navigate('/');
             return;
           }
 
@@ -76,6 +82,12 @@ export const useAdminCheck = () => {
           }
           setIsAdmin(false);
           setLoading(false);
+          toast({
+            title: 'Error de verificación',
+            description: 'Ocurrió un error inesperado al confirmar tu acceso. Por favor, intenta de nuevo.',
+            variant: 'destructive',
+          });
+          navigate('/');
           return;
         }
       }

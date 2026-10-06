@@ -2,7 +2,6 @@ import { useParams, Link } from "react-router-dom";
 import { useLanguage } from "@/contexts/LanguageContext";
 import { Badge } from "@/components/ui/badge";
 import { Button } from "@/components/ui/button";
-import { AdSenseAd } from "@/components/AdSenseAd";
 import { ArrowLeft, Loader2 } from "lucide-react";
 import Navigation from "@/components/Navigation";
 import { supabase } from '@/integrations/supabase/client';
@@ -165,8 +164,6 @@ const BlogPost = () => {
             />
           )}
 
-          {/* Ad at article start */}
-          <AdSenseAd adSlot="4747218112" adFormat="rectangle" className="my-6" />
 
           <div 
             className="text-foreground leading-relaxed prose prose-lg max-w-none
@@ -178,8 +175,6 @@ const BlogPost = () => {
             }}
           />
 
-          {/* Ad at article end */}
-          <AdSenseAd adSlot="4747218112" adFormat="horizontal" className="my-6" />
         </article>
 
         <div className="mt-12 pt-8 border-t border-border">

@@ -1,7 +1,6 @@
 import AuthorProfile from "@/components/AuthorProfile";
 import Navigation from "@/components/Navigation";
 import { ContactForm } from "@/components/ContactForm";
-import { AdSenseAd } from "@/components/AdSenseAd";
 import { BooksHero } from "@/components/BooksHero";
 import { BooksGrid } from "@/components/BooksGrid";
 import { FeaturedBook } from "@/components/FeaturedBook";
@@ -179,10 +178,6 @@ const Index = () => {
         title={language === 'es' ? 'Todos Nuestros Libros' : 'All Our Books'}
       />
 
-      {/* Ad before authors */}
-      <div className="max-w-4xl mx-auto px-4 py-8">
-        <AdSenseAd adSlot="7977028447" adFormat="auto" className="my-4" />
-      </div>
 
       {/* Authors Section - Now below books */}
       <section className="authors py-16 px-4 bg-muted/30">
@@ -199,10 +194,6 @@ const Index = () => {
               image={rosnelmaProfileImage}
             />
             
-            {/* Ad between authors */}
-            <div className="py-4">
-              <AdSenseAd adSlot="5608873640" adFormat="horizontal" className="my-4" />
-            </div>
             
             <AuthorProfile
               name="Juan C. Ribot Guzmán"

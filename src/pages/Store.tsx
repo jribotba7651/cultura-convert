@@ -1,7 +1,6 @@
 import { useState, useEffect } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Loader2, Search, ShoppingCart as ShoppingCartIcon } from 'lucide-react';
-import { AdSenseAd } from '@/components/AdSenseAd';
 import Navigation from '@/components/Navigation';
 import { ProductCard } from '@/components/store/ProductCard';
 import { CategoryFilter } from '@/components/store/CategoryFilter';
@@ -163,10 +162,6 @@ const Store = () => {
           </div>
         </div>
 
-        {/* Ad before products */}
-        <div className="mb-8">
-          <AdSenseAd adSlot="7977028447" adFormat="horizontal" className="my-4" />
-        </div>
 
         {/* Search and Filters */}
         <div className="flex flex-col lg:flex-row gap-4 mb-8">

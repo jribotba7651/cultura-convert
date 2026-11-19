@@ -240,7 +240,7 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     console.log('Creating payment intent for items:', items.length);
-    console.log('Customer email:', customer_email);
+    console.log('Customer email provided:', !!customer_email);
 
     // Validate shipping address server-side
     console.log('Validating shipping address...');

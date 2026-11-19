@@ -45,14 +45,14 @@ Deno.serve(async (req) => {
       .single();
 
     if (roleError || !roleData) {
-      console.error('[Sales Analytics] User is not admin:', user.email);
+      console.error('[Sales Analytics] User is not admin:', user.id);
       return new Response(
         JSON.stringify({ error: 'Unauthorized - admin only' }),
         { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    console.log('[Sales Analytics] Admin access granted for user:', user.email);
+    console.log('[Sales Analytics] Admin access granted for user:', user.id);
 
     // Get request parameters
     const { startdate, enddate, granularity } = await req.json();

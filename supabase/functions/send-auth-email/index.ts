@@ -348,6 +348,28 @@ const getOrderConfirmationHTML = (data: any) => {
   `;
 };
 
+const escapeHtml = (v: unknown): string =>
+  String(v ?? '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+
+const escapeDeep = (v: any): any => {
+  if (typeof v === 'string') return escapeHtml(v);
+  if (Array.isArray(v)) return v.map(escapeDeep);
+  if (v && typeof v === 'object') {
+    const out: Record<string, any> = {};
+    for (const [k, val] of Object.entries(v)) out[k] = escapeDeep(val);
+    return out;
+  }
+  return v;
+};
+
+// Only trusted backend functions (using the service role key) may trigger order emails.
+const isInternalCall = (req: Request): boolean => {
+  const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
+  const auth = req.headers.get('Authorization') || '';
+  const token = auth.replace(/^Bearer\s+/i, '');
+  return !!serviceKey && token === serviceKey;
+};
+
 const handler = async (req: Request): Promise<Response> => {
   console.log('Auth email function called');
 
@@ -372,11 +394,20 @@ const handler = async (req: Request): Promise<Response> => {
     const data = JSON.parse(payload);
 
     // Check if this is an order confirmation request (direct call, not webhook)
+    if (data.type === 'order_confirmation' || data.type === 'admin_new_order' || data.type === 'tracking_update') {
+      if (!isInternalCall(req)) {
+        return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+          status: 401,
+          headers: { 'Content-Type': 'application/json', ...corsHeaders },
+        });
+      }
+    }
+
     if (data.type === 'order_confirmation') {
       console.log('Processing order confirmation email');
       
       const { email, data: orderData } = data;
-      const emailHtml = getOrderConfirmationHTML(orderData);
+      const emailHtml = getOrderConfirmationHTML(escapeDeep(orderData));
       
       const emailResponse = await resend.emails.send({
         from: ORDER_FROM,
@@ -401,7 +432,7 @@ const handler = async (req: Request): Promise<Response> => {
       console.log('Processing admin new order notification email');
       
       const { email, data: orderData } = data;
-      const emailHtml = getAdminNewOrderHTML(orderData);
+      const emailHtml = getAdminNewOrderHTML(escapeDeep(orderData));
       
       const emailResponse = await resend.emails.send({
         from: ADMIN_FROM,
@@ -447,7 +478,7 @@ const handler = async (req: Request): Promise<Response> => {
       },
     } = data;
 
-    console.log('Processing email for user:', user.email, 'Action:', email_action_type);
+    console.log('Processing auth email, action:', email_action_type);
 
     const supabaseUrl = Deno.env.get('SUPABASE_URL') || 'https://ifctpzrmqcpqtgwepvoq.supabase.co';
     const redirectUrl = redirect_to || site_url || 'https://cultura-convert.lovable.app';

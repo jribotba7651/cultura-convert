@@ -26,7 +26,7 @@ const handler = async (req: Request): Promise<Response> => {
     console.log('Received Printify webhook');
     
     const body = await req.json();
-    console.log('Webhook payload:', JSON.stringify(body, null, 2));
+    
 
     const { event, data } = body;
 
@@ -50,7 +50,15 @@ const handler = async (req: Request): Promise<Response> => {
         console.log(`Product deleted: ${data?.id}`);
         
         // Deactivate the product in our database
-        if (data?.id) {
+        if (data?.id && /^[a-zA-Z0-9]+$/.test(String(data.id))) {
+          // Do not trust the caller: confirm with Printify that the product is really gone.
+          const token = Deno.env.get('PRINTIFY_API_TOKEN') ?? Deno.env.get('PRINTIFY_API_KEY');
+          const shopId = Deno.env.get('PRINTIFY_SHOP_ID');
+          if (!token || !shopId) { console.error('Printify credentials missing; skipping'); break; }
+          const check = await fetch(`https://api.printify.com/v1/shops/${shopId}/products/${data.id}.json`, {
+            headers: { Authorization: `Bearer ${token}` },
+          });
+          if (check.status !== 404) { console.warn('Product still exists in Printify; ignoring delete event'); break; }
           const { error: deactivateError } = await supabase
             .from('products')
             .update({ is_active: false })

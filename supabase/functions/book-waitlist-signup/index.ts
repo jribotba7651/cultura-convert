@@ -17,9 +17,21 @@ interface WaitlistSignupRequest {
   bookTitle: string;
 }
 
+// HMAC-signed unsubscribe token so only the real recipient's link can unsubscribe them.
+const unsubTokens = new Map<string, string>();
+const prepareUnsubToken = async (email: string): Promise<string> => {
+  const normalized = email.toLowerCase().trim();
+  const secret = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
+  const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+  const sig = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(`unsubscribe:${normalized}`));
+  const token = Array.from(new Uint8Array(sig)).map((b) => b.toString(16).padStart(2, '0')).join('');
+  unsubTokens.set(email, token);
+  return token;
+};
+
 const getEmailFooter = (language: 'en' | 'es', email: string) => {
   const supabaseUrl = Deno.env.get('SUPABASE_URL') || 'https://ifctpzrmqcpqtgwepvoq.supabase.co';
-  const unsubscribeUrl = `${supabaseUrl}/functions/v1/unsubscribe-email?email=${encodeURIComponent(email)}`;
+  const unsubscribeUrl = `${supabaseUrl}/functions/v1/unsubscribe-email?email=${encodeURIComponent(email)}&token=${unsubTokens.get(email) ?? ''}`;
   const siteUrl = 'https://escritorespuertorricodiaspora.com';
   const privacyUrl = `${siteUrl}/privacy-policy`;
   const contactEmail = 'contact@escritorespuertorricodiaspora.com';
@@ -153,7 +165,10 @@ const handler = async (req: Request): Promise<Response> => {
     }
 
     const supabase = createClient(supabaseUrl, supabaseServiceKey);
-    const { email, language, bookSlug, sourceComponent, bookTitle }: WaitlistSignupRequest = await req.json();
+    const { email, language, bookSlug, sourceComponent, bookTitle: rawBookTitle }: WaitlistSignupRequest = await req.json();
+    const bookTitle = String(rawBookTitle ?? '').slice(0, 200)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/[\r\n]/g, ' ');
 
     console.log('Book waitlist signup:', { email, language, bookSlug, sourceComponent });
 
@@ -250,6 +265,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     // Send welcome email immediately
     try {
+      await prepareUnsubToken(email);
       const emailHtml = getWelcomeEmailHtml(language, bookTitle, bookSlug, sampleToken, email);
       
       const emailResponse = await resend.emails.send({

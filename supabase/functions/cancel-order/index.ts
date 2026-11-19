@@ -59,7 +59,7 @@ Deno.serve(async (req) => {
       );
     }
 
-    console.log(`[cancel-order] Authenticated user: ${user.email}`);
+    console.log(`[cancel-order] Authenticated user: ${user.id}`);
 
     // 3) Check admin role using user_roles table
     const { data: adminRole, error: roleError } = await supabaseUser
@@ -78,14 +78,14 @@ Deno.serve(async (req) => {
     }
 
     if (!adminRole) {
-      console.warn(`[cancel-order] User ${user.email} is not an admin`);
+      console.warn(`[cancel-order] User ${user.id} is not an admin`);
       return new Response(
         JSON.stringify({ ok: false, error: "Admin access required" }),
         { status: 403, headers: { ...corsHeaders, "Content-Type": "application/json" } }
       );
     }
 
-    console.log(`[cancel-order] Admin access verified for ${user.email}`);
+    console.log(`[cancel-order] Admin access verified for ${user.id}`);
 
     // 4) Parse request body (after auth checks)
     const { order_id, refund, reason }: CancelOrderRequest = await req.json();
@@ -308,7 +308,7 @@ Deno.serve(async (req) => {
       if (emailQueueError) {
         console.error(`[cancel-order] Failed to enqueue email:`, emailQueueError);
       } else {
-        console.log(`[cancel-order] Enqueued ${emailType} email for ${order.customer_email}`);
+        console.log(`[cancel-order] Enqueued ${emailType} email for order ${order.id}`);
       }
     } catch (emailError) {
       console.error(`[cancel-order] Error enqueueing email:`, emailError);

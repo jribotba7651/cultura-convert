@@ -195,14 +195,14 @@ const handler = async (req: Request): Promise<Response> => {
       .rpc('has_role', { _user_id: user.id, _role: 'admin' });
 
     if (roleError || !hasAdminRole) {
-      console.error('User is not admin:', user.email, roleError?.message);
+      console.error('User is not admin:', user.id, roleError?.message);
       return new Response(
         JSON.stringify({ error: 'Forbidden - Insufficient permissions' }),
         { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
       );
     }
 
-    console.log('Admin access verified for:', user.email);
+    console.log('Admin access verified for:', user.id);
     // === END AUTHENTICATION CHECK ===
 
     // Use service role for actual operations
@@ -519,7 +519,7 @@ const handler = async (req: Request): Promise<Response> => {
       }
     }
 
-    console.log(`Admin ${user.email} completed sync. Synced ${syncedCount} products. Deactivated ${deletedProducts.length} deleted products.`);
+    console.log(`Admin ${user.id} completed sync. Synced ${syncedCount} products. Deactivated ${deletedProducts.length} deleted products.`);
 
     return new Response(
       JSON.stringify({ 

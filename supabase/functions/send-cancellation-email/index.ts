@@ -278,7 +278,7 @@ Deno.serve(async (req: Request): Promise<Response> => {
         const payload = record.payload as CancellationEmailPayload;
         const emailHtml = getCancellationEmailHtml(payload, record.recipient_email);
 
-        console.log(`[send-cancellation-email] Sending to ${record.recipient_email} (attempt ${newAttempts})`);
+        console.log(`[send-cancellation-email] Sending record ${record.id} (attempt ${newAttempts})`);
 
         // Send email via Resend REST API
         const result = await sendEmailViaResend(

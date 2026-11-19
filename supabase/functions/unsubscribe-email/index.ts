@@ -52,6 +52,17 @@ const handler = async (req: Request): Promise<Response> => {
 
     const normalizedEmail = email.toLowerCase().trim();
 
+    // Verify HMAC token bound to this email address
+    const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(supabaseServiceKey), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+    const sig = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(`unsubscribe:${normalizedEmail}`));
+    const expected = Array.from(new Uint8Array(sig)).map((b) => b.toString(16).padStart(2, '0')).join('');
+    if (!token || token !== expected) {
+      return new Response(
+        JSON.stringify({ error: 'Invalid or missing unsubscribe token' }),
+        { status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
+      );
+    }
+
     // Update all book_waitlist entries for this email
     const { data: updated, error: updateError } = await supabase
       .from('book_waitlist')
@@ -65,7 +76,7 @@ const handler = async (req: Request): Promise<Response> => {
       throw updateError;
     }
 
-    console.log(`Unsubscribed ${normalizedEmail}, updated ${updated?.length || 0} entries`);
+    console.log(`Unsubscribed address, updated ${updated?.length || 0} entries`);
 
     // For GET requests (from email links), return a nice HTML page
     if (req.method === 'GET') {
@@ -95,7 +106,7 @@ const handler = async (req: Request): Promise<Response> => {
         <body>
           <div class="check">✓</div>
           <h1>You've been unsubscribed</h1>
-          <p>You will no longer receive emails about our books at <strong>${normalizedEmail}</strong>.</p>
+          <p>You will no longer receive emails about our books at <strong>${normalizedEmail.replace(/[<>&"']/g, '')}</strong>.</p>
           <p style="margin-top: 24px;">
             <a href="https://escritorespuertorricodiaspora.com">Return to website</a>
           </p>

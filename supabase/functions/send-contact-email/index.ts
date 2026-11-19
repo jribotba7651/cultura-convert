@@ -22,9 +22,22 @@ const handler = async (req: Request): Promise<Response> => {
   }
 
   try {
-    const { name, email, subject, message }: ContactEmailRequest = await req.json();
+    const raw: ContactEmailRequest = await req.json();
+    const esc = (v: unknown) => String(v ?? '').slice(0, 5000)
+      .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+      .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+    const rawEmail = String(raw?.email ?? '').trim();
+    if (rawEmail && !/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(rawEmail)) {
+      return new Response(JSON.stringify({ error: "Email inválido" }), {
+        status: 400, headers: { "Content-Type": "application/json", ...corsHeaders },
+      });
+    }
+    const name = esc(raw?.name);
+    const email = esc(rawEmail);
+    const subject = esc(raw?.subject).replace(/[\r\n]/g, ' ');
+    const message = esc(raw?.message);
 
-    console.log('Sending contact email:', { name, email, subject });
+    console.log('Sending contact email');
 
     // Validate required fields
     if (!name || !email || !subject || !message) {

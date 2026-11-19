@@ -22,6 +22,14 @@ const handler = async (req: Request): Promise<Response> => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  const serviceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
+  const bearer = (req.headers.get('Authorization') || '').replace(/^Bearer\s+/i, '');
+  if (!serviceKey || bearer !== serviceKey) {
+    return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+      status: 401, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+
   try {
     const { payment_intent_id } = await req.json();
     
@@ -49,6 +57,10 @@ const handler = async (req: Request): Promise<Response> => {
 
     if (orderError || !order) {
       throw new Error(`Order not found or multiple matched: ${orderError?.message ?? 'no matching order'}`);
+    }
+
+    if (order.status !== 'paid') {
+      throw new Error('Order is not paid');
     }
 
     // Get first shop ID

@@ -61,7 +61,7 @@ Deno.serve(async (req) => {
 
     const isAdmin = !!roles;
 
-    console.log(`Admin check for user ${user.email}: ${isAdmin}`);
+    console.log(`Admin check for user ${user.id}: ${isAdmin}`);
 
     return new Response(
       JSON.stringify({ isAdmin, email: user.email }),

@@ -75,9 +75,21 @@ const bookMetadata: Record<string, {
   },
 };
 
+// HMAC-signed unsubscribe token so only the real recipient's link can unsubscribe them.
+const unsubTokens = new Map<string, string>();
+const prepareUnsubToken = async (email: string): Promise<string> => {
+  const normalized = email.toLowerCase().trim();
+  const secret = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '';
+  const key = await crypto.subtle.importKey('raw', new TextEncoder().encode(secret), { name: 'HMAC', hash: 'SHA-256' }, false, ['sign']);
+  const sig = await crypto.subtle.sign('HMAC', key, new TextEncoder().encode(`unsubscribe:${normalized}`));
+  const token = Array.from(new Uint8Array(sig)).map((b) => b.toString(16).padStart(2, '0')).join('');
+  unsubTokens.set(email, token);
+  return token;
+};
+
 const getEmailFooter = (language: 'en' | 'es', email: string) => {
   const supabaseUrl = Deno.env.get('SUPABASE_URL') || 'https://ifctpzrmqcpqtgwepvoq.supabase.co';
-  const unsubscribeUrl = `${supabaseUrl}/functions/v1/unsubscribe-email?email=${encodeURIComponent(email)}`;
+  const unsubscribeUrl = `${supabaseUrl}/functions/v1/unsubscribe-email?email=${encodeURIComponent(email)}&token=${unsubTokens.get(email) ?? ''}`;
   const siteUrl = 'https://escritorespuertorricodiaspora.com';
   const privacyUrl = `${siteUrl}/privacy-policy`;
   const contactEmail = 'contact@escritorespuertorricodiaspora.com';
@@ -229,6 +241,14 @@ const handler = async (req: Request): Promise<Response> => {
     return new Response(null, { headers: corsHeaders });
   }
 
+  const cronSecret = Deno.env.get('CRON_SECRET');
+  const requestSecret = req.headers.get('x-cron-secret');
+  if (!cronSecret || !requestSecret || requestSecret !== cronSecret) {
+    return new Response(JSON.stringify({ error: 'Forbidden' }), {
+      status: 403, headers: { ...corsHeaders, 'Content-Type': 'application/json' },
+    });
+  }
+
   try {
     const supabaseUrl = Deno.env.get('SUPABASE_URL');
     const supabaseServiceKey = Deno.env.get('SUPABASE_SERVICE_ROLE_KEY');
@@ -274,7 +294,7 @@ const handler = async (req: Request): Promise<Response> => {
 
       // Skip if user has unsubscribed
       if (waitlist.unsubscribed_at) {
-        console.log(`Skipping unsubscribed user: ${waitlist.email}`);
+        console.log(`Skipping unsubscribed waitlist entry ${waitlist.id ?? ''}`);
         
         // Mark as skipped in email_queue
         await supabase
@@ -294,6 +314,7 @@ const handler = async (req: Request): Promise<Response> => {
       const relatedBook = meta?.relatedBook;
 
       try {
+        await prepareUnsubToken(waitlist.email);
         const emailHtml = getFollowUpEmailHtml(
           waitlist.language,
           waitlist.book_slug,
@@ -312,7 +333,7 @@ const handler = async (req: Request): Promise<Response> => {
           html: emailHtml,
         });
 
-        console.log(`Follow-up email sent to ${waitlist.email}:`, emailResponse);
+        console.log(`Follow-up email sent:`, emailResponse);
 
         await supabase
           .from('email_queue')
@@ -326,7 +347,7 @@ const handler = async (req: Request): Promise<Response> => {
         sent++;
 
       } catch (emailError: any) {
-        console.error(`Error sending to ${waitlist.email}:`, emailError);
+        console.error(`Error sending follow-up email:`, emailError);
         
         await supabase
           .from('email_queue')

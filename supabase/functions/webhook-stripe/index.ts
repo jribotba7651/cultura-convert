@@ -148,7 +148,7 @@ serve(async (req) => {
           const customerName = order.customer_name || paymentIntent.metadata?.customer_name
 
           if (customerEmail) {
-            console.log('Sending confirmation email to:', customerEmail)
+            console.log('Sending confirmation email for order:', order.id)
 
             // Obtener información completa de productos
             const { data: orderItems, error: itemsError } = await supabase

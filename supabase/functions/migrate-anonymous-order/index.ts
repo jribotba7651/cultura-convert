@@ -18,10 +18,34 @@ serve(async (req) => {
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY')!
     )
 
-    const { order_id, user_id } = await req.json()
+    // Caller must be signed in; the order is linked only to the caller's own account
+    const authHeader = req.headers.get('Authorization') || ''
+    const jwt = authHeader.replace(/^Bearer\s+/i, '')
+    const { data: userData, error: userError } = await supabase.auth.getUser(jwt)
+    if (userError || !userData?.user) {
+      return new Response(JSON.stringify({ error: 'Unauthorized' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 401,
+      })
+    }
+    const user_id = userData.user.id
+    const userEmail = (userData.user.email || '').toLowerCase().trim()
 
-    if (!order_id || !user_id) {
-      throw new Error('Missing order_id or user_id')
+    const { order_id } = await req.json()
+    if (!order_id) {
+      throw new Error('Missing order_id')
+    }
+
+    const { data: order } = await supabase
+      .from('orders')
+      .select('id, customer_email, user_id')
+      .eq('id', order_id)
+      .maybeSingle()
+
+    if (!order || order.user_id !== null || !userEmail ||
+        (order.customer_email || '').toLowerCase().trim() !== userEmail) {
+      return new Response(JSON.stringify({ error: 'Forbidden' }), {
+        headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 403,
+      })
     }
 
     // Update the order to link it to the user
@@ -50,7 +74,7 @@ serve(async (req) => {
       // Don't throw here as the main migration succeeded
     }
 
-    console.log('Order migrated successfully:', order_id, 'to user:', user_id)
+    console.log('Order migrated successfully:', order_id)
 
     return new Response(JSON.stringify({ 
       success: true, 

@@ -31,7 +31,7 @@ const handler = async (req: Request): Promise<Response> => {
 
     const { name, email, interests, language }: NewsletterSubscriptionRequest = await req.json();
 
-    console.log('Newsletter subscription request:', { email, name, interests, language });
+    console.log('Newsletter subscription request received');
 
     // Validate input
     if (!name || name.trim().length < 2) {
@@ -69,25 +69,9 @@ const handler = async (req: Request): Promise<Response> => {
           { status: 409, headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
         );
       } else {
-        // Reactivate subscription
-        const { error: updateError } = await supabase
-          .from('newsletter_subscriptions')
-          .update({
-            name: name.trim(),
-            interests,
-            language,
-            is_active: true,
-            unsubscribed_at: null,
-            subscribed_at: new Date().toISOString(),
-          })
-          .eq('id', existingSubscription.id);
-
-        if (updateError) {
-          console.error('Error reactivating subscription:', updateError);
-          throw updateError;
-        }
-
-        console.log('Subscription reactivated:', email);
+        // Previously-unsubscribed address: do not let anonymous callers modify
+        // or reactivate another person's record. Respond generically.
+        console.log('Subscribe request for inactive address ignored');
       }
     } else {
       // Create new subscription
@@ -96,7 +80,7 @@ const handler = async (req: Request): Promise<Response> => {
         .insert({
           email: email.trim().toLowerCase(),
           name: name.trim(),
-          interests,
+          interests: interests.slice(0, 20).map((i: string) => String(i).slice(0, 100).replace(/^[=+\-@\t\r]+/, '')),
           language,
         });
 
@@ -105,7 +89,7 @@ const handler = async (req: Request): Promise<Response> => {
         throw insertError;
       }
 
-      console.log('New subscription created:', email);
+      console.log('New subscription created');
     }
 
     return new Response(
